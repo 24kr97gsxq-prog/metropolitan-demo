@@ -223,6 +223,16 @@ font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--steel);
 justify-content:space-between;gap:14px;flex-wrap:wrap}
 .demo-note{background:var(--amber);color:var(--ink);font-family:'IBM Plex Mono';font-size:10.5px;
 font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:7px 20px;text-align:center}
+.rpt-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:11px}
+.rpt-tools{display:flex;gap:7px}
+.rpt-tools button{font-size:12px;padding:6px 12px;background:transparent;color:var(--ink);
+border-color:var(--concrete-dk);font-family:'IBM Plex Mono';font-weight:600;letter-spacing:.08em;
+text-transform:uppercase}
+.rpt-tools button:hover{border-color:var(--ink);transform:none}
+body.printing *{visibility:hidden}
+body.printing .print-target,body.printing .print-target *{visibility:visible}
+body.printing .print-target{position:absolute;left:0;top:0;width:100%}
+body.printing .print-target .rpt-tools{display:none}
 @media(prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -505,46 +515,51 @@ font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:7px 20px;t
   <h1>Every pound accounted for.</h1>
   <p class="lede">Received, destroyed, still on hand. If those three don't reconcile, something
   is wrong — and that's the first thing an auditor checks.</p>
+  <div style="display:flex;gap:9px;flex-wrap:wrap;margin-bottom:22px">
+    <button id="printAll">Print all reports</button>
+    <span class="hint" style="flex-basis:auto;align-self:center">Or print and export each one below
+    on its own</span>
+  </div>
 
   <div class="card">
-    <div class="screen-label">Reconciliation by client · year to date</div>
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Reconciliation by client · year to date</div><div class="rpt-tools"><button data-print="reconTable">Print</button><button data-csv="reconTable" data-name="reconciliation">CSV</button></div></div>
     <div class="scroll"><table id="reconTable"></table></div>
     <div class="of-note" style="text-align:left">Received must equal destroyed plus on hand, for every client, always.</div>
   </div>
 
   <div class="card">
-    <div class="screen-label">Custody ageing · how long material sits before destruction</div>
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Custody ageing · how long material sits before destruction</div><div class="rpt-tools"><button data-print="ageTable">Print</button><button data-csv="ageTable" data-name="custody_ageing">CSV</button></div></div>
     <div class="scroll"><table id="ageTable"></table></div>
   </div>
 
   <div class="card">
-    <div class="screen-label">Tonnage by material · all inbound, year to date</div>
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Tonnage by material · all inbound, year to date</div><div class="rpt-tools"><button data-print="matRepTable">Print</button><button data-csv="matRepTable" data-name="tonnage_by_material">CSV</button></div></div>
     <div class="scroll"><table id="matRepTable"></table></div>
     <div class="of-note" style="text-align:left">Destruction jobs and ordinary recycling receipts
     both cross the same scale. Only destruction jobs produce a certificate.</div>
   </div>
 
   <div class="card">
-    <div class="screen-label">Material inventory · received, shipped, on hand</div>
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Material inventory · received, shipped, on hand</div><div class="rpt-tools"><button data-print="invTable">Print</button><button data-csv="invTable" data-name="inventory">CSV</button></div></div>
     <div class="scroll"><table id="invTable"></table></div>
     <div class="of-note" style="text-align:left">What came in, what went out to the mills, what is
     still baled in the yard. This is the balance that tells you if a ticket got missed.</div>
   </div>
 
   <div class="card">
-    <div class="screen-label">Weight ticket register · every weighment, reprintable</div>
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Weight ticket register · every weighment, reprintable</div><div class="rpt-tools"><button data-print="tktTable">Print</button><button data-csv="tktTable" data-name="weight_tickets">CSV</button></div></div>
     <div class="scroll"><table id="tktTable"></table></div>
     <div class="of-note" style="text-align:left">A ticket exists for every truck that crosses the
     scale, whether anyone asked for paper or not. Print or resend it any time after the fact.</div>
   </div>
 
   <div class="card">
-    <div class="screen-label">Outbound shipments · recent</div>
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Outbound shipments · recent</div><div class="rpt-tools"><button data-print="shipTable">Print</button><button data-csv="shipTable" data-name="shipments">CSV</button></div></div>
     <div class="scroll"><table id="shipTable"></table></div>
   </div>
 
   <div class="card">
-    <div class="screen-label">Certificate register</div>
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Certificate register</div><div class="rpt-tools"><button data-print="regTable">Print</button><button data-csv="regTable" data-name="certificates">CSV</button></div></div>
     <div class="scroll"><table id="regTable"></table></div>
   </div>
 
@@ -1272,6 +1287,42 @@ $('fullX').addEventListener('click',()=>{
     exported:new Date().toISOString(),facility:'Metropolitan Recycling',
     tickets:TICKETS,shipments:SHIPMENTS,custody:CUSTODY,certificates:REGISTER,
     materials:MATERIALS,haulers:HAULERS,clients:CLIENTS},null,2),'application/json');
+});
+
+
+/* ---- per-report print and export ---- */
+function tableToRows(id){
+  const t=$(id); if(!t) return [];
+  return [...t.rows].map(r=>[...r.cells].map(c=>
+    c.innerText.replace(/\s+/g,' ').trim()));
+}
+document.addEventListener('click',e=>{
+  const pb=e.target.closest('[data-print]');
+  if(pb){
+    const card=pb.closest('.card');
+    card.classList.add('print-target');
+    document.body.classList.add('printing');
+    const done=()=>{document.body.classList.remove('printing');
+      card.classList.remove('print-target');window.removeEventListener('afterprint',done)};
+    window.addEventListener('afterprint',done);
+    setTimeout(()=>{window.print();setTimeout(done,800)},60);
+    return;
+  }
+  const cb=e.target.closest('[data-csv]');
+  if(cb){
+    const rows=tableToRows(cb.dataset.csv);
+    if(!rows.length){cb.textContent='Empty';setTimeout(()=>cb.textContent='CSV',1400);return}
+    const stamp=new Date().toISOString().slice(0,10);
+    rows.unshift(['Metropolitan Recycling — '+cb.dataset.name.replace(/_/g,' '),'exported '+stamp]);
+    rows.splice(1,0,[]);
+    download('metropolitan_'+cb.dataset.name+'_'+stamp+'.csv',csv(rows));
+    cb.textContent='Saved';setTimeout(()=>cb.textContent='CSV',1400);
+  }
+});
+
+$('printAll').addEventListener('click',()=>{
+  document.querySelector('nav button[data-t="reports"]').classList.add('on');
+  window.print();
 });
 
 $('voidBtn').addEventListener('click',async()=>{
