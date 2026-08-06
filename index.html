@@ -300,6 +300,7 @@ font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:7px 20px;t
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:11px">
           <button id="printBtn" class="ghost-btn" style="font-size:13px;padding:9px 15px">Print</button>
           <button id="phoneBtn" class="ghost-btn" style="font-size:13px;padding:9px 15px">Send to phone</button>
+          <button id="copyToggle" class="ghost-btn" style="font-size:13px;padding:9px 15px;display:none">Show office copy</button>
         </div>
         <div class="receipt" id="receipt"></div>
       </div>
@@ -1110,8 +1111,9 @@ async function capLoaded(){
       (net/2000*mill.rate).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+
     '</span></div>';
   $('ofNote').textContent='Invoice value calculated from the measured weight and the contract rate.';
-  printBOL(net);
-  $('ticketWho').textContent='· bill of lading, one copy to the driver';
+  printBOL(net,false);
+  $('ticketWho').textContent='\u00b7 driver copy \u2014 no pricing';
+  $('copyToggle').style.display='inline-block';
   TICKETS.unshift({id:bolId,date:md(outStamp),time:hm(outStamp),veh:'GP TRAILER 8842',
     ref:release,net:net,type:'Outbound BOL'});
   SHIPMENTS.unshift({id:bolId,date:md(outStamp),dest:mill.name,mat:mill.mat,net:net,
@@ -1122,11 +1124,13 @@ async function capLoaded(){
   $('hintText').textContent='Outbound tonnage is revenue. It also proves where the material went.';
 }
 
-function printBOL(net){
+function printBOL(net,office){
   $('receiptZone').classList.add('show');
   $('receipt').innerHTML=
    '<div class="ctr"><b>METROPOLITAN RECYCLING</b><br>4141 Singleton Blvd<br>Dallas, TX 75212</div><hr>'+
-   '<div class="ctr big">BILL OF LADING</div><div class="ctr">'+bolId+'</div><hr>'+
+   '<div class="ctr big">BILL OF LADING</div><div class="ctr">'+bolId+'</div>'+
+   '<div class="ctr" style="font-size:9px;letter-spacing:.14em">'+
+   (office?'OFFICE FILE COPY':'DRIVER COPY')+'</div><hr>'+
    '<div class="rw"><span>Release no.</span><b>'+release+'</b></div>'+
    '<div class="rw"><span>Ship to</span><b>'+mill.name.split(' — ')[0]+'</b></div>'+
    '<div class="rw"><span>PO / contract</span><b>'+mill.po+'</b></div>'+
@@ -1136,16 +1140,20 @@ function printBOL(net){
    '<div class="rw"><span>Tare</span><b>'+comma(EMPTY_TRUCK)+' lb</b></div>'+
    '<div class="rw big"><span>NET</span><b>'+comma(net)+' lb</b></div><hr>'+
    '<div class="rw"><span>Net tons</span><b>'+(net/2000).toFixed(2)+'</b></div>'+
-   '<div class="rw"><span>Contract rate</span><b>$'+mill.rate.toFixed(2)+'/ton</b></div>'+
-   '<div class="rw big"><span>VALUE</span><b>$'+
-     (net/2000*mill.rate).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+
-   '</b></div><hr>'+
+   (office
+     ?'<div class="rw"><span>Contract rate</span><b>$'+mill.rate.toFixed(2)+'/ton</b></div>'+
+      '<div class="rw big"><span>VALUE</span><b>$'+
+      (net/2000*mill.rate).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+
+      '</b></div>'
+     :'')+'<hr>'+
    '<div class="rw"><span>Tare in</span><b>'+hm(inStamp)+'</b></div>'+
    '<div class="rw"><span>Gross out</span><b>'+hm(outStamp)+'</b></div>'+
    '<div class="rw"><span>Tare source</span><b>Measured</b></div>'+
    '<div class="rw"><span>Released by</span><b>'+CLERK+'</b></div><hr>'+
-   '<div class="ctr tiny">DRIVER SIGNATURE<br><br>_______________________<br><br>'+
-   'One copy to driver, one on file.</div>';
+   (office
+     ?'<div class="ctr tiny">OFFICE FILE COPY<br>PRICING SHOWN \u2014 DO NOT HAND TO DRIVER</div>'
+     :'<div class="ctr tiny">DRIVER SIGNATURE<br><br>_______________________<br><br>'+
+      'Driver copy. Weights only.</div>');
 }
 
 $('mainBtn').addEventListener('click',()=>{
@@ -1169,6 +1177,7 @@ $('resetBtn').addEventListener('click',()=>{
   $('phVeh').textContent='Scan the sign at the scale';
   $('phBody').innerHTML='<div class="ph-idle">Nothing<br>on the scale</div>';
   $('receiptZone').classList.remove('show');$('receipt').innerHTML='';
+  $('copyToggle').style.display='none';$('copyToggle').textContent='Show office copy';showingOffice=false;
   const b=$('mainBtn');b.disabled=false;
   b.textContent=direction==='in'?'Truck pulls onto the scale':'Empty GP trailer onto the scale';
   $('hintText').textContent='Watch the office panel — the alert fires the moment it settles';
@@ -1199,6 +1208,15 @@ function showTicketOnPhone(net,isDest){
     $('receiptZone').scrollIntoView({block:'center'});
   });
 }
+let showingOffice=false;
+$('copyToggle').addEventListener('click',()=>{
+  showingOffice=!showingOffice;
+  printBOL(LOADED-EMPTY_TRUCK,showingOffice);
+  $('copyToggle').textContent=showingOffice?'Show driver copy':'Show office copy';
+  $('ticketWho').textContent=showingOffice
+    ? '\u00b7 office file copy \u2014 pricing included'
+    : '\u00b7 driver copy \u2014 no pricing';
+});
 $('printBtn').addEventListener('click',()=>{
   $('receipt').style.animation='none';void $('receipt').offsetWidth;
   $('receipt').style.animation='feed .7s ease-out';
