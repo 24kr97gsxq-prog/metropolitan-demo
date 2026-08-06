@@ -276,7 +276,8 @@ body.printing .print-target .rpt-tools{display:none}
   </div>
 
   <div class="controls">
-    <button id="mainBtn">Truck pulls onto the scale</button>
+    <button id="mainBtn">Truck arrives to unload</button>
+    <button id="outBtn">An empty truck returns</button>
     <button id="dirBtn" class="ghost-btn">Direction: Inbound receipt</button>
     <button id="resetBtn" class="ghost-btn">Start over</button>
     <span class="hint" id="hintText">Watch the office panel — the alert fires the moment it settles</span>
@@ -326,6 +327,23 @@ body.printing .print-target .rpt-tools{display:none}
       install. He cannot see other haulers, other clients, prices, or anything else on the yard.
       If he never touches his phone, the office handles it and nothing breaks.</div>
     </div>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">Chain of custody</div>
+  <h2>Captured first, identified after</h2>
+  <p class="lede" style="margin-bottom:20px">Every weight is recorded and sealed the moment it
+  settles, before anyone says whose it is. Nothing is ever matched by weight or by timing.</p>
+  <div class="chain">
+    <div class="ev" id="evIn"><div class="ev-head"><span class="ev-label">Inbound gross</span>
+      <span class="ev-val" id="valIn">—</span></div><div class="ev-sub" id="hashIn">Awaiting capture</div></div>
+    <div class="ev" id="evOut"><div class="ev-head"><span class="ev-label">Outbound tare</span>
+      <span class="ev-val" id="valOut">—</span></div><div class="ev-sub" id="hashOut">Awaiting capture</div></div>
+    <div class="ev net" id="evNet"><div class="ev-head"><span class="ev-label">Net — after matching</span>
+      <span class="ev-val" id="valNet">—</span></div><div class="ev-sub" id="hashNet">A person or a scan decides which load this belongs to</div></div>
+    <div class="ev" id="evPhoto"><div class="ev-head"><span class="ev-label">Photo evidence</span>
+      <span class="ev-val" id="valPhoto">—</span></div><div class="ev-sub" id="hashPhoto">Captured at destruction</div></div>
   </div>
 </section>
 </div>
@@ -652,7 +670,8 @@ const JOBS=[
  {wo:'TRF-2210',client:'Trinity Foods Group',mat:'Expired packaged goods',lot:'TF-22-1187'},
  {wo:'PSB-0885',client:'Panhandle Snack Brands',mat:'Recalled cartons, printed film',lot:'PS-0885-R3'}
 ];
-const VEH='TX 4LK-9920',CARRIER='Trinity Hauling LLC',CLERK='M. Alvarez',
+let VEH='TX 4LK-9920';
+const CARRIER='Trinity Hauling LLC',CLERK='M. Alvarez',
  METHOD='Mechanical shredding, single-pass grinder',WITNESS='D. Okafor (client representative)',
  GROSS=62480,TARE=18940;
 
@@ -920,9 +939,20 @@ function renderReports(){
       '<td class="r"><span class="tag '+(dead?'red':'green')+'">'+(r.status||'Valid')+'</span></td></tr>'}).join('');
 }
 
-/* ---- scale house ---- */
+/* ---- scale house · multiple trucks on the yard ---- */
+const PLATES=['TX 4LK-9920','TX 7BD-3312','TX 9HV-6041','TX 5NC-2287'];
+let OPEN=[
+ {tk:'WT-8931',veh:'TX 8RM-4417',gross:54120,inAt:'9:42 AM',
+  ref:JOBS[1],by:'Driver scan',paper:true},
+ {tk:'WT-8934',veh:'TX 2WQ-1180',gross:48600,inAt:'10:15 AM',
+  ref:{material:'OCC — old corrugated cardboard'},by:'Office · '+CLERK,paper:false}
+];
+let pendingTare=null, plateIx=0;
+let direction='in', mill=null, bolId=null, release=null;
+
 function weigh(target,label,done){
-  $('mainBtn').disabled=true;$('modeTag').textContent=label;$('lockTag').textContent='';
+  $('mainBtn').disabled=true;$('outBtn').disabled=true;
+  $('modeTag').textContent=label;$('lockTag').textContent='';
   let t=0;setAnn(false,true,true);$('statusText').textContent='Truck on scale — in motion';
   const c=setInterval(()=>{t++;const w=target*(1-Math.pow(1-t/24,2.4));
     if(t>=24){clearInterval(c);settle(target,done);return}
@@ -935,132 +965,205 @@ function settle(target,done){
     if(k>8){clearInterval(s);setAnn(false,true,false);$('readout').textContent=pad(target);
       $('statusText').textContent='Stable — captured';$('lockTag').textContent='LOCKED';done()}},110);
 }
+
+function refLabel(r){return r.wo? r.wo+' · '+r.client : r.material}
+function isDest(r){return !!r.wo}
+
+function renderOpen(){
+  $('ofCount').textContent=OPEN.length?OPEN.length+' on the yard':'Nothing on the yard';
+  if(!OPEN.length && !pendingTare && !job){
+    $('loadList').innerHTML='<div class="empty">No trucks on the yard</div>';return}
+  let h='';
+  if(job){ /* a load is mid-identification at the scale */
+    h+='<div class="load needs"><div class="load-top">'+
+       '<span class="load-veh">'+VEH+'</span><span class="load-w">'+comma(GROSS)+' lb in</span></div>'+
+       '<div class="load-job"><b>'+refLabel(job)+'</b></div>'+
+       '<span class="tag green">'+identBy+'</span></div>';
+  }
+  if(pendingTare!==null){
+    h+='<div class="load needs"><div class="load-top">'+
+       '<span class="load-veh">Truck on the scale</span>'+
+       '<span class="load-w">'+comma(pendingTare)+' lb</span></div>'+
+       '<div class="load-job">Empty. Which of these is it?</div>'+
+       '<span class="tag red">Weight captured — not yet matched</span>'+
+       '<div class="picker">'+OPEN.map((l,i)=>
+         '<button class="pick" data-match="'+i+'"><b>'+l.veh+'</b>'+refLabel(l.ref)+
+         '<div style="font-size:12px;color:var(--steel);margin-top:3px">In '+l.inAt+
+         ' · '+comma(l.gross)+' lb gross · net would be '+comma(l.gross-pendingTare)+
+         ' lb</div></button>').join('')+'</div></div>';
+  }
+  h+=OPEN.map(l=>'<div class="load"><div class="load-top">'+
+     '<span class="load-veh">'+l.veh+'</span><span class="load-w">'+comma(l.gross)+' lb in</span></div>'+
+     '<div class="load-job"><b>'+refLabel(l.ref)+'</b></div>'+
+     '<span class="tag">In '+l.inAt+'</span>'+
+     '<span class="tag '+(isDest(l.ref)?'amber':'')+'">'+
+     (isDest(l.ref)?'Destruction · cert due':'Recycling')+'</span></div>').join('');
+  $('loadList').innerHTML=h;
+  document.querySelectorAll('[data-match]').forEach(b=>
+    b.addEventListener('click',()=>matchOut(+b.dataset.match,'Office · '+CLERK)));
+}
+
 async function capIn(){
   inStamp=new Date();
+  VEH=PLATES[plateIx++%PLATES.length];
+  $('valIn').textContent=comma(GROSS)+' lb';
+  $('hashIn').textContent=inStamp.toLocaleString()+' · '+
+    await sha256(inStamp.toISOString()+'|'+GROSS+'|metro-scale-01');
+  $('evIn').classList.add('done');
   $('officePanel').classList.add('alert');beep();
-  $('ofCount').textContent='1 needs a job';
+  $('ofAlert').textContent='◆ '+VEH+' on the scale — needs a job';
+  $('ofCount').textContent=OPEN.length+' on the yard · 1 at the scale';
   $('loadList').innerHTML='<div class="load needs"><div class="load-top">'+
     '<span class="load-veh">'+VEH+'</span><span class="load-w">'+comma(GROSS)+' lb in</span></div>'+
     '<div class="load-job">Not identified</div><span class="tag red">Needs a job or material</span>'+
-    '<div class="picker">'+pickerHTML()+'</div></div>';
+    '<div class="picker">'+pickerHTML()+'</div></div>'+
+    OPEN.map(l=>'<div class="load" style="opacity:.5"><div class="load-top">'+
+     '<span class="load-veh">'+l.veh+'</span><span class="load-w">'+comma(l.gross)+' lb in</span></div>'+
+     '<div class="load-job">'+refLabel(l.ref)+'</div>'+
+     '<span class="tag">On the yard since '+l.inAt+'</span></div>').join('');
   wirePickers('.pick','Office · '+CLERK);
-  $('ofNote').textContent='Weight recorded and sealed — the truck is not waiting on anyone';
-  $('phVeh').textContent='Scale 01 · '+comma(GROSS)+' lb';
+  $('ofNote').textContent='Weight recorded and sealed before anyone identifies it';
+  $('phVeh').textContent=VEH+' · '+comma(GROSS)+' lb';
   $('phBody').innerHTML='<div class="ph-prompt">What are you delivering?</div>'+
     JOBS.map((j,i)=>'<button class="opt" data-j="'+i+'"><b>'+j.wo+'</b><span>'+j.client+'</span></button>').join('')+
     '<div class="ph-prompt" style="margin-top:6px">Or plain material</div>'+
-    MATERIALS.map((m,i)=>'<button class="opt" data-m="'+i+'"><b>'+m.name.split(' — ')[0].toUpperCase()+
-    '</b><span>Recycling receipt</span></button>').join('');
+    MATERIALS.slice(0,3).map((m,i)=>'<button class="opt" data-m="'+i+'"><b>'+
+    m.name.split(' — ')[0].toUpperCase()+'</b><span>Recycling receipt</span></button>').join('');
   wirePickers('.opt','Driver scan');
   state='needs';$('mainBtn').disabled=true;$('mainBtn').textContent='Waiting to be identified';
   $('hintText').textContent='Pick a job on EITHER screen — whichever happens first wins';
   document.querySelector('.screens').scrollIntoView({block:'center'});
 }
-let direction='in',mill=null,bolId=null,release=null;
-const EMPTY_TRUCK=31460, LOADED=76320;
-
-$('dirBtn').addEventListener('click',()=>{
-  if(state!=='idle'){$('hintText').textContent='Press Start over before switching direction.';return}
-  direction=direction==='in'?'out':'in';
-  $('dirBtn').textContent='Direction: '+(direction==='in'?'Inbound receipt':'Outbound shipment');
-  $('mainBtn').textContent=direction==='in'?'Truck pulls onto the scale':'Empty GP trailer onto the scale';
-  $('hintText').textContent=direction==='in'
-    ? 'Watch the office panel — the alert fires the moment it settles'
-    : 'Outbound runs backwards: tare first, gross after loading';
-});
 
 function pickerHTML(){
   return JOBS.map((j,i)=>'<button class="pick" data-j="'+i+'"><b>'+j.wo+'</b>'+j.client+'</button>').join('')+
-   MATERIALS.map((m,i)=>'<button class="pick" data-m="'+i+'"><b>MAT</b>'+m.name+'</button>').join('');
+   MATERIALS.slice(0,3).map((m,i)=>'<button class="pick" data-m="'+i+'"><b>MAT</b>'+m.name+'</button>').join('');
 }
 function wirePickers(sel,by){
   document.querySelectorAll(sel).forEach(e=>e.addEventListener('click',()=>{
     if(e.dataset.j!==undefined) assign(JOBS[+e.dataset.j],by);
-    else assign({material:MATERIALS[+e.dataset.m].name},by);
+    else if(e.dataset.m!==undefined) assign({material:MATERIALS[+e.dataset.m].name},by);
   }));
 }
-function assign(j,by){
+
+function assign(r,by){
   if(job) return;
-  job=j;identBy=by;
-  const isDest=!!j.wo;
+  job=r;identBy=by;
   $('officePanel').classList.remove('alert');
-  $('loadList').innerHTML='<div class="load"><div class="load-top">'+
-    '<span class="load-veh">'+VEH+'</span><span class="load-w">'+comma(GROSS)+' lb in</span></div>'+
-    '<div class="load-job">'+(isDest?'<b>'+j.wo+'</b> · '+j.client:'<b>'+j.material+'</b> · recycling receipt')+'</div>'+
-    '<span class="tag green">'+by+'</span>'+
-    (isDest?'<span class="tag amber">Certificate due after destruction</span>':
-            '<span class="tag">Weight ticket only</span>')+'</div>';
-  $('ofNote').textContent='Identified by '+by.toLowerCase()+' — nobody left the desk';
   if(by==='Driver scan'){
     $('phBody').innerHTML='<div class="ph-prompt">Do you want a paper ticket?</div>'+
       '<button class="opt" id="yesP"><b>YES — PRINT IT</b><span>Ready at the window on your way out</span></button>'+
       '<button class="opt" id="noP"><b>NO — PHONE ONLY</b><span>Saved to your loadbook</span></button>';
-    $('yesP').addEventListener('click',()=>finishIn(true));
-    $('noP').addEventListener('click',()=>finishIn(false));
+    $('yesP').addEventListener('click',()=>parkLoad(true));
+    $('noP').addEventListener('click',()=>parkLoad(false));
   }else{
     $('phBody').innerHTML='<div class="ph-idle">Office handled it<br>—<br>driver never<br>touched a phone</div>';
-    finishIn(true);
+    parkLoad(true);
   }
 }
-function finishIn(paper){
-  wantsPaper=paper;state='in';
-  const b=$('mainBtn');b.disabled=false;b.textContent='Truck dumps, returns to the scale';
-  $('hintText').textContent='Material stays on the yard until it is scheduled for destruction';
+
+function parkLoad(paper){
+  OPEN.unshift({tk:'WT-'+String(Math.floor(Math.random()*900)+9000),veh:VEH,gross:GROSS,
+    inAt:hm(inStamp),ref:job,by:identBy,paper:paper});
+  job=null;identBy=null;
+  renderOpen();
+  $('ofNote').textContent='On the yard. It will not be matched by weight or timing — a person or a scan does that.';
+  state='idle';
+  $('mainBtn').disabled=false;$('mainBtn').textContent='Another truck arrives';
+  $('outBtn').disabled=false;
+  $('hintText').textContent='Send another truck in, or bring an empty one back to the scale';
 }
-async function capOut(){
+
+/* ---- outbound: capture first, match after ---- */
+async function capTare(){
   outStamp=new Date();
-  const net=GROSS-TARE;
-  ticketId='WT-'+String(Math.floor(Math.random()*900)+9000);
+  pendingTare=TARE+Math.round((Math.random()*1400)-700);
+  $('valOut').textContent=comma(pendingTare)+' lb';
+  $('hashOut').textContent=outStamp.toLocaleString()+' · '+
+    await sha256(outStamp.toISOString()+'|'+pendingTare+'|metro-scale-01');
+  $('evOut').classList.add('done');
+  $('officePanel').classList.add('alert');beep();
+  $('ofAlert').textContent='◆ Empty truck on the scale — which load is it?';
+  renderOpen();
+  $('ofNote').textContent='The scale reports a weight, not an identity. Someone has to say whose it is.';
+  $('phVeh').textContent='Empty on the scale';
+  $('phBody').innerHTML='<div class="ph-prompt">Which truck are you?</div>'+
+    OPEN.map((l,i)=>'<button class="opt" data-out="'+i+'"><b>'+l.veh+'</b><span>'+
+    refLabel(l.ref)+'</span></button>').join('');
+  document.querySelectorAll('[data-out]').forEach(b=>
+    b.addEventListener('click',()=>matchOut(+b.dataset.out,'Driver scan')));
+  state='matching';$('mainBtn').disabled=true;$('outBtn').disabled=true;
+  $('outBtn').textContent='Waiting to be matched';
+  $('hintText').textContent='Match it on EITHER screen — never on weight, never on timing';
+  document.querySelector('.screens').scrollIntoView({block:'center'});
+}
+
+async function matchOut(ix,by){
+  if(pendingTare===null) return;
+  const load=OPEN[ix], tare=pendingTare, net=load.gross-tare;
+  pendingTare=null;
+  OPEN.splice(ix,1);
+  ticketId=load.tk;
+  const dest=isDest(load.ref);
   $('officePanel').classList.remove('alert');
-  $('ofCount').textContent='Received';
-  const isDest=!!job.wo;
+  $('valNet').textContent=comma(net)+' lb';
+  $('hashNet').textContent='Matched by '+by.toLowerCase()+' · '+
+    await sha256(load.tk+tare+net+by);
+  $('evNet').classList.add('done');
+  renderOpen();
   $('loadList').innerHTML='<div class="load"><div class="load-top">'+
-    '<span class="load-veh">'+VEH+'</span><span class="load-w">'+comma(net)+' lb net</span></div>'+
-    '<div class="load-job"><b>'+ticketId+'</b> · '+(isDest?job.client+' · '+job.wo:job.material)+'</div>'+
-    '<span class="tag '+(isDest?'amber':'green')+'">'+
-    (isDest?'In custody · awaiting destruction':'Complete · counted to tonnage')+'</span></div>';
-  $('ofNote').textContent=isDest
+    '<span class="load-veh">'+load.veh+'</span><span class="load-w">'+comma(net)+' lb net</span></div>'+
+    '<div class="load-job"><b>'+load.tk+'</b> · '+refLabel(load.ref)+'</div>'+
+    '<span class="tag green">Matched by '+by+'</span>'+
+    '<span class="tag '+(dest?'amber':'')+'">'+
+    (dest?'In custody · awaiting destruction':'Complete · counted to tonnage')+'</span></div>'+
+    $('loadList').innerHTML;
+  $('ofNote').textContent=dest
     ? 'Weight ticket issued. Certificate comes later, when it is destroyed.'
     : 'Weight ticket issued. Ordinary recycling receipt — no certificate needed.';
-  printTicket(net,isDest);
-  $('ticketWho').textContent=wantsPaper?'· driver asked for paper':'· driver took it on his phone';
-  if(!wantsPaper) showTicketOnPhone(net,isDest);
-  TICKETS.unshift({id:ticketId,date:md(outStamp),time:hm(outStamp),veh:VEH,
-    ref:isDest?job.wo:job.material,net:net,type:isDest?'Destruction receipt':'Recycling receipt'});
-  if(isDest){
-    CUSTODY.unshift({id:ticketId,date:md(outStamp),days:0,client:job.client,wo:job.wo,net:net,veh:VEH});
+  job=load.ref;
+  printTicket(net,dest,load,tare);
+  $('ticketWho').textContent=load.paper?'· driver asked for paper':'· driver took it on his phone';
+  TICKETS.unshift({id:load.tk,date:md(outStamp),time:hm(outStamp),veh:load.veh,
+    ref:dest?load.ref.wo:load.ref.material,net:net,
+    type:dest?'Destruction receipt':'Recycling receipt'});
+  if(dest){
+    CUSTODY.unshift({id:load.tk,date:md(outStamp),days:0,client:load.ref.client,
+      wo:load.ref.wo,net:net,veh:load.veh});
   }else{
-    const m=MATERIALS.find(x=>x.name===job.material); if(m) m.ytd+=net;
+    const m=MATERIALS.find(x=>x.name===load.ref.material); if(m) m.ytd+=net;
   }
+  $('phBody').innerHTML='<div class="ph-done"><div class="tick">✓</div><b>You\u2019re clear</b><span>'+
+    load.tk+'<br>'+comma(net)+' lb<br>'+(load.paper?'Ticket printing at the window.':'Saved to your phone.')+
+    '</span></div>';
   renderCustody();renderSel();updateRun();renderReports();renderSetup();
-  state='done';$('mainBtn').disabled=true;
-  $('mainBtn').textContent=isDest?'Received — see In custody':'Received — see Reports';
-  $('hintText').textContent=isDest
-    ? 'It is now on the yard. Destroy it from the Destruction tab.'
-    : 'Counted to tonnage by material. Nothing else to do.';
+  state='idle';$('mainBtn').disabled=false;$('mainBtn').textContent='Another truck arrives';
+  $('outBtn').disabled=!OPEN.length;$('outBtn').textContent='An empty truck returns';
+  $('hintText').textContent=OPEN.length
+    ? OPEN.length+' still on the yard — bring another back and match it'
+    : 'Yard is clear. Send another truck in.';
 }
-function printTicket(net,isDest){
+
+function printTicket(net,dest,load,tare){
   $('receiptZone').classList.add('show');
   $('receipt').innerHTML=
    '<div class="ctr"><b>METROPOLITAN RECYCLING</b><br>4141 Singleton Blvd<br>Dallas, TX 75212</div><hr>'+
-   '<div class="ctr big">WEIGHT TICKET</div><div class="ctr">'+ticketId+'</div><hr>'+
-   '<div class="rw"><span>Vehicle</span><b>'+VEH+'</b></div>'+
-   '<div class="rw"><span>Carrier</span><b>'+CARRIER+'</b></div>'+
-   (isDest?'<div class="rw"><span>Work order</span><b>'+job.wo+'</b></div>'
-          :'<div class="rw"><span>Material</span><b>'+job.material.split(' — ')[0]+'</b></div>')+'<hr>'+
-   '<div class="rw"><span>Gross</span><b>'+comma(GROSS)+' lb</b></div>'+
-   '<div class="rw"><span>Tare</span><b>'+comma(TARE)+' lb</b></div>'+
+   '<div class="ctr big">WEIGHT TICKET</div><div class="ctr">'+load.tk+'</div><hr>'+
+   '<div class="rw"><span>Vehicle</span><b>'+load.veh+'</b></div>'+
+   (dest?'<div class="rw"><span>Work order</span><b>'+load.ref.wo+'</b></div>'
+        :'<div class="rw"><span>Material</span><b>'+load.ref.material.split(' — ')[0]+'</b></div>')+'<hr>'+
+   '<div class="rw"><span>Gross</span><b>'+comma(load.gross)+' lb</b></div>'+
+   '<div class="rw"><span>Tare</span><b>'+comma(tare)+' lb</b></div>'+
    '<div class="rw big"><span>NET</span><b>'+comma(net)+' lb</b></div><hr>'+
-   '<div class="rw"><span>In</span><b>'+hm(inStamp)+'</b></div>'+
+   '<div class="rw"><span>In</span><b>'+load.inAt+'</b></div>'+
    '<div class="rw"><span>Out</span><b>'+hm(outStamp)+'</b></div>'+
    '<div class="rw"><span>Confirmed</span><b>'+CLERK+'</b></div>'+
    '<div class="rw"><span>Tare source</span><b>Measured</b></div><hr>'+
-   (isDest
+   (dest
      ?'<div class="ctr tiny">RECEIPT OF MATERIAL ONLY<br>NOT A CERTIFICATE OF DESTRUCTION<br><br>'+
       'Certificate issues when the material<br>is destroyed.</div>'
      :'<div class="ctr tiny">RECYCLING RECEIPT<br><br>Thank you.</div>');
 }
-
 /* ---- outbound ---- */
 async function capEmpty(){
   inStamp=new Date();
@@ -1178,25 +1281,37 @@ $('mainBtn').addEventListener('click',()=>{
     return;
   }
   if(state==='idle') weigh(GROSS,'Inbound',capIn);
-  else if(state==='in') weigh(TARE,'Outbound',capOut);
+});
+$('outBtn').addEventListener('click',()=>{
+  if(direction==='out'||state!=='idle'||!OPEN.length) return;
+  weigh(TARE,'Outbound',capTare);
 });
 $('resetBtn').addEventListener('click',()=>{
   state='idle';job=identBy=ticketId=mill=bolId=release=null;wantsPaper=null;
-  $('dirBtn').textContent='Direction: '+(direction==='in'?'Inbound receipt':'Outbound shipment');
-  $('ofAlert').textContent='◆ Truck on the scale — needs a job';
+  pendingTare=null;plateIx=0;
+  OPEN=[
+   {tk:'WT-8931',veh:'TX 8RM-4417',gross:54120,inAt:'9:42 AM',ref:JOBS[1],by:'Driver scan',paper:true},
+   {tk:'WT-8934',veh:'TX 2WQ-1180',gross:48600,inAt:'10:15 AM',
+    ref:{material:'OCC — old corrugated cardboard'},by:'Office · '+CLERK,paper:false}
+  ];
   $('readout').textContent='000000';setAnn(true,false,false);
   $('statusText').textContent='Scale empty — ready';$('lockTag').textContent='';$('modeTag').textContent='Inbound';
-  $('officePanel').classList.remove('alert');$('ofCount').textContent='Nothing active';
-  $('loadList').innerHTML='<div class="empty">No truck on the scale</div>';
-  $('ofNote').textContent='Waiting';
+  $('dirBtn').textContent='Direction: '+(direction==='in'?'Inbound receipt':'Outbound shipment');
+  $('ofAlert').textContent='◆ Truck on the scale — needs a job';
+  $('officePanel').classList.remove('alert');
+  ['evIn','evOut','evNet','evPhoto'].forEach(i=>$(i).classList.remove('done'));
+  $('valIn').textContent=$('valOut').textContent=$('valNet').textContent=$('valPhoto').textContent='—';
+  $('hashIn').textContent=$('hashOut').textContent=$('hashPhoto').textContent='Awaiting capture';
+  $('hashNet').textContent='Sealed once the load closes';
   $('phVeh').textContent='Scan the sign at the scale';
   $('phBody').innerHTML='<div class="ph-idle">Nothing<br>on the scale</div>';
   $('receiptZone').classList.remove('show');$('receipt').innerHTML='';
   $('copyToggle').style.display='none';$('copyToggle').textContent='Show office copy';showingOffice=false;
   const b=$('mainBtn');b.disabled=false;
-  b.textContent=direction==='in'?'Truck pulls onto the scale':'Empty GP trailer onto the scale';
-  $('hintText').textContent='Watch the office panel — the alert fires the moment it settles';
-  window.scrollTo({top:0});
+  b.textContent=direction==='in'?'Truck arrives to unload':'Empty GP trailer onto the scale';
+  $('outBtn').disabled=false;$('outBtn').textContent='An empty truck returns';
+  $('hintText').textContent='Two trucks are already on the yard — watch how the return is matched';
+  renderOpen();window.scrollTo({top:0});
 });
 
 let TICKETS=[
@@ -1391,7 +1506,7 @@ $('addMat').addEventListener('click',()=>{
 });
 $('newMat').addEventListener('keydown',e=>{if(e.key==='Enter')$('addMat').click()});
 
-renderCustody();renderSel();updateRun();renderReports();renderSetup();
+renderCustody();renderSel();updateRun();renderReports();renderSetup();renderOpen();
 </script>
 </body>
 </html>
