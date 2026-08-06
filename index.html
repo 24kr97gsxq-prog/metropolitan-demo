@@ -360,9 +360,24 @@ font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:7px 20px;t
   <div class="cert">
     <div class="cert-mast"><div class="cert-title">Certificate of Destruction</div>
       <div class="cert-no"><b id="certNo">—</b><br>Issued <span id="certDate">—</span><br>Page 1 of 1</div></div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px 24px;
+      padding-bottom:17px;border-bottom:1px solid var(--concrete-dk);margin-bottom:19px">
+      <div>
+        <div class="fld-label">Destruction facility</div>
+        <div class="fld-val">Metropolitan Recycling<br>
+          <span style="font-size:13.5px;color:var(--steel)">2140 Sample St, Dallas, TX 75220</span></div>
+      </div>
+      <div>
+        <div class="fld-label">Facility registrations</div>
+        <div class="fld-val mono" style="font-size:12.5px;line-height:1.75">
+          TCEQ RN—————<br>NAID AAA #———— <span style="color:var(--steel-lt)">(pending)</span></div>
+      </div>
+    </div>
     <div class="grid2">
       <div><div class="fld-label">Client</div><div class="fld-val" id="fClient">—</div></div>
       <div><div class="fld-label">Work order</div><div class="fld-val mono" id="fWO">—</div></div>
+      <div><div class="fld-label">Invoice</div><div class="fld-val mono" id="fInv">—</div></div>
       <div><div class="fld-label">Material described as</div><div class="fld-val" id="fMaterial">—</div></div>
       <div><div class="fld-label">Lot / batch codes</div><div class="fld-val mono" id="fLot">—</div></div>
       <div><div class="fld-label">Method of destruction</div><div class="fld-val" id="fMethod">—</div></div>
@@ -389,6 +404,16 @@ font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:7px 20px;t
     Weights and photographs were captured at the point of work and cryptographically sealed at
     the time of capture.</div>
 
+    <div style="border:1px solid var(--concrete-dk);border-radius:var(--r);padding:14px 16px;
+      margin-bottom:19px;font-family:'IBM Plex Mono';font-size:11px;line-height:1.85;color:var(--steel)">
+      <span style="display:block;font-weight:600;letter-spacing:.13em;text-transform:uppercase;
+        color:var(--ink);margin-bottom:6px">Applicable standards</span>
+      Destruction performed as final disposition of product unfit for resale or return to commerce.
+      Records maintained in accordance with FDA guidance on voluntary product destruction and
+      applicable EPA disposition requirements. Chain of custody documented from receipt through
+      destruction. Records retained six years from the date of issue.
+    </div>
+
     <div class="fld-label">Photographic evidence</div>
     <div class="evid">
       <figure><div class="frame">▣</div><figcaption><b>As received</b><span id="pIn">—</span></figcaption></figure>
@@ -402,8 +427,10 @@ font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:7px 20px;t
       <span><i class="dot" style="background:var(--oxblood)"></i>Recycled 94%</span>
       <span><i class="dot" style="background:var(--concrete-dk)"></i>Landfill 6%</span></div>
 
-    <div class="fld-label" style="margin-top:19px">Verification fingerprint (SHA-256)</div>
+    <div class="fld-label" style="margin-top:19px">Record integrity check (SHA-256)</div>
     <div class="fld-val mono" id="cHash" style="word-break:break-all;font-size:11px;color:var(--steel)">—</div>
+    <div style="font-size:12.5px;color:var(--steel-lt);margin-top:6px;line-height:1.6">Weights and
+    photographs were sealed at capture. Any later change to this record breaks the check.</div>
 
     <div class="sig"><div><div class="sig-line">&nbsp;</div>
       <div class="fld-label" style="margin:0">Authorized signature · Metropolitan Recycling</div></div>
@@ -434,9 +461,10 @@ font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:7px 20px;t
 </section>
 
 <section class="verify">
-  <h2>Anyone can check it</h2>
-  <p>A client's auditor enters the certificate number. If a weight, date, or photo was altered
-  after issue, the fingerprint stops matching and the check fails.</p>
+  <h2>Certificate lookup</h2>
+  <p>A client or their auditor enters the certificate number and sees whether it is current,
+  superseded, or void. The record integrity check runs behind it — if a weight or date were
+  altered after issue, the lookup fails.</p>
   <div class="vrow"><input id="vInput" placeholder="MR-2026-0000" aria-label="Certificate number">
     <button id="vBtn">Verify</button></div>
   <div class="vout" id="vOut"></div>
@@ -716,6 +744,7 @@ async function issueCert(){
   $('certNo').textContent=certId;
   $('certDate').textContent=md(now);
   $('fClient').textContent=j.client;$('fWO').textContent=j.wo;$('fMaterial').textContent=j.mat;
+  $('fInv').textContent='INV-'+String(Math.floor(Math.random()*3000)+7000);
   $('fLot').textContent=j.lot;$('fMethod').textContent=METHOD;$('fWitness').textContent=WITNESS;
   $('fIn').textContent=sel[sel.length-1].date+' — '+sel[0].date;
   $('fDone').textContent=md(now)+', '+hm(now);
