@@ -513,6 +513,22 @@ letter-spacing:-.02em;margin-bottom:10px}
 .drv-exit{margin-top:18px;font-family:'IBM Plex Mono';font-size:10px;letter-spacing:.12em;
 text-transform:uppercase;color:#565F6B;background:none;border:none;cursor:pointer;
 text-decoration:underline;text-underline-offset:3px}
+
+/* ---- portal sign-in attention ---- */
+.try-chip{display:inline-flex;align-items:center;gap:8px;background:var(--phosphor-dim);
+color:var(--phosphor);border-radius:var(--r);padding:8px 13px;margin-bottom:14px;
+font-family:'IBM Plex Mono';font-size:10px;font-weight:600;letter-spacing:.13em;text-transform:uppercase}
+.try-chip i{width:7px;height:7px;border-radius:50%;background:var(--phosphor);
+animation:chipblink 1.4s ease-in-out infinite}
+@keyframes chipblink{0%,100%{opacity:1}50%{opacity:.25}}
+.plogin button.pulse{animation:signpulse 2s ease-out infinite}
+@keyframes signpulse{
+ 0%{box-shadow:0 0 0 0 rgba(107,232,150,.55)}
+ 70%{box-shadow:0 0 0 14px rgba(107,232,150,0)}
+ 100%{box-shadow:0 0 0 0 rgba(107,232,150,0)}}
+@media (prefers-reduced-motion:reduce){
+ .try-chip i{animation:none}
+ .plogin button.pulse{animation:none;box-shadow:0 0 0 3px rgba(107,232,150,.5)}}
 </style>
 </head>
 <body>
@@ -884,13 +900,14 @@ text-decoration:underline;text-underline-offset:3px}
 
       <div id="pLogin">
         <div class="plogin">
+          <div class="try-chip"><i></i>Demo — tap Sign in to see what your client sees</div>
           <h3>Sign in</h3>
           <p>Use the details Metropolitan sent you. One login per account — you only ever see
           your own material.</p>
           <input id="pEmail" type="email" value="operations@lonestarbev.com"
             aria-label="Email" autocomplete="off">
           <input id="pPass" type="password" value="demo-password" aria-label="Password" autocomplete="off">
-          <button id="pGo">Sign in</button>
+          <button id="pGo" class="pulse">Sign in</button>
         </div>
       </div>
 
@@ -906,8 +923,8 @@ text-decoration:underline;text-underline-offset:3px}
 
         <div class="bill-grid" style="margin-bottom:16px">
           <div class="bill-cell"><div class="k">Included with your login</div>
-            <div class="s" style="margin-top:0">Certificates · loads · monthly reports ·
-            destruction photos · your equipment · service requests</div></div>
+            <div class="s" style="margin-top:0">Certificates · LEED projects · monthly reports ·
+            destruction photos · loads · equipment · service requests</div></div>
           <div class="bill-cell"><div class="k">Reports arrive</div>
             <div class="v" style="font-size:14px">1st of the month</div>
             <div class="s">By email, automatically</div></div>
@@ -934,6 +951,16 @@ text-decoration:underline;text-underline-offset:3px}
         </div>
 
 
+
+        <div class="card" style="margin-bottom:14px">
+          <div class="rpt-head"><div class="screen-label" style="margin:0">Your projects · LEED diversion, one project at a time</div>
+            <div class="rpt-tools"><button data-csv="pProjTable" data-name="my_projects">CSV</button></div></div>
+          <div class="scroll"><table id="pProjTable"></table></div>
+          <div class="of-note" style="text-align:left">Each project stands alone — its own tonnage,
+          its own diversion rate, its own MRp2 / MRc5 report. Nothing is ever blended across
+          projects, because a LEED reviewer will not accept blended numbers. Non-LEED work is
+          flagged so it can never leak into a submission.</div>
+        </div>
         <div class="card" style="margin-bottom:14px">
           <div class="rpt-head"><div class="screen-label" style="margin:0">Your monthly reports · sent on the 1st, downloadable any time</div>
             <div class="rpt-tools"><button data-csv="pRepTable" data-name="my_reports">CSV</button></div></div>
@@ -2699,7 +2726,7 @@ const TOUR=[
  {t:'custody',sel:'#custodyTable',say:'The receipt lands on the yard and the clock starts. This is the client\u2019s product sitting on your ground, and the ageing column is what they will ask about.'},
  {t:'destroy',sel:'#tab-destroy .card',say:'Several receipts get destroyed together as one run. Photographs are taken and sealed at the moment of capture.'},
  {t:'cert',sel:'#tab-cert section',say:'The certificate covers the run, names every receipt inside it, and can be checked by anyone holding it without calling you.'},
- {t:'portal',sel:'.portal',say:'Your client signs in and pulls their own certificates, monthly reports, destruction photos and diversion rate — and asks for a container pull without ringing your office.'},
+ {t:'portal',sel:'#pApp .bill-grid',say:'Your client signs in and pulls their own certificates, LEED projects, monthly reports and destruction photos — and asks for a container pull without ringing your office.'},
  {t:'trade',sel:'#setlTable',say:'The same weights follow the material out the door and get checked against what the mill actually paid on.'},
  {t:'reb',sel:'#idxTable',say:'Drop in the month’s published index and every generator rebate reprices itself — and you see the margin before you approve it.'},
  {t:'cont',sel:'#eqMapCard',say:'Every container and trailer on a map — who has it, when it last reported, and the red ones pulsing are your assets earning nothing.'},
@@ -2713,6 +2740,7 @@ function goTour(i){
   const st=TOUR[tIdx];
   const btn=document.querySelector('nav button[data-t="'+st.t+'"]');
   if(btn) btn.click();
+  if(st.t==='portal' && $('pApp').style.display==='none') $('pGo').click();
   clearFocus();
   $('tourStep').textContent='Step '+(tIdx+1)+' of '+TOUR.length;
   $('tourSay').textContent=st.say;
@@ -2754,6 +2782,32 @@ document.addEventListener('keydown',e=>{
 
 renderCustody();renderSel();updateRun();renderReports();renderSetup();renderOpen();
 renderTrade();renderCont();renderAuto();paintNet();
+
+/* ================= PORTAL: LEED PROJECTS ================= */
+/* Per standing rule: per-project reports are LEED-clean and never blended,
+   so this table deliberately has NO total row. Weight-based only. */
+const P_PROJECTS=[
+ {name:'Plano DC decommission',leed:'LEED v5 BD+C',tons:112.4,div:106.1,st:'Active'},
+ {name:'Riverside Medical Pavilion',leed:'LEED v4 BD+C',tons:97.7,div:94.4,st:'Active'},
+ {name:'Waco line retrofit',leed:'Non-LEED',tons:41.2,div:37.9,st:'Closed'},
+ {name:'HQ warehouse clear-out',leed:'LEED v5 O+M',tons:23.6,div:22.8,st:'Active'}
+];
+function renderPProjects(){
+  $('pProjTable').innerHTML='<tr><th>Project</th><th>Rating system</th><th class="r">Tons</th>'+
+   '<th class="r">Diverted</th><th class="r">Rate</th><th class="r">Report</th></tr>'+
+   P_PROJECTS.map(p=>{
+    const non = p.leed==='Non-LEED';
+    return '<tr><td>'+p.name+
+    (p.st==='Closed'?' <span class="tag" style="margin-left:6px">Closed</span>':'')+'</td>'+
+    '<td>'+(non?'<span class="tag amber">Non-LEED \u00b7 kept separate</span>'
+              :'<span class="mono" style="font-size:12px">'+p.leed+'</span>')+'</td>'+
+    '<td class="mono r">'+p.tons.toFixed(1)+'</td>'+
+    '<td class="mono r">'+p.div.toFixed(1)+'</td>'+
+    '<td class="mono r" style="font-weight:600">'+Math.round(p.div/p.tons*100)+'%</td>'+
+    '<td class="r"><span class="tag">'+(non?'Summary':'MRp2 / MRc5')+'</span></td></tr>'}).join('');
+}
+renderPProjects();
+
 
 /* ================= PORTAL: REPORTS + EVIDENCE ================= */
 const P_REPORTS=[
@@ -3039,6 +3093,7 @@ function renderPortal(){
 }
 $('pGo').addEventListener('click',()=>{
   $('pLogin').style.display='none'; $('pApp').style.display='';
+  $('pGo').classList.remove('pulse');
 });
 $('pOut').addEventListener('click',()=>{
   $('pApp').style.display='none'; $('pLogin').style.display='';
