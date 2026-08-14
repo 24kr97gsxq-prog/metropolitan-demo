@@ -903,6 +903,21 @@ text-decoration:underline;text-underline-offset:3px}
           <button class="ghost-btn" id="pOut">Sign out</button>
         </div>
 
+
+        <div class="bill-grid" style="margin-bottom:16px">
+          <div class="bill-cell"><div class="k">Included with your login</div>
+            <div class="s" style="margin-top:0">Certificates · loads · monthly reports ·
+            destruction photos · your equipment · service requests</div></div>
+          <div class="bill-cell"><div class="k">Reports arrive</div>
+            <div class="v" style="font-size:14px">1st of the month</div>
+            <div class="s">By email, automatically</div></div>
+          <div class="bill-cell"><div class="k">Verify a certificate</div>
+            <div class="v" style="font-size:14px">Anyone, any time</div>
+            <div class="s">No login needed to check one</div></div>
+          <div class="bill-cell"><div class="k">Your data</div>
+            <div class="v" style="font-size:14px">Yours, exportable</div>
+            <div class="s">CSV on every table here</div></div>
+        </div>
         <div class="kpis">
           <div class="kpi"><div class="n">31</div><div class="l">loads this year</div></div>
           <div class="kpi"><div class="n">642.8</div><div class="l">tons received</div></div>
@@ -918,6 +933,24 @@ text-decoration:underline;text-underline-offset:3px}
           hand it to — your auditor, your insurer, your brand team — without calling Metropolitan.</div>
         </div>
 
+
+        <div class="card" style="margin-bottom:14px">
+          <div class="rpt-head"><div class="screen-label" style="margin:0">Your monthly reports · sent on the 1st, downloadable any time</div>
+            <div class="rpt-tools"><button data-csv="pRepTable" data-name="my_reports">CSV</button></div></div>
+          <div class="scroll"><table id="pRepTable"></table></div>
+          <div class="of-note" style="text-align:left">Every report is weight-based from the certified
+          scale — the numbers your auditor, your insurer or your own sustainability filing can use
+          directly. They arrive by email on the 1st without anyone asking, and live here forever.</div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <div class="rpt-head"><div class="screen-label" style="margin:0">Destruction evidence · photographs sealed at capture</div>
+            <div class="rpt-tools"><span class="netpill"><i></i><span>3 runs on file</span></span></div></div>
+          <div class="scroll"><table id="pEvTable"></table></div>
+          <div class="of-note" style="text-align:left">Photos are hashed the moment they are taken and
+          tied to the run they belong to — evidence, not decoration. Available to you for every run,
+          for the life of the account.</div>
+        </div>
         <div class="card" style="margin-bottom:14px">
           <div class="rpt-head"><div class="screen-label" style="margin:0">Your recent loads</div>
             <div class="rpt-tools"><button data-print="pLoadTable">Print</button>
@@ -2666,7 +2699,7 @@ const TOUR=[
  {t:'custody',sel:'#custodyTable',say:'The receipt lands on the yard and the clock starts. This is the client\u2019s product sitting on your ground, and the ageing column is what they will ask about.'},
  {t:'destroy',sel:'#tab-destroy .card',say:'Several receipts get destroyed together as one run. Photographs are taken and sealed at the moment of capture.'},
  {t:'cert',sel:'#tab-cert section',say:'The certificate covers the run, names every receipt inside it, and can be checked by anyone holding it without calling you.'},
- {t:'portal',sel:'.portal',say:'Your client signs in and pulls their own certificates, weights and diversion rate. They stop ringing your office for numbers you already hold.'},
+ {t:'portal',sel:'.portal',say:'Your client signs in and pulls their own certificates, monthly reports, destruction photos and diversion rate — and asks for a container pull without ringing your office.'},
  {t:'trade',sel:'#setlTable',say:'The same weights follow the material out the door and get checked against what the mill actually paid on.'},
  {t:'reb',sel:'#idxTable',say:'Drop in the month’s published index and every generator rebate reprices itself — and you see the margin before you approve it.'},
  {t:'cont',sel:'#eqMapCard',say:'Every container and trailer on a map — who has it, when it last reported, and the red ones pulsing are your assets earning nothing.'},
@@ -2721,6 +2754,34 @@ document.addEventListener('keydown',e=>{
 
 renderCustody();renderSel();updateRun();renderReports();renderSetup();renderOpen();
 renderTrade();renderCont();renderAuto();paintNet();
+
+/* ================= PORTAL: REPORTS + EVIDENCE ================= */
+const P_REPORTS=[
+ {name:'Destruction & diversion summary',period:'July 2026',loads:6,tons:40.08,div:'94%'},
+ {name:'Destruction & diversion summary',period:'June 2026',loads:5,tons:37.13,div:'95%'},
+ {name:'Destruction & diversion summary',period:'May 2026',loads:5,tons:49.06,div:'92%'},
+ {name:'Quarterly certificate register',period:'Q2 2026',loads:16,tons:126.27,div:'94%'}
+];
+const P_EVID=[
+ {run:'MR-2026-4417',date:'12 Aug 2026',photos:8,note:'Before \u00b7 during \u00b7 after \u00b7 witnessed'},
+ {run:'MR-2026-3190',date:'14 Jul 2026',photos:6,note:'Before \u00b7 during \u00b7 after'},
+ {run:'MR-2026-2871',date:'19 Jun 2026',photos:6,note:'Before \u00b7 during \u00b7 after'}
+];
+function renderPReports(){
+  $('pRepTable').innerHTML='<tr><th>Report</th><th>Period</th><th class="r">Loads</th>'+
+   '<th class="r">Tons</th><th class="r">Diverted</th><th class="r"></th></tr>'+
+   P_REPORTS.map(r=>'<tr><td>'+r.name+'</td><td class="mono">'+r.period+'</td>'+
+    '<td class="mono r">'+r.loads+'</td><td class="mono r">'+r.tons.toFixed(2)+'</td>'+
+    '<td class="mono r">'+r.div+'</td>'+
+    '<td class="r"><span class="tag">Download</span></td></tr>').join('');
+  $('pEvTable').innerHTML='<tr><th>Run</th><th class="mono">Destroyed</th>'+
+   '<th class="r">Photos</th><th>Coverage</th><th class="r"></th></tr>'+
+   P_EVID.map(e=>'<tr><td class="mono">'+e.run+'</td><td class="mono">'+e.date+'</td>'+
+    '<td class="mono r">'+e.photos+'</td><td style="color:var(--steel)">'+e.note+'</td>'+
+    '<td class="r"><span class="tag">View</span></td></tr>').join('');
+}
+renderPReports();
+
 
 /* ================= LEED REPORT ================= */
 const LEED_ROWS=[
