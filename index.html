@@ -1285,14 +1285,51 @@ animation:chipblink 1.4s ease-in-out infinite}
 
 
   <div class="card" id="leedCard">
-    <div class="rpt-head"><div class="screen-label" style="margin:0">LEED diversion report · per project, contractor-ready</div>
-      <div class="rpt-tools"><button data-print="leedTable">Print</button>
-      <button data-csv="leedTable" data-name="leed_diversion">CSV</button></div></div>
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Sample monthly diversion report · what the GC's LEED consultant receives</div>
+      <div class="rpt-tools"><span class="tag" style="border-color:#2F6B4F;color:#2F6B4F">LEED v4 · target 75% · ON TRACK</span>
+      <button data-print="leedZone">Print</button></div></div>
+
+    <div class="bill-grid" style="margin-bottom:14px">
+      <div class="bill-cell"><div class="k">Project</div>
+        <div class="v" style="font-size:14px">Meridian Pediatric Tower</div>
+        <div class="s">Sample project · name changed</div></div>
+      <div class="bill-cell"><div class="k">GC / hauler</div>
+        <div class="v" style="font-size:14px">Caprock Builders</div>
+        <div class="s">Hauling by Caprock Site Services</div></div>
+      <div class="bill-cell"><div class="k">Recycling facility</div>
+        <div class="v" style="font-size:14px">Metropolitan Recycling</div>
+        <div class="s">Dallas TX · TCEQ reg. on file</div></div>
+      <div class="bill-cell"><div class="k">Report period</div>
+        <div class="v" style="font-size:14px">July 2026</div>
+        <div class="s">Issued automatically Aug 1</div></div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi"><div class="n">178</div><div class="l">tickets this month</div></div>
+      <div class="kpi"><div class="n">531.4</div><div class="l">tons generated</div></div>
+      <div class="kpi"><div class="n">404.9</div><div class="l">tons diverted</div></div>
+      <div class="kpi"><div class="n">76%</div><div class="l">diversion · target 75%</div></div>
+    </div>
+    <div class="of-note" style="text-align:left;margin-bottom:14px">Project to date: 902 tickets ·
+    3,084 tons generated · 2,224 diverted · 72% cumulative. The math is printed on the report
+    itself: generated = diverted + landfill, rate = diverted ÷ generated. Nothing to take on trust.</div>
+
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Tonnage by zone · July</div>
+      <div class="rpt-tools"><button data-csv="leedZone" data-name="leed_zones">CSV</button></div></div>
+    <div class="scroll"><table id="leedZone"></table></div>
+
+    <div class="rpt-head" style="margin-top:16px"><div class="screen-label" style="margin:0">Material breakdown · where it actually went</div>
+      <div class="rpt-tools"><button data-csv="leedTable" data-name="leed_materials">CSV</button></div></div>
     <div class="scroll"><table id="leedTable"></table></div>
-    <div class="of-note" style="text-align:left">Formatted for what a GC's LEED consultant actually
-    files — MRp2 / MRc5, one project per report, never blended with any other project. Weight-based
-    only: diverted tonnage is what earns the credit, so that is what goes on the page. Monthly, on a
-    schedule, without anyone asking.</div>
+
+    <div class="rpt-head" style="margin-top:16px"><div class="screen-label" style="margin:0">Scale tickets · first twelve of 178 — every one is in the full report</div>
+      <div class="rpt-tools"><button data-csv="leedTix" data-name="leed_tickets">CSV</button></div></div>
+    <div class="scroll"><table id="leedTix"></table></div>
+
+    <div class="of-note" style="text-align:left">Every ticket: gross, tare, net, material split,
+    diversion, and whether a photo was captured. Standard-tare loads are marked Estimated — the
+    report says so instead of hiding it. One project per report, never blended. Weight-based only.
+    Monthly, on a schedule, without anyone asking.</div>
   </div>
 
   <div class="card">
@@ -2726,6 +2763,7 @@ const TOUR=[
  {t:'custody',sel:'#custodyTable',say:'The receipt lands on the yard and the clock starts. This is the client\u2019s product sitting on your ground, and the ageing column is what they will ask about.'},
  {t:'destroy',sel:'#tab-destroy .card',say:'Several receipts get destroyed together as one run. Photographs are taken and sealed at the moment of capture.'},
  {t:'cert',sel:'#tab-cert section',say:'The certificate covers the run, names every receipt inside it, and can be checked by anyone holding it without calling you.'},
+ {t:'reports',sel:'#leedCard',say:'The monthly LEED report, ticket by ticket — every weight, every tare, every photo, issued on the 1st without anyone asking. This page is what wins the GC.'},
  {t:'portal',sel:'#pApp .bill-grid',say:'Your client signs in and pulls their own certificates, LEED projects, monthly reports and destruction photos — and asks for a container pull without ringing your office.'},
  {t:'trade',sel:'#setlTable',say:'The same weights follow the material out the door and get checked against what the mill actually paid on.'},
  {t:'reb',sel:'#idxTable',say:'Drop in the month’s published index and every generator rebate reprices itself — and you see the margin before you approve it.'},
@@ -2845,16 +2883,61 @@ const LEED_ROWS=[
  {mat:'Concrete & masonry \u00b7 recycled',tons:9.61,div:9.61},
  {mat:'Mixed C&D residue \u00b7 landfill',tons:3.32,div:0}
 ];
+const LEED_ZONES=[
+ {z:'A \u2014 tower core',tk:141,t:421.6,d:320.4},
+ {z:'B \u2014 podium',tk:9,t:30.1,d:22.9},
+ {z:'C \u2014 sitework',tk:3,t:5.8,d:4.0},
+ {z:'D \u2014 parking structure',tk:19,t:55.3,d:43.2},
+ {z:'E \u2014 central plant',tk:2,t:3.9,d:2.9},
+ {z:'Unassigned',tk:4,t:14.7,d:11.5}
+];
+const LEED_MATS=[
+ {mat:'Wood \u00b7 reuse / salvage \u2014 pallet remanufacture',pct:'41%',tons:218.9},
+ {mat:'Cardboard & paper \u00b7 recycled \u2014 Northgate Fiber',pct:'16%',tons:86.1},
+ {mat:'Metals \u00b7 recycled \u2014 regional metals recycler',pct:'16%',tons:84.3},
+ {mat:'Concrete & block \u00b7 crushed \u2014 aggregate base',pct:'3%',tons:15.6},
+ {mat:'Residue \u00b7 landfill disposal',pct:'24%',tons:126.5}
+];
+const LEED_TIX=[
+ ['7/01','88214','A',39460,33400,3.03,'80%',true,false],
+ ['7/01','88215','B',41930,33400,4.27,'75%',true,false],
+ ['7/02','88221','A',40310,32600,3.86,'77%',true,false],
+ ['7/06','88240','A',42120,33400,4.36,'77%',true,false],
+ ['7/07','88246','A',39130,33200,2.97,'83%',true,false],
+ ['7/08','88252','A',41760,32600,4.58,'56%',true,false],
+ ['7/09','88257','D',40260,32420,3.92,'75%',true,false],
+ ['7/11','88270','A',42140,32600,4.77,'79%',true,false],
+ ['7/13','88281','B',39870,32600,3.64,'77%',true,false],
+ ['7/15','DX0091','A',38280,32540,2.87,'77%',false,true],
+ ['7/16','88295','D',41062,33000,4.03,'88%',true,false],
+ ['7/16','DX0093','A',35280,32540,1.37,'64%',false,true]
+];
 function renderLeed(){
-  const t=LEED_ROWS.reduce((a,r)=>a+r.tons,0), d=LEED_ROWS.reduce((a,r)=>a+r.div,0);
-  $('leedTable').innerHTML='<tr><th>Sample project \u00b7 Riverside Medical Pavilion</th>'+
-   '<th class="r">Tons</th><th class="r">Diverted</th><th class="r">To landfill</th></tr>'+
-   LEED_ROWS.map(r=>'<tr><td>'+r.mat+'</td><td class="mono r">'+r.tons.toFixed(2)+'</td>'+
-    '<td class="mono r">'+r.div.toFixed(2)+'</td>'+
-    '<td class="mono r">'+(r.tons-r.div>0.005?(r.tons-r.div).toFixed(2):'\u2014')+'</td></tr>').join('')
-   +'<tr class="total"><td>Project diversion rate \u00b7 '+Math.round(d/t*100)+'%</td>'+
-    '<td class="mono r">'+t.toFixed(2)+'</td><td class="mono r">'+d.toFixed(2)+'</td>'+
-    '<td class="mono r">'+(t-d).toFixed(2)+'</td></tr>';
+  $('leedZone').innerHTML='<tr><th>Zone</th><th class="r">Tickets</th><th class="r">Tons</th>'+
+   '<th class="r">Diverted</th><th class="r">Landfill</th><th class="r">Rate</th></tr>'+
+   LEED_ZONES.map(z=>'<tr><td>'+z.z+'</td><td class="mono r">'+z.tk+'</td>'+
+    '<td class="mono r">'+z.t.toFixed(1)+'</td><td class="mono r">'+z.d.toFixed(1)+'</td>'+
+    '<td class="mono r">'+(z.t-z.d).toFixed(1)+'</td>'+
+    '<td class="mono r" style="font-weight:600">'+Math.round(z.d/z.t*100)+'%</td></tr>').join('')
+   +'<tr class="total"><td>July total</td><td class="mono r">178</td>'+
+    '<td class="mono r">531.4</td><td class="mono r">404.9</td>'+
+    '<td class="mono r">126.5</td><td class="mono r">76%</td></tr>';
+
+  $('leedTable').innerHTML='<tr><th>Material \u00b7 end market</th><th class="r">Share</th>'+
+   '<th class="r">Tons</th></tr>'+
+   LEED_MATS.map(m=>'<tr><td>'+m.mat+'</td><td class="mono r">'+m.pct+'</td>'+
+    '<td class="mono r">'+m.tons.toFixed(1)+'</td></tr>').join('');
+
+  $('leedTix').innerHTML='<tr><th class="mono">Date</th><th>Ticket</th><th>Zone</th>'+
+   '<th class="r">Gross lb</th><th class="r">Tare lb</th><th class="r">Net T</th>'+
+   '<th class="r">Div %</th><th class="r">Tare</th><th class="r">Photo</th></tr>'+
+   LEED_TIX.map(t=>'<tr><td class="mono">'+t[0]+'</td><td class="mono">'+t[1]+'</td>'+
+    '<td class="mono">'+t[2]+'</td><td class="mono r">'+comma(t[3])+'</td>'+
+    '<td class="mono r">'+comma(t[4])+'</td><td class="mono r">'+t[5].toFixed(2)+'</td>'+
+    '<td class="mono r">'+t[6]+'</td>'+
+    '<td class="r">'+(t[8]?'<span class="tag amber">Estimated</span>':'<span class="tag">Measured</span>')+'</td>'+
+    '<td class="mono r">'+(t[7]?'\u2713':'\u2014')+'</td></tr>').join('')
+   +'<tr class="total"><td colspan="8">Photo coverage this month</td><td class="mono r">168 / 178</td></tr>';
 }
 renderLeed();
 
