@@ -266,7 +266,15 @@ text-transform:uppercase;color:#8A4B1F;white-space:nowrap}
 .auto-item .now b{color:var(--ink);font-weight:600}
 
 /* ---- plans ---- */
-.plan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:14px;margin-bottom:18px}
+.plan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-bottom:18px;align-items:stretch}
+/* iPad Safari hardening: everything inside a plan card stacks vertically,
+   full width, no exceptions. The pick button pins to the bottom. */
+.plan{display:flex;flex-direction:column;min-width:0}
+.plan-top,.plan ul,.plan .plan-pick{display:block;width:100%;float:none;position:static}
+.plan ul{flex:1 1 auto;columns:1 !important;column-count:1 !important}
+.plan li{break-inside:avoid}
+.plan .plan-pick{margin-top:auto}
+.plan ul{margin-bottom:15px}
 .plan{background:var(--paper);border:1px solid var(--concrete-dk);border-radius:var(--r);
 padding:18px;border-top:4px solid var(--concrete-dk)}
 .plan.co{border-top-color:var(--ink)}
@@ -1215,6 +1223,18 @@ text-decoration:underline;text-underline-offset:3px}
     on its own</span>
   </div>
 
+
+  <div class="card" id="leedCard">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">LEED diversion report · per project, contractor-ready</div>
+      <div class="rpt-tools"><button data-print="leedTable">Print</button>
+      <button data-csv="leedTable" data-name="leed_diversion">CSV</button></div></div>
+    <div class="scroll"><table id="leedTable"></table></div>
+    <div class="of-note" style="text-align:left">Formatted for what a GC's LEED consultant actually
+    files — MRp2 / MRc5, one project per report, never blended with any other project. Weight-based
+    only: diverted tonnage is what earns the credit, so that is what goes on the page. Monthly, on a
+    schedule, without anyone asking.</div>
+  </div>
+
   <div class="card">
     <div class="rpt-head"><div class="screen-label" style="margin:0">Reconciliation by client · year to date</div><div class="rpt-tools"><button data-print="reconTable">Print</button><button data-csv="reconTable" data-name="reconciliation">CSV</button></div></div>
     <div class="scroll"><table id="reconTable"></table></div>
@@ -1300,6 +1320,7 @@ text-decoration:underline;text-underline-offset:3px}
         <li>Chain of custody from receipt through destruction</li>
         <li>Certificates of destruction, verifiable by whoever holds one</li>
         <li>Diversion rate by client and project, weight-based</li>
+        <li>LEED-ready diversion reports per project — MRp2 / MRc5, contractor-grade</li>
         <li>Weight ticket register, every weighment reprintable</li>
         <li>Client portal and accounting exports</li>
       </ul>
@@ -2701,6 +2722,28 @@ document.addEventListener('keydown',e=>{
 renderCustody();renderSel();updateRun();renderReports();renderSetup();renderOpen();
 renderTrade();renderCont();renderAuto();paintNet();
 
+/* ================= LEED REPORT ================= */
+const LEED_ROWS=[
+ {mat:'Wood \u00b7 reuse / salvage',tons:56.14,div:56.14},
+ {mat:'Metals \u00b7 recycled',tons:14.80,div:14.80},
+ {mat:'Cardboard & paper \u00b7 recycled',tons:13.83,div:13.83},
+ {mat:'Concrete & masonry \u00b7 recycled',tons:9.61,div:9.61},
+ {mat:'Mixed C&D residue \u00b7 landfill',tons:3.32,div:0}
+];
+function renderLeed(){
+  const t=LEED_ROWS.reduce((a,r)=>a+r.tons,0), d=LEED_ROWS.reduce((a,r)=>a+r.div,0);
+  $('leedTable').innerHTML='<tr><th>Sample project \u00b7 Riverside Medical Pavilion</th>'+
+   '<th class="r">Tons</th><th class="r">Diverted</th><th class="r">To landfill</th></tr>'+
+   LEED_ROWS.map(r=>'<tr><td>'+r.mat+'</td><td class="mono r">'+r.tons.toFixed(2)+'</td>'+
+    '<td class="mono r">'+r.div.toFixed(2)+'</td>'+
+    '<td class="mono r">'+(r.tons-r.div>0.005?(r.tons-r.div).toFixed(2):'\u2014')+'</td></tr>').join('')
+   +'<tr class="total"><td>Project diversion rate \u00b7 '+Math.round(d/t*100)+'%</td>'+
+    '<td class="mono r">'+t.toFixed(2)+'</td><td class="mono r">'+d.toFixed(2)+'</td>'+
+    '<td class="mono r">'+(t-d).toFixed(2)+'</td></tr>';
+}
+renderLeed();
+
+
 /* ================= DRIVER VIEW (#driver deep link) =================
    The sign's QR lands here: full-screen driver check-in, nothing else.
    A shared sign identifies the SCALE, not the person — so the first tap
@@ -2754,10 +2797,16 @@ $('drvExit').addEventListener('click',()=>{
   $('drv').classList.remove('on');
   try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
 });
+function drvWanted(){
+  if(location.hash.toLowerCase()==='#driver') return true;
+  try{ if(new URLSearchParams(location.search).has('driver')) return true }catch(e){}
+  return false;
+}
 function drvCheck(){
-  if(location.hash==='#driver'){ drvStep='who'; drvPaint(); $('drv').classList.add('on'); }
+  if(drvWanted()){ drvStep='who'; drvPaint(); $('drv').classList.add('on'); }
 }
 window.addEventListener('hashchange',drvCheck);
+window.addEventListener('load',drvCheck);
 drvCheck();
 
 
