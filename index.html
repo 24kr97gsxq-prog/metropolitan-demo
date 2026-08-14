@@ -8,8 +8,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;800&family=IBM+Plex+Mono:wght@400;500;600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#16191C;--steel:#5A6570;--steel-lt:#8D97A1;--concrete:#E4E2DD;--concrete-dk:#CFCCC5;
---paper:#FFF;--phosphor:#6BE896;--phosphor-dim:#1E4630;--oxblood:#7A2E2E;--amber:#C8892F;--bezel:#23282D;--r:3px}
+:root{--ink:#16191C;--steel:#454E58;--steel-lt:#565F6B;--mute-dk:#A8B2BD;--concrete:#E9E7E2;--concrete-dk:#C6C2BA;
+--paper:#FFF;--phosphor:#6BE896;--phosphor-dim:#1E4630;--oxblood:#7A2E2E;--amber:#C8892F;--bezel:#23282D;--r:3px;
+/* panels that are dark on purpose — constant in both themes */
+--panel-dk:#16191C;--on-dk:#E9E7E2}
+/* ---- night mode: scale house at 4am, or a driver in the dark ---- */
+body.night{--ink:#E6E3DE;--steel:#A9B3BE;--steel-lt:#8D97A2;--concrete:#111417;--concrete-dk:#333A42;--paper:#1B1F23;--oxblood:#E08585;--amber:#E5AC5C;--bezel:#0C0E10}
+body.night .demo-note{background:#4A3410;color:#F0C97A}
+body.night .lcd{box-shadow:none}
+@media print{body.night{--ink:#16191C;--steel:#454E58;--steel-lt:#565F6B;--concrete:#E9E7E2;--concrete-dk:#C6C2BA;--paper:#FFF;--oxblood:#7A2E2E;--amber:#C8892F}}
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
 body{background:var(--concrete);color:var(--ink);font-family:'Public Sans',system-ui,sans-serif;
@@ -42,10 +49,10 @@ section{margin-bottom:40px}
 .indicator{background:linear-gradient(176deg,#2C3238,var(--bezel) 55%,#1A1E22);border-radius:8px;
 padding:15px 15px 13px;margin-bottom:14px;box-shadow:0 1px 0 rgba(255,255,255,.09) inset,0 14px 34px -14px rgba(22,25,28,.6)}
 .ind-top{display:flex;justify-content:space-between;margin-bottom:10px;font-family:'IBM Plex Mono';
-font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;color:#6E7A85}
+font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:#6E7A85}
 .lcd{background:#0D1512;border:1px solid #000;border-radius:4px;padding:15px 17px;display:flex;
 align-items:center;justify-content:space-between;gap:14px;box-shadow:0 2px 12px rgba(0,0,0,.5) inset}
-.annun{display:flex;flex-direction:column;gap:6px;font-family:'IBM Plex Mono';font-size:9.5px;
+.annun{display:flex;flex-direction:column;gap:6px;font-family:'IBM Plex Mono';font-size:10.5px;
 font-weight:600;letter-spacing:.12em;text-transform:uppercase}
 .ann{color:var(--phosphor-dim);transition:color .18s}
 .ann.on{color:var(--phosphor);text-shadow:0 0 9px rgba(107,232,150,.5)}
@@ -60,7 +67,7 @@ font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8D97A1;min-he
 
 .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 button{font-family:'Archivo';font-size:14px;font-weight:600;padding:11px 20px;border-radius:var(--r);
-border:1.5px solid var(--ink);background:var(--ink);color:var(--concrete);cursor:pointer;transition:transform .1s,opacity .15s}
+border:1.5px solid var(--panel-dk);background:var(--panel-dk);color:var(--on-dk);cursor:pointer;transition:transform .1s,opacity .15s}
 button:hover:not(:disabled){transform:translateY(-1px)}
 button:focus-visible{outline:2.5px solid var(--oxblood);outline-offset:2.5px}
 button.ghost-btn{background:transparent;color:var(--ink)}
@@ -69,15 +76,15 @@ button:disabled{opacity:.3;cursor:not-allowed}
 
 .screens{display:grid;grid-template-columns:1fr;gap:18px;margin-top:22px}
 @media(min-width:760px){.screens{grid-template-columns:1fr 250px;align-items:start}}
-.screen-label{font-family:'IBM Plex Mono';font-size:9.5px;font-weight:600;letter-spacing:.15em;
+.screen-label{font-family:'IBM Plex Mono';font-size:10.5px;font-weight:600;letter-spacing:.15em;
 text-transform:uppercase;color:var(--steel);margin-bottom:7px}
 .role{display:flex;align-items:center;gap:9px;padding:9px 13px;border-radius:var(--r) var(--r) 0 0;
 margin-bottom:0;font-family:'IBM Plex Mono';font-size:10px;font-weight:600;letter-spacing:.14em;
 text-transform:uppercase}
-.role.office{background:var(--ink);color:var(--phosphor)}
+.role.office{background:var(--panel-dk);color:var(--phosphor)}
 .role.driver{background:var(--oxblood);color:#fff}
 .role .who{font-size:12.5px;letter-spacing:.06em}
-.role .dev{margin-left:auto;opacity:.7;font-size:9px;letter-spacing:.12em}
+.role .dev{margin-left:auto;opacity:.7;font-size:10px;letter-spacing:.12em}
 .role-cap{font-size:12.5px;color:var(--steel);line-height:1.55;margin-top:9px;padding:0 2px}
 .role-cap b{color:var(--ink);font-weight:600}
 .office{background:var(--paper);border:1px solid var(--concrete-dk);border-radius:var(--r);
@@ -91,7 +98,7 @@ font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
 .of-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-bottom:10px;
 border-bottom:1px solid var(--concrete-dk);margin-bottom:11px}
 .of-head b{font-family:'Archivo';font-size:14.5px;font-weight:700}
-.of-head span{font-family:'IBM Plex Mono';font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--steel)}
+.of-head span{font-family:'IBM Plex Mono';font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--steel)}
 .load{border:1.5px solid var(--concrete-dk);border-radius:var(--r);padding:11px 12px;margin-bottom:8px}
 .load.needs{border-color:var(--oxblood);background:#FCF8F8}
 .load.closed{opacity:.5}
@@ -100,27 +107,27 @@ border-bottom:1px solid var(--concrete-dk);margin-bottom:11px}
 .load-w{font-family:'IBM Plex Mono';font-size:11.5px;font-variant-numeric:tabular-nums;color:var(--steel)}
 .load-job{font-size:13px;margin-top:4px;color:var(--steel)}
 .load-job b{color:var(--ink);font-weight:600}
-.tag{display:inline-block;font-family:'IBM Plex Mono';font-size:8.5px;font-weight:600;letter-spacing:.12em;
+.tag{display:inline-block;font-family:'IBM Plex Mono';font-size:10.5px;font-weight:600;letter-spacing:.1em;
 text-transform:uppercase;padding:3px 7px;border-radius:99px;margin-top:6px;border:1px solid var(--concrete-dk);color:var(--steel)}
 .tag.red{border-color:var(--oxblood);color:var(--oxblood)}
-.tag.green{border-color:var(--ink);background:var(--ink);color:var(--phosphor)}
+.tag.green{border-color:var(--panel-dk);background:var(--panel-dk);color:var(--phosphor)}
 .tag.amber{border-color:var(--amber);color:#8A5D14}
 .picker{margin-top:9px;display:grid;gap:6px}
 .pick{width:100%;text-align:left;background:var(--paper);color:var(--ink);border:1.5px solid var(--concrete-dk);
 padding:9px 11px;font-family:'Public Sans';font-size:13px}
 .pick:hover{border-color:var(--ink);transform:none}
 .pick b{font-family:'IBM Plex Mono';font-size:11px;margin-right:7px}
-.of-note{font-family:'IBM Plex Mono';font-size:10px;color:var(--steel-lt);text-align:center;margin-top:10px;line-height:1.6}
+.of-note{font-family:'IBM Plex Mono';font-size:11.5px;color:var(--steel-lt);text-align:center;margin-top:10px;line-height:1.65}
 
 .phone{background:var(--bezel);border-radius:22px;padding:9px;box-shadow:0 16px 34px -18px rgba(22,25,28,.55)}
 .phone-in{background:var(--paper);border-radius:15px;overflow:hidden;min-height:360px;display:flex;flex-direction:column}
-.ph-top{background:var(--ink);color:var(--concrete);padding:12px 14px}
+.ph-top{background:var(--panel-dk);color:var(--on-dk);padding:12px 14px}
 .ph-top b{font-family:'Archivo';font-size:13px;font-weight:700;display:block}
-.ph-top span{font-family:'IBM Plex Mono';font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--steel-lt)}
+.ph-top span{font-family:'IBM Plex Mono';font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--mute-dk)}
 .ph-body{padding:14px;flex:1;display:flex;flex-direction:column}
-.ph-idle{margin:auto;text-align:center;color:var(--steel-lt);font-family:'IBM Plex Mono';font-size:10px;
+.ph-idle{margin:auto;text-align:center;color:var(--steel-lt);font-family:'IBM Plex Mono';font-size:11px;
 letter-spacing:.1em;text-transform:uppercase;line-height:1.9}
-.ph-prompt{font-family:'IBM Plex Mono';font-size:9.5px;font-weight:600;letter-spacing:.13em;
+.ph-prompt{font-family:'IBM Plex Mono';font-size:10.5px;font-weight:600;letter-spacing:.13em;
 text-transform:uppercase;color:var(--steel);margin-bottom:10px}
 .opt{border:1.5px solid var(--concrete-dk);border-radius:var(--r);padding:10px 11px;margin-bottom:7px;
 background:var(--paper);width:100%;text-align:left;font-family:'Public Sans';color:var(--ink)}
@@ -139,7 +146,7 @@ font-size:10.5px;line-height:1.72;box-shadow:0 10px 26px -14px rgba(22,25,28,.5)
 .receipt hr{border:0;border-top:1px dashed var(--concrete-dk);margin:7px 0}
 .receipt .ctr{text-align:center}.receipt .big{font-size:14px;font-weight:600}
 .receipt .rw{display:flex;justify-content:space-between;gap:10px}
-.receipt .tiny{font-size:8.5px;line-height:1.6;word-break:break-all;color:var(--steel)}
+.receipt .tiny{font-size:9.5px;line-height:1.6;word-break:break-all;color:var(--steel)}
 
 /* custody + tables */
 .card{background:var(--paper);border:1px solid var(--concrete-dk);border-radius:var(--r);padding:18px;margin-bottom:16px}
@@ -148,11 +155,11 @@ background:var(--concrete-dk)}
 .kpi{background:var(--paper);padding:15px 16px}
 .kpi .n{font-family:'Archivo';font-weight:800;font-size:clamp(21px,4vw,27px);letter-spacing:-.03em;
 font-variant-numeric:tabular-nums;line-height:1.1}
-.kpi .l{font-family:'IBM Plex Mono';font-size:9.5px;font-weight:600;letter-spacing:.13em;
+.kpi .l{font-family:'IBM Plex Mono';font-size:10.5px;font-weight:600;letter-spacing:.13em;
 text-transform:uppercase;color:var(--steel);margin-top:6px;line-height:1.5}
 .kpi.warn .n{color:var(--oxblood)}
-table{width:100%;border-collapse:collapse;font-size:14px}
-th{font-family:'IBM Plex Mono';font-size:9.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;
+table{width:100%;border-collapse:collapse;font-size:14.5px;color:var(--ink)}
+th{font-family:'IBM Plex Mono';font-size:10.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;
 color:var(--steel);text-align:left;padding:0 10px 9px 0;border-bottom:1.5px solid var(--ink);white-space:nowrap}
 th.r,td.r{text-align:right;padding-right:0}
 td{padding:11px 10px 11px 0;border-bottom:1px solid var(--concrete-dk);vertical-align:top}
@@ -179,7 +186,7 @@ line-height:1.14;max-width:16ch}
 .cert-no{font-family:'IBM Plex Mono';font-size:10.5px;letter-spacing:.08em;text-align:right;color:var(--steel);line-height:1.9}
 .cert-no b{color:var(--ink);font-weight:600}
 .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:15px 22px;margin-bottom:19px}
-.fld-label{font-family:'IBM Plex Mono';font-size:9.5px;font-weight:600;letter-spacing:.15em;
+.fld-label{font-family:'IBM Plex Mono';font-size:10.5px;font-weight:600;letter-spacing:.15em;
 text-transform:uppercase;color:var(--steel);margin-bottom:4px}
 .fld-val{font-size:14.5px;font-weight:500;line-height:1.4}
 .fld-val.mono{font-family:'IBM Plex Mono';font-size:13.5px;font-variant-numeric:tabular-nums}
@@ -189,9 +196,9 @@ margin-bottom:19px;font-size:13.5px;line-height:1.65;color:#2C3238}
 .evid figure{border:1px solid var(--concrete-dk);border-radius:var(--r);overflow:hidden}
 .evid .frame{height:88px;display:flex;align-items:center;justify-content:center;font-size:24px;
 color:var(--steel-lt);background:repeating-linear-gradient(45deg,#EDEBE7 0 8px,#F2F0EC 8px 16px)}
-.evid figcaption{padding:7px 9px;font-family:'IBM Plex Mono';font-size:8.5px;line-height:1.7;
+.evid figcaption{padding:7px 9px;font-family:'IBM Plex Mono';font-size:9.5px;line-height:1.7;
 color:var(--steel);word-break:break-all;background:#F2F0EC}
-.evid figcaption b{display:block;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink)}
+.evid figcaption b{display:block;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink)}
 .disposition{display:flex;gap:2px;height:8px;border-radius:99px;overflow:hidden;margin:9px 0 7px}
 .disposition i{display:block;height:100%}
 .disp-key{display:flex;gap:15px;flex-wrap:wrap;font-family:'IBM Plex Mono';font-size:10px;color:var(--steel)}
@@ -204,19 +211,19 @@ padding-bottom:3px;min-width:185px;margin-bottom:5px}
 .stamp{border:2.5px solid var(--oxblood);color:var(--oxblood);border-radius:var(--r);padding:8px 13px;
 text-align:center;transform:rotate(-3.5deg);flex-shrink:0}
 .stamp b{display:block;font-family:'Archivo';font-weight:800;font-size:12.5px;letter-spacing:.06em}
-.stamp span{font-family:'IBM Plex Mono';font-size:8.5px;letter-spacing:.12em}
+.stamp span{font-family:'IBM Plex Mono';font-size:9.5px;letter-spacing:.12em}
 .empty{text-align:center;padding:38px 18px;color:var(--steel-lt);font-family:'IBM Plex Mono';
 font-size:11px;letter-spacing:.08em;line-height:2}
 
-.verify{background:var(--ink);color:var(--concrete);border-radius:var(--r);padding:22px 20px}
+.verify{background:var(--panel-dk);color:var(--on-dk);border-radius:var(--r);padding:22px 20px}
 .verify h2{color:var(--paper)}
-.verify p{color:var(--steel-lt);font-size:14.5px;max-width:52ch;margin-bottom:16px}
+.verify p{color:var(--mute-dk);font-size:14.5px;max-width:52ch;margin-bottom:16px}
 .vrow{display:flex;gap:9px;flex-wrap:wrap}
 .vrow input{flex:1;min-width:180px;font-family:'IBM Plex Mono';font-size:13px;padding:11px 13px;
-border-radius:var(--r);border:1.5px solid var(--steel);background:#0F1215;color:var(--phosphor)}
+border-radius:var(--r);border:1.5px solid #6E7A86;background:#0F1215;color:var(--phosphor)}
 .vrow button{background:var(--phosphor);color:var(--ink);border-color:var(--phosphor)}
 .vout{margin-top:15px;font-family:'IBM Plex Mono';font-size:12px;line-height:1.85;word-break:break-all;min-height:18px}
-.vout .ok{color:var(--phosphor)}.vout .bad{color:#FF8B6B}.vout .dim{color:var(--steel-lt)}
+.vout .ok{color:var(--phosphor)}.vout .bad{color:#FF8B6B}.vout .dim{color:var(--mute-dk)}
 
 footer{border-top:1.5px solid var(--ink);padding:18px 0 40px;margin-top:14px;font-family:'IBM Plex Mono';
 font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--steel);display:flex;
@@ -234,6 +241,204 @@ body.printing .print-target,body.printing .print-target *{visibility:visible}
 body.printing .print-target{position:absolute;left:0;top:0;width:100%}
 body.printing .print-target .rpt-tools{display:none}
 @media(prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation:none!important}html{scroll-behavior:auto}}
+
+/* ---- module badges ---- */
+.tier{display:inline-block;font-family:'IBM Plex Mono';font-size:10.5px;font-weight:600;
+letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:var(--r);
+margin-left:auto;flex:0 0 auto}
+.tier.core{background:var(--panel-dk);color:var(--phosphor)}
+.tier.trade{background:#1F4E5F;color:#fff}
+.tier.cont{background:#5A4A7A;color:#fff}
+.tier.auto{background:#8A4B1F;color:#fff}
+.tier.leed{background:#2F6B4F;color:#fff}
+.tier.comp{background:var(--oxblood);color:#fff}
+.eyebrow .tier{margin-left:0}
+
+/* ---- automations cards ---- */
+.auto-item{background:var(--paper);border:1px solid var(--concrete-dk);border-left:3px solid #8A4B1F;
+border-radius:var(--r);padding:15px 17px;margin-bottom:11px}
+.auto-item h3{font-family:'Archivo';font-weight:700;font-size:15.5px;letter-spacing:-.01em;
+margin-bottom:5px;display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.auto-item .saved{font-family:'IBM Plex Mono';font-size:10px;font-weight:600;letter-spacing:.1em;
+text-transform:uppercase;color:#8A4B1F;white-space:nowrap}
+.auto-item p{font-size:14px;color:var(--steel);line-height:1.55;margin-bottom:9px}
+.auto-item .now{font-family:'IBM Plex Mono';font-size:11.5px;color:var(--steel-lt);line-height:1.7}
+.auto-item .now b{color:var(--ink);font-weight:600}
+
+/* ---- plans ---- */
+.plan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:14px;margin-bottom:18px}
+.plan{background:var(--paper);border:1px solid var(--concrete-dk);border-radius:var(--r);
+padding:18px;border-top:4px solid var(--concrete-dk)}
+.plan.co{border-top-color:var(--ink)}
+.plan.tr{border-top-color:#1F4E5F}
+.plan.le{border-top-color:#2F6B4F}
+.plan.cn{border-top-color:#5A4A7A}
+.plan.au{border-top-color:#8A4B1F}
+.plan.cm{border-top-color:var(--oxblood)}
+.plan-top{margin-bottom:13px;padding-bottom:11px;border-bottom:1px solid var(--concrete-dk)}
+.plan-name{font-family:'Archivo';font-weight:800;font-size:17px;letter-spacing:-.02em;
+display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:7px}
+.plan-price{font-family:'Archivo';font-weight:800;font-size:25px;letter-spacing:-.03em}
+.plan-price span{font-family:'IBM Plex Mono';font-size:11px;font-weight:500;
+letter-spacing:.1em;color:var(--steel);text-transform:uppercase;margin-left:4px}
+.plan ul{list-style:none}
+.plan li{font-size:13.5px;color:var(--steel);line-height:1.5;padding-left:15px;position:relative;margin-bottom:7px}
+.plan li::before{content:'';position:absolute;left:0;top:8px;width:5px;height:5px;
+border-radius:50%;background:var(--concrete-dk)}
+.total-bar{background:var(--panel-dk);color:var(--on-dk);border-radius:var(--r);padding:19px 22px;
+display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.total-bar .tb-l{font-family:'Archivo';font-weight:800;font-size:18px;letter-spacing:-.02em;color:var(--paper)}
+.total-bar .tb-s{font-size:13.5px;color:var(--mute-dk);margin-top:4px;max-width:46ch}
+.total-bar .tb-p{font-family:'Archivo';font-weight:800;font-size:31px;letter-spacing:-.03em;color:var(--phosphor)}
+.total-bar .tb-p span{font-family:'IBM Plex Mono';font-size:11px;font-weight:500;
+letter-spacing:.1em;color:var(--mute-dk);text-transform:uppercase;margin-left:5px}
+
+/* ---- network state ---- */
+.netpill{display:inline-flex;align-items:center;gap:7px;font-family:'IBM Plex Mono';font-size:10.5px;
+font-weight:600;letter-spacing:.11em;text-transform:uppercase;padding:6px 11px;border-radius:var(--r);
+border:1.5px solid var(--concrete-dk);color:var(--steel);background:var(--paper)}
+.netpill i{width:7px;height:7px;border-radius:50%;background:var(--phosphor-dim);display:block}
+.netpill.down{border-color:var(--amber);color:#7A5310;background:#FBF2E0}
+.netpill.down i{background:var(--amber)}
+
+/* ---- guided tour ---- */
+.tour-open{position:relative}
+.tourbar{position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--panel-dk);
+color:var(--on-dk);border-top:2px solid var(--phosphor);padding:13px 20px;
+transform:translateY(105%);transition:transform .28s ease}
+.tourbar.on{transform:translateY(0)}
+.tour-in{max-width:920px;margin:0 auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.tour-txt{flex:1;min-width:200px}
+.tour-step{font-family:'IBM Plex Mono';font-size:10.5px;font-weight:600;letter-spacing:.15em;
+text-transform:uppercase;color:var(--phosphor);margin-bottom:3px}
+.tour-say{font-size:14.5px;line-height:1.45;color:var(--paper)}
+.tour-nav{display:flex;gap:7px;flex:0 0 auto}
+.tourbar button{font-size:13px;padding:8px 14px;border-radius:var(--r);border:1.5px solid #6E7A86;
+background:transparent;color:var(--concrete);font-family:'Public Sans';cursor:pointer}
+.tourbar button.go{background:var(--phosphor);border-color:var(--phosphor);color:var(--ink);font-weight:600}
+.tourbar button:focus-visible{outline:2px solid var(--phosphor);outline-offset:2px}
+body.touring{padding-bottom:96px}
+.tour-focus{outline:2.5px solid var(--phosphor);outline-offset:5px;border-radius:var(--r)}
+.tourbtn{background:var(--panel-dk);color:var(--phosphor);border:none;border-radius:var(--r);
+font-family:'IBM Plex Mono';font-size:10.5px;font-weight:600;letter-spacing:.12em;
+text-transform:uppercase;padding:9px 14px;cursor:pointer;white-space:nowrap}
+.tourbtn:hover{background:#000}
+.tourbtn:focus-visible{outline:2px solid var(--oxblood);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.tourbar{transition:none}}
+@media print{.tourbar,.tourbtn{display:none}}
+@media (max-width:600px){
+  nav button{font-size:12px;padding:11px 9px}
+  .tourbtn{font-size:10.5px;padding:8px 11px}
+  .total-bar{flex-direction:column;align-items:flex-start}
+}
+
+
+/* ---- plan toggles + billing ---- */
+.plan{transition:opacity .18s,border-color .18s}
+.plan.off{opacity:.5}
+.plan.off .plan-price{color:var(--steel-lt)}
+.tog{display:inline-flex;align-items:center;gap:9px;cursor:pointer;font-family:'IBM Plex Mono';
+font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--steel);
+margin-top:11px}
+.tog input{position:absolute;opacity:0;width:0;height:0}
+.tog i{width:36px;height:20px;border-radius:10px;background:var(--concrete-dk);position:relative;
+transition:background .18s;flex:0 0 auto}
+.tog i::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;
+background:var(--paper);transition:transform .18s}
+.tog input:checked + i{background:var(--phosphor-dim)}
+.tog input:checked + i::after{transform:translateX(16px)}
+.tog input:focus-visible + i{outline:2px solid var(--ink);outline-offset:3px}
+.tog input:disabled + i{opacity:.55;cursor:not-allowed}
+.sub-btn{background:var(--phosphor);color:var(--ink);border:none;border-radius:var(--r);
+font-family:'Public Sans';font-weight:700;font-size:15px;padding:14px 26px;cursor:pointer;white-space:nowrap}
+.sub-btn:hover{background:#8FF0B2}
+.sub-btn:focus-visible{outline:2px solid var(--paper);outline-offset:3px}
+.stripe-note{font-family:'IBM Plex Mono';font-size:11px;color:var(--mute-dk);line-height:1.7;margin-top:9px}
+.bill-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1px;
+background:var(--concrete-dk);border:1px solid var(--concrete-dk);border-radius:var(--r);overflow:hidden;
+margin-bottom:14px}
+.bill-cell{background:var(--paper);padding:14px 16px}
+.bill-cell .k{font-family:'IBM Plex Mono';font-size:10px;letter-spacing:.13em;text-transform:uppercase;
+color:var(--steel-lt);margin-bottom:6px}
+.bill-cell .v{font-family:'Archivo';font-weight:700;font-size:17px;letter-spacing:-.01em}
+.bill-cell .s{font-size:12.5px;color:var(--steel);margin-top:3px}
+@media (max-width:600px){.sub-btn{width:100%}}
+
+/* ---- three-tier plans ---- */
+.plan.sel{border-color:var(--phosphor-dim);border-top-color:var(--phosphor-dim);
+box-shadow:0 0 0 2px var(--phosphor-dim)}
+.plan-pick{width:100%;margin-top:15px;padding:12px;border-radius:var(--r);cursor:pointer;
+font-family:'IBM Plex Mono';font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+border:1.5px solid var(--ink);background:transparent;color:var(--ink)}
+.plan-pick:hover{background:var(--concrete)}
+.plan.sel .plan-pick{background:var(--phosphor-dim);border-color:var(--phosphor-dim);color:var(--phosphor)}
+.plan-pick:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.plan-was{font-family:'IBM Plex Mono';font-size:11.5px;color:var(--steel-lt);margin-top:5px}
+.seg{display:inline-flex;border:1.5px solid var(--concrete-dk);border-radius:var(--r);
+overflow:hidden;margin-bottom:16px;background:var(--paper)}
+.seg button{font-family:'IBM Plex Mono';font-size:11px;font-weight:600;letter-spacing:.11em;
+text-transform:uppercase;padding:10px 16px;border:none;background:transparent;color:var(--steel);cursor:pointer}
+.seg button.on{background:var(--panel-dk);color:var(--phosphor)}
+.seg button:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
+.addon{background:var(--paper);border:1px solid var(--concrete-dk);border-left:3px solid var(--oxblood);
+border-radius:var(--r);padding:17px 19px;margin-bottom:18px;display:flex;gap:18px;
+align-items:flex-start;flex-wrap:wrap}
+.addon .ao-t{flex:1;min-width:230px}
+.addon h3{font-family:'Archivo';font-weight:700;font-size:16px;letter-spacing:-.01em;margin-bottom:6px}
+.addon p{font-size:13.5px;color:var(--steel);line-height:1.55}
+.addon .ao-p{font-family:'Archivo';font-weight:800;font-size:21px;letter-spacing:-.02em;white-space:nowrap}
+
+/* ---- driver scan sign ---- */
+.sign{background:var(--panel-dk);border-radius:var(--r);padding:26px;display:flex;gap:26px;
+align-items:center;flex-wrap:wrap;justify-content:center;text-align:center}
+.sign-qr{background:var(--paper);padding:14px;border-radius:var(--r);flex:0 0 auto;line-height:0}
+.sign-qr svg{display:block;width:172px;height:172px}
+.sign-t{flex:1;min-width:230px;text-align:left}
+.sign-t .sh{font-family:'Archivo';font-weight:800;font-size:27px;line-height:1.1;letter-spacing:-.03em;
+color:var(--paper);margin-bottom:10px}
+.sign-t .sp{font-size:15px;color:var(--mute-dk);line-height:1.55;margin-bottom:14px;max-width:38ch}
+.sign-t .sn{font-family:'IBM Plex Mono';font-size:11px;letter-spacing:.13em;text-transform:uppercase;
+color:var(--phosphor)}
+.steps3{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;
+background:var(--concrete-dk);border:1px solid var(--concrete-dk);border-radius:var(--r);
+overflow:hidden;margin-top:14px}
+.steps3 div{background:var(--paper);padding:15px 17px}
+.steps3 b{font-family:'IBM Plex Mono';font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+color:var(--oxblood);display:block;margin-bottom:7px}
+.steps3 p{font-size:13.5px;color:var(--steel);line-height:1.55}
+
+/* ---- client portal ---- */
+.portal{border:1px solid var(--concrete-dk);border-radius:var(--r);overflow:hidden;background:var(--paper)}
+.pbar{background:#EFEDE8;border-bottom:1px solid var(--concrete-dk);padding:9px 13px;
+display:flex;align-items:center;gap:8px}
+.pbar i{width:9px;height:9px;border-radius:50%;background:var(--concrete-dk);display:block}
+.pbar span{flex:1;background:var(--paper);border:1px solid var(--concrete-dk);border-radius:2px;
+font-family:'IBM Plex Mono';font-size:11px;color:var(--steel);padding:5px 10px;margin-left:8px}
+.pbody{padding:24px}
+.plogin{max-width:330px;margin:26px auto 34px}
+.plogin h3{font-family:'Archivo';font-weight:800;font-size:21px;letter-spacing:-.02em;margin-bottom:6px}
+.plogin p{font-size:13.5px;color:var(--steel);margin-bottom:18px;line-height:1.55}
+.plogin input{width:100%;padding:11px 13px;margin-bottom:10px;border:1.5px solid var(--concrete-dk);
+border-radius:var(--r);font-family:'IBM Plex Mono';font-size:13.5px;background:var(--paper);color:var(--ink)}
+.plogin input:focus{outline:2px solid var(--ink);outline-offset:1px}
+.plogin button{width:100%;padding:13px;border:none;border-radius:var(--r);background:var(--panel-dk);
+color:var(--phosphor);font-family:'Public Sans';font-weight:700;font-size:15px;cursor:pointer}
+.phead{display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap;
+padding-bottom:14px;border-bottom:1px solid var(--concrete-dk);margin-bottom:18px}
+.phead .pn{font-family:'Archivo';font-weight:800;font-size:22px;letter-spacing:-.02em}
+.phead .pm{font-family:'IBM Plex Mono';font-size:11px;letter-spacing:.11em;text-transform:uppercase;
+color:var(--steel)}
+
+.mini-seg{display:inline-flex;border:1.5px solid var(--concrete-dk);border-radius:var(--r);
+overflow:hidden;background:var(--paper)}
+.mini-seg button{font-family:'IBM Plex Mono';font-size:10px;font-weight:600;letter-spacing:.1em;
+text-transform:uppercase;padding:7px 10px;border:none;background:transparent;color:var(--steel);cursor:pointer}
+.mini-seg button.on{background:var(--panel-dk);color:var(--phosphor)}
+.mini-seg button:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
+.sign-t .sh small{display:block;font-size:17px;font-weight:700;color:var(--phosphor);
+letter-spacing:-.01em;margin-top:5px}
+.sign-t .sp em{display:block;font-style:normal;color:var(--on-dk);margin-top:7px}
+@media print{.mini-seg{display:none}}
 </style>
 </head>
 <body>
@@ -243,14 +448,28 @@ body.printing .print-target .rpt-tools{display:none}
 <header class="mast">
   <div class="mast-in">
     <div class="brand">Metropolitan Recycling<span>Certified Product Destruction · Singleton Blvd, Dallas</span></div>
-    <div class="mast-meta">Scale 01<br>Powered by DivertScan</div>
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <div class="mast-meta">Scale 01<br>Powered by DivertScan</div>
+      <div class="mini-seg" id="lightSeg" role="group" aria-label="Screen brightness">
+        <button data-lt="auto" class="on">Auto</button>
+        <button data-lt="day">Day</button>
+        <button data-lt="night">Night</button>
+      </div>
+      <button class="tourbtn" id="tourStart">▶ Show me how it works</button>
+    </div>
   </div>
   <nav>
     <button class="on" data-t="scale">Scale house</button>
     <button data-t="custody">In custody</button>
     <button data-t="destroy">Destruction</button>
     <button data-t="cert">Certificates</button>
+    <button data-t="portal">Client portal</button>
+    <button data-t="trade">Trading</button>
+    <button data-t="reb">Rebates</button>
+    <button data-t="cont">Containers</button>
+    <button data-t="auto">Automations</button>
     <button data-t="reports">Reports</button>
+    <button data-t="plans">Plans</button>
     <button data-t="setup">Setup</button>
   </nav>
 </header>
@@ -280,6 +499,8 @@ body.printing .print-target .rpt-tools{display:none}
     <button id="outBtn">An empty truck returns</button>
     <button id="dirBtn" class="ghost-btn">Direction: Inbound receipt</button>
     <button id="resetBtn" class="ghost-btn">Start over</button>
+    <button id="netBtn" class="ghost-btn">Cut the internet</button>
+    <span class="netpill" id="netPill"><i></i><span id="netTxt">Online</span></span>
     <span class="hint" id="hintText">Watch the office panel — the alert fires the moment it settles</span>
   </div>
 
@@ -320,7 +541,13 @@ body.printing .print-target .rpt-tools{display:none}
       <div class="role driver"><span class="who">Driver</span>
         <span class="dev">His own phone · QR at scale</span></div>
       <div class="phone" style="border-radius:0 0 22px 22px"><div class="phone-in">
-        <div class="ph-top"><b>Metropolitan Recycling</b><span id="phVeh">Scan the sign at the scale</span></div>
+        <div class="ph-top" style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <div><b>Metropolitan Recycling</b><span id="phVeh">Scan the sign at the scale</span></div>
+          <button id="langBtn" style="flex:0 0 auto;font-family:'IBM Plex Mono';font-size:10px;
+            font-weight:600;letter-spacing:.1em;padding:5px 8px;border-radius:var(--r);cursor:pointer;
+            border:1.5px solid #6E7A86;background:transparent;color:var(--on-dk)"
+            aria-label="Cambiar idioma">ES</button>
+        </div>
         <div class="ph-body" id="phBody"><div class="ph-idle">Nothing<br>on the scale</div></div>
       </div></div>
       <div class="role-cap"><b>Sees only his own load.</b> No account, no password, no app to
@@ -344,6 +571,35 @@ body.printing .print-target .rpt-tools{display:none}
       <span class="ev-val" id="valNet">—</span></div><div class="ev-sub" id="hashNet">A person or a scan decides which load this belongs to</div></div>
     <div class="ev" id="evPhoto"><div class="ev-head"><span class="ev-label">Photo evidence</span>
       <span class="ev-val" id="valPhoto">—</span></div><div class="ev-sub" id="hashPhoto">Captured at destruction</div></div>
+  </div>
+
+  <div class="card">
+    <div class="screen-label">Posted at the scale · what the driver actually sees</div>
+    <div class="sign">
+      <div class="sign-qr">
+        <svg viewBox="0 0 33 33" xmlns="http://www.w3.org/2000/svg" role="img"
+          aria-label="Scan to check in"><path d="M0 0h7v1h-7zM8 0h1v1h-1zM10 0h3v1h-3zM16 0h1v1h-1zM18 0h7v1h-7zM26 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h2v1h-2zM14 1h1v1h-1zM16 1h2v1h-2zM20 1h1v1h-1zM23 1h2v1h-2zM26 1h1v1h-1zM32 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM9 2h1v1h-1zM13 2h2v1h-2zM26 2h1v1h-1zM28 2h3v1h-3zM32 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h1v1h-1zM15 3h1v1h-1zM18 3h1v1h-1zM22 3h3v1h-3zM26 3h1v1h-1zM28 3h3v1h-3zM32 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM12 4h1v1h-1zM16 4h1v1h-1zM20 4h1v1h-1zM24 4h1v1h-1zM26 4h1v1h-1zM28 4h3v1h-3zM32 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM9 5h3v1h-3zM15 5h7v1h-7zM26 5h1v1h-1zM32 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h7v1h-7zM8 7h2v1h-2zM11 7h2v1h-2zM14 7h6v1h-6zM22 7h3v1h-3zM0 8h1v1h-1zM2 8h2v1h-2zM5 8h3v1h-3zM9 8h3v1h-3zM15 8h1v1h-1zM17 8h2v1h-2zM20 8h2v1h-2zM24 8h1v1h-1zM26 8h1v1h-1zM29 8h1v1h-1zM31 8h2v1h-2zM0 9h1v1h-1zM7 9h2v1h-2zM11 9h3v1h-3zM16 9h5v1h-5zM23 9h2v1h-2zM26 9h2v1h-2zM29 9h2v1h-2zM32 9h1v1h-1zM0 10h2v1h-2zM3 10h1v1h-1zM5 10h2v1h-2zM10 10h4v1h-4zM18 10h1v1h-1zM20 10h4v1h-4zM25 10h1v1h-1zM27 10h3v1h-3zM32 10h1v1h-1zM0 11h1v1h-1zM8 11h1v1h-1zM10 11h1v1h-1zM16 11h2v1h-2zM19 11h1v1h-1zM22 11h2v1h-2zM26 11h2v1h-2zM29 11h1v1h-1zM32 11h1v1h-1zM1 12h2v1h-2zM4 12h8v1h-8zM14 12h1v1h-1zM16 12h1v1h-1zM25 12h1v1h-1zM27 12h3v1h-3zM31 12h2v1h-2zM1 13h2v1h-2zM5 13h1v1h-1zM7 13h1v1h-1zM9 13h1v1h-1zM12 13h1v1h-1zM14 13h1v1h-1zM17 13h1v1h-1zM19 13h2v1h-2zM24 13h2v1h-2zM27 13h1v1h-1zM30 13h2v1h-2zM2 14h2v1h-2zM6 14h1v1h-1zM9 14h1v1h-1zM12 14h3v1h-3zM17 14h5v1h-5zM24 14h1v1h-1zM26 14h1v1h-1zM29 14h2v1h-2zM3 15h2v1h-2zM8 15h4v1h-4zM15 15h1v1h-1zM19 15h4v1h-4zM24 15h4v1h-4zM29 15h2v1h-2zM0 16h1v1h-1zM4 16h1v1h-1zM6 16h1v1h-1zM9 16h2v1h-2zM12 16h1v1h-1zM19 16h1v1h-1zM21 16h2v1h-2zM24 16h1v1h-1zM26 16h1v1h-1zM28 16h3v1h-3zM0 17h1v1h-1zM2 17h3v1h-3zM11 17h1v1h-1zM15 17h1v1h-1zM20 17h2v1h-2zM23 17h2v1h-2zM26 17h1v1h-1zM28 17h2v1h-2zM31 17h2v1h-2zM1 18h1v1h-1zM5 18h2v1h-2zM9 18h2v1h-2zM12 18h1v1h-1zM14 18h2v1h-2zM18 18h1v1h-1zM20 18h3v1h-3zM27 18h2v1h-2zM30 18h2v1h-2zM0 19h1v1h-1zM8 19h1v1h-1zM10 19h4v1h-4zM16 19h3v1h-3zM22 19h1v1h-1zM26 19h1v1h-1zM28 19h1v1h-1zM31 19h2v1h-2zM0 20h3v1h-3zM5 20h3v1h-3zM13 20h2v1h-2zM16 20h1v1h-1zM21 20h1v1h-1zM23 20h1v1h-1zM27 20h1v1h-1zM29 20h4v1h-4zM0 21h1v1h-1zM2 21h3v1h-3zM11 21h7v1h-7zM19 21h3v1h-3zM23 21h1v1h-1zM26 21h1v1h-1zM29 21h1v1h-1zM32 21h1v1h-1zM2 22h7v1h-7zM12 22h1v1h-1zM14 22h2v1h-2zM18 22h1v1h-1zM21 22h1v1h-1zM23 22h1v1h-1zM26 22h1v1h-1zM31 22h2v1h-2zM1 23h3v1h-3zM5 23h1v1h-1zM7 23h3v1h-3zM11 23h1v1h-1zM15 23h1v1h-1zM19 23h2v1h-2zM24 23h6v1h-6zM31 23h1v1h-1zM0 24h1v1h-1zM3 24h1v1h-1zM6 24h1v1h-1zM9 24h1v1h-1zM11 24h4v1h-4zM16 24h2v1h-2zM19 24h1v1h-1zM22 24h7v1h-7zM31 24h1v1h-1zM8 25h4v1h-4zM13 25h4v1h-4zM19 25h2v1h-2zM22 25h3v1h-3zM28 25h2v1h-2zM0 26h7v1h-7zM8 26h4v1h-4zM14 26h1v1h-1zM17 26h4v1h-4zM23 26h2v1h-2zM26 26h1v1h-1zM28 26h1v1h-1zM0 27h1v1h-1zM6 27h1v1h-1zM8 27h1v1h-1zM10 27h1v1h-1zM15 27h1v1h-1zM17 27h2v1h-2zM21 27h1v1h-1zM23 27h2v1h-2zM28 27h3v1h-3zM32 27h1v1h-1zM0 28h1v1h-1zM2 28h3v1h-3zM6 28h1v1h-1zM9 28h1v1h-1zM11 28h1v1h-1zM15 28h4v1h-4zM20 28h9v1h-9zM30 28h2v1h-2zM0 29h1v1h-1zM2 29h3v1h-3zM6 29h1v1h-1zM8 29h2v1h-2zM12 29h1v1h-1zM14 29h1v1h-1zM16 29h1v1h-1zM20 29h3v1h-3zM25 29h1v1h-1zM27 29h1v1h-1zM29 29h1v1h-1zM32 29h1v1h-1zM0 30h1v1h-1zM2 30h3v1h-3zM6 30h1v1h-1zM8 30h1v1h-1zM10 30h1v1h-1zM12 30h6v1h-6zM20 30h2v1h-2zM23 30h5v1h-5zM29 30h2v1h-2zM0 31h1v1h-1zM6 31h1v1h-1zM10 31h2v1h-2zM13 31h1v1h-1zM17 31h2v1h-2zM23 31h3v1h-3zM27 31h2v1h-2zM32 31h1v1h-1zM0 32h7v1h-7zM8 32h1v1h-1zM10 32h2v1h-2zM16 32h6v1h-6zM23 32h1v1h-1zM26 32h1v1h-1zM28 32h3v1h-3z" fill="#16191C"/></svg>
+      </div>
+      <div class="sign-t">
+        <div class="sh">Drivers — scan to check in
+          <small>Choferes — escanee para registrarse</small></div>
+        <div class="sp">Point your phone camera at this. No app, no account, no clipboard. Tell us
+        the job, say whether you want paper, and go.
+        <em>Apunte la cámara aquí. Sin aplicación y sin cuenta. Escoja el trabajo, diga si
+        quiere boleto impreso, y listo.</em></div>
+        <div class="sn">Metropolitan Recycling · Scale 01</div>
+      </div>
+    </div>
+    <div class="steps3">
+      <div><b>He scans</b><p>The camera opens his loadbook in the browser. It already knows which
+      scale he is standing on.</p></div>
+      <div><b>He picks the job</b><p>His open jobs are listed. One tap. If a client needs a release
+      number, it asks for it there.</p></div>
+      <div><b>The office knows</b><p>The scale house sees the load assigned before he has climbed
+      back in the cab. Nobody walked outside.</p></div>
+    </div>
+    <div class="of-note" style="text-align:left">That code is live — scan it with your own phone and
+    this demo opens. A real sign carries the same thing pointed at your yard.</div>
   </div>
 </section>
 </div>
@@ -475,12 +731,15 @@ body.printing .print-target .rpt-tools{display:none}
       <figure><div class="frame">▨</div><figcaption><b>After destruction</b><span id="pOut">—</span></figcaption></figure>
     </div>
 
-    <div class="fld-label">Final disposition of destroyed material</div>
+    <div class="fld-label">Final disposition · 94% diverted from landfill</div>
     <div class="disposition"><i style="background:var(--oxblood);width:94%"></i>
       <i style="background:var(--concrete-dk);width:6%"></i></div>
     <div class="disp-key">
-      <span><i class="dot" style="background:var(--oxblood)"></i>Recycled 94%</span>
-      <span><i class="dot" style="background:var(--concrete-dk)"></i>Landfill 6%</span></div>
+      <span><i class="dot" style="background:var(--oxblood)"></i>Recovered and recycled 94%</span>
+      <span><i class="dot" style="background:var(--concrete-dk)"></i>Residue to landfill 6%</span></div>
+    <div style="font-size:12.5px;color:var(--steel);margin-top:8px;line-height:1.6;max-width:62ch">
+    Destroyed and unrecoverable, and 94% of it kept out of the ground. One document answers
+    the brand-protection question and the sustainability question at the same time.</div>
 
     <div class="fld-label" style="margin-top:19px">Record integrity check (SHA-256)</div>
     <div class="fld-val mono" id="cHash" style="word-break:break-all;font-size:11px;color:var(--steel)">—</div>
@@ -527,6 +786,307 @@ body.printing .print-target .rpt-tools{display:none}
 </div>
 
 <!-- ============ REPORTS ============ -->
+
+
+<!-- ============ CLIENT PORTAL ============ -->
+<div class="tab" id="tab-portal">
+<section>
+  <div class="eyebrow">What your client sees<span class="tier core">Every tier</span></div>
+  <h1>They stop calling you for their own numbers.</h1>
+  <p class="lede">Every client gets a login to their own account and nobody else's. Their loads,
+  their weights, their certificates, their diversion rate — pulled themselves, at 11pm, without
+  anyone in your office knowing they wanted it.</p>
+
+  <div class="portal">
+    <div class="pbar"><i></i><i></i><i></i>
+      <span>metropolitanrecycling.com/portal</span></div>
+    <div class="pbody">
+
+      <div id="pLogin">
+        <div class="plogin">
+          <h3>Sign in</h3>
+          <p>Use the details Metropolitan sent you. One login per account — you only ever see
+          your own material.</p>
+          <input id="pEmail" type="email" value="operations@lonestarbev.com"
+            aria-label="Email" autocomplete="off">
+          <input id="pPass" type="password" value="demo-password" aria-label="Password" autocomplete="off">
+          <button id="pGo">Sign in</button>
+        </div>
+      </div>
+
+      <div id="pApp" style="display:none">
+        <div class="phead">
+          <div>
+            <div class="pn">Lone Star Beverage Co.</div>
+            <div class="pm">Account LSB · signed in as operations@lonestarbev.com</div>
+          </div>
+          <button class="ghost-btn" id="pOut">Sign out</button>
+        </div>
+
+        <div class="kpis">
+          <div class="kpi"><div class="n">31</div><div class="l">loads this year</div></div>
+          <div class="kpi"><div class="n">642.8</div><div class="l">tons received</div></div>
+          <div class="kpi"><div class="n">94%</div><div class="l">diverted from landfill</div></div>
+          <div class="kpi"><div class="n">7</div><div class="l">certificates issued</div></div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <div class="rpt-head"><div class="screen-label" style="margin:0">Your certificates of destruction</div>
+            <div class="rpt-tools"><button data-csv="pCertTable" data-name="my_certificates">CSV</button></div></div>
+          <div class="scroll"><table id="pCertTable"></table></div>
+          <div class="of-note" style="text-align:left">Every certificate can be checked by anyone you
+          hand it to — your auditor, your insurer, your brand team — without calling Metropolitan.</div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <div class="rpt-head"><div class="screen-label" style="margin:0">Your recent loads</div>
+            <div class="rpt-tools"><button data-print="pLoadTable">Print</button>
+            <button data-csv="pLoadTable" data-name="my_loads">CSV</button></div></div>
+          <div class="scroll"><table id="pLoadTable"></table></div>
+        </div>
+
+        <div class="card">
+          <div class="rpt-head"><div class="screen-label" style="margin:0">Your equipment · and asking for a service</div>
+            <div class="rpt-tools"><button class="ghost-btn" id="pReq">Request a pull</button></div></div>
+          <div class="scroll"><table id="pEquipTable"></table></div>
+          <div class="of-note" style="text-align:left" id="pReqNote">A request raised here is
+          timestamped the moment you send it. No phone call to remember, no argument later about
+          when you asked.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="of-note" style="text-align:left;margin-top:14px">One account, one client. Lone Star
+  cannot see Trinity's tonnage, Trinity cannot see theirs, and neither can see what you were paid
+  for the material.</div>
+</section>
+</div>
+
+<!-- ============ TRADING ============ -->
+<div class="tab" id="tab-trade">
+<section>
+  <div class="eyebrow">Selling the material<span class="tier trade">Trading tier</span></div>
+  <h1>The mill weighs it again. You should know when the numbers disagree.</h1>
+  <p class="lede">Every load that leaves crossed your scale first. When the settlement comes back
+  light, the system says so before anybody signs it.</p>
+
+  <div class="kpis">
+    <div class="kpi warn"><div class="n">$555.30</div><div class="l">found this month</div></div>
+    <div class="kpi warn"><div class="n">$435.20</div><div class="l">paid but never applied</div></div>
+    <div class="kpi"><div class="n">3</div><div class="l">loads billed wrong</div></div>
+    <div class="kpi"><div class="n">1</div><div class="l">load under buyer minimum</div></div>
+  </div>
+
+  <div class="card">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Contract rates · by grade, this month</div>
+      <div class="rpt-tools"><button data-print="rateTable">Print</button>
+      <button data-csv="rateTable" data-name="rate_card">CSV</button></div></div>
+    <div class="scroll"><table id="rateTable"></table></div>
+    <div class="of-note" style="text-align:left">Buyers set a load window as well as a price. A truck
+    under the minimum is a short-paid load; over the maximum is a problem at their scale.</div>
+  </div>
+
+  <div class="card">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Billing audit · scale ticket against what was invoiced</div>
+      <div class="rpt-tools"><button data-print="setlTable">Print</button>
+      <button data-csv="setlTable" data-name="settlements">CSV</button></div></div>
+    <div class="scroll"><table id="setlTable"></table></div>
+    <div class="of-note" style="text-align:left">Every row is the scale reading against the invoice
+    line. The scale is not an opinion — if the two disagree, one of them was typed.</div>
+  </div>
+
+  <div class="card">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Money in · what arrived against what it was for</div>
+      <div class="rpt-tools"><button data-print="payTable">Print</button>
+      <button data-csv="payTable" data-name="payments_applied">CSV</button></div></div>
+    <div class="scroll"><table id="payTable"></table></div>
+    <div class="of-note" style="text-align:left">Buyers pay in batches covering several releases, so no
+    deposit ever equals a load. Matching on the reference is the only thing that works — and it is
+    how you notice money that arrived and was never applied to anything.</div>
+  </div>
+
+  <div class="card">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Position · what is sold and what is not</div>
+      <div class="rpt-tools"><button data-csv="posTable" data-name="position">CSV</button></div></div>
+    <div class="scroll"><table id="posTable"></table></div>
+    <div class="of-note" style="text-align:left">Uncommitted tonnage with no contract behind it is
+    the number to look at before you call a broker.</div>
+  </div>
+
+  <div class="card">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Residue to landfill · the side that costs money</div>
+      <div class="rpt-tools"><button data-csv="lfTable" data-name="disposal_cost">CSV</button></div></div>
+    <div class="scroll"><table id="lfTable"></table></div>
+    <div class="of-note" style="text-align:left">Residue is a cost of trading, not an accident.
+    Watching it per ton is how you notice a supplier's material has quietly changed.</div>
+  </div>
+</section>
+</div>
+
+<!-- ============ CONTAINERS ============ -->
+
+<!-- ============ REBATES ============ -->
+<div class="tab" id="tab-reb">
+<section>
+  <div class="eyebrow">Buying material in<span class="tier trade">Trading tier</span></div>
+  <h1>The index moves. Every rebate should move with it.</h1>
+  <p class="lede">You pay your generators off a published index and sell against a contract. When the
+  Yellow Sheet lands, drop it in — every rebate reprices, every statement regenerates, and you can
+  see what it did to your margin before you commit to it.</p>
+
+  <div class="kpis">
+    <div class="kpi"><div class="n" id="kIdxMonth">—</div><div class="l">index in force</div></div>
+    <div class="kpi"><div class="n" id="kRebTot">—</div><div class="l">rebates due this month</div></div>
+    <div class="kpi warn"><div class="n" id="kRebDelta">—</div><div class="l">change from last index</div></div>
+    <div class="kpi"><div class="n" id="kMargin">—</div><div class="l">margin after rebate</div></div>
+  </div>
+
+  <div class="card">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Published index · Southwest, FOB seller's dock</div>
+      <div class="rpt-tools"><button id="ppiBtn" class="ghost-btn">Upload next Yellow Sheet</button>
+      <button data-csv="idxTable" data-name="index">CSV</button></div></div>
+    <div class="scroll"><table id="idxTable"></table></div>
+    <div class="of-note" style="text-align:left" id="ppiNote">Drop in the monthly PDF. The system reads
+    your region, compares it to the index in force, and shows what it changes before anything is paid.</div>
+  </div>
+
+  <div class="card">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Rebate terms · what each account is owed against the index</div>
+      <div class="rpt-tools"><button data-csv="termTable" data-name="rebate_terms">CSV</button></div></div>
+    <div class="scroll"><table id="termTable"></table></div>
+    <div class="of-note" style="text-align:left">A floor matters more than the formula. When the index
+    fell through the winter, the floor is the only reason some of these accounts stayed worth servicing.</div>
+  </div>
+
+  <div class="card">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">This month's rebate run</div>
+      <div class="rpt-tools"><button data-print="rebTable">Print</button>
+      <button data-csv="rebTable" data-name="rebate_run">CSV</button></div></div>
+    <div class="scroll"><table id="rebTable"></table></div>
+    <div class="of-note" style="text-align:left">Every line traces back to weighed loads. A rebate
+    statement a customer can argue with is a rebate statement you will end up discounting.</div>
+  </div>
+
+  <div class="card">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Margin · what you sold it for, less what you paid for it</div>
+      <div class="rpt-tools"><button data-csv="marTable" data-name="margin">CSV</button></div></div>
+    <div class="scroll"><table id="marTable"></table></div>
+    <div class="of-note" style="text-align:left">This is the number the index actually threatens. A rising
+    market lifts your rebate before it lifts your contract, and the squeeze shows up here first.</div>
+  </div>
+</section>
+</div>
+
+<div class="tab" id="tab-cont">
+<section>
+  <div class="eyebrow">Equipment out in the world<span class="tier cont">Operations tier</span></div>
+  <h1>Every box you own, and whether it is earning.</h1>
+  <p class="lede">A container sitting full at a customer for six weeks is your asset doing nothing.
+  Nobody notices until somebody asks where it went.</p>
+
+  <div class="kpis">
+    <div class="kpi"><div class="n">47</div><div class="l">containers placed</div></div>
+    <div class="kpi warn"><div class="n">6</div><div class="l">idle over 30 days</div></div>
+    <div class="kpi warn"><div class="n">41</div><div class="l">days · longest idle</div></div>
+    <div class="kpi"><div class="n">4</div><div class="l">open service requests</div></div>
+  </div>
+
+  <div class="card">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">On site now · longest standing first</div>
+      <div class="rpt-tools"><button data-print="cntTable">Print</button>
+      <button data-csv="cntTable" data-name="containers">CSV</button></div></div>
+    <div class="scroll"><table id="cntTable"></table></div>
+    <div class="of-note" style="text-align:left">Trailers count too. A 48-footer parked at a customer
+    for a month is the most expensive thing on this list.</div>
+  </div>
+
+  <div class="card">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Service requests · asked through the client portal</div>
+      <div class="rpt-tools"><button data-csv="srqTable" data-name="service_requests">CSV</button></div></div>
+    <div class="scroll"><table id="srqTable"></table></div>
+    <div class="of-note" style="text-align:left">The customer asking through the portal instead of
+    calling is the point. It timestamps the request, so "we called you Tuesday" stops being an argument.</div>
+  </div>
+
+  <div class="card">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Standing schedule · pulls that create their own jobs</div>
+      <div class="rpt-tools"><button data-csv="schTable" data-name="schedule">CSV</button></div></div>
+    <div class="scroll"><table id="schTable"></table></div>
+  </div>
+</section>
+</div>
+
+<!-- ============ AUTOMATIONS ============ -->
+<div class="tab" id="tab-auto">
+<section>
+  <div class="eyebrow">Work nobody should be doing by hand<span class="tier auto">Operations tier</span></div>
+  <h1>The jobs somebody currently does with a keyboard.</h1>
+  <p class="lede">None of these are clever. They are all things the system already holds the data for,
+  which somebody is still doing manually from a stack of tickets.</p>
+
+  <div class="auto-item">
+    <h3>Draft invoices from tickets<span class="saved">biggest time saver</span></h3>
+    <p>Every ticket already carries the account, material, tonnage and rate. Month end produces
+    draft invoices in Wave's own upload layout, ready to review and send. Nothing gets rekeyed,
+    and every line still points back to the ticket that made it.</p>
+    <div class="now">Today: <b>someone retypes a month of tickets into the accounting package.</b></div>
+  </div>
+
+  <div class="auto-item">
+    <h3>Reports that send themselves<span class="saved">no chasing</span></h3>
+    <p>Monday morning, last week's numbers in Mark's inbox. Month end, every client gets their
+    diversion report and rebate statement without asking for it.</p>
+    <div class="now">Today: <b>clients call and ask, then somebody stops what they are doing.</b></div>
+  </div>
+
+  <div class="auto-item">
+    <h3>Contamination and rejection<span class="saved">prevents disputes</span></h3>
+    <p>A load comes in wrong. Photograph it, note it, notify the customer, adjust the ticket, and the
+    cost flows to disposal instead of quietly disappearing into the rebate.</p>
+    <div class="now">Today: <b>a phone call, and an argument about it three weeks later.</b></div>
+  </div>
+
+  <div class="auto-item">
+    <h3>Recurring service schedules<span class="saved">nothing forgotten</span></h3>
+    <p>Standing weekly pulls create themselves as jobs. The route sheet builds from the schedule plus
+    whatever customers asked for through the portal.</p>
+    <div class="now">Today: <b>"did anyone remember the Tuesday pull at Westside?"</b></div>
+  </div>
+
+  <div class="auto-item">
+    <h3>Weight anomaly flags<span class="saved">catches errors early</span></h3>
+    <p>A load three times that account's normal weight gets flagged before anyone confirms it. Wrong
+    material, keying error, or a driver on the wrong scale, caught before it reaches a certificate.</p>
+    <div class="now">Today: <b>found weeks later, if at all.</b></div>
+  </div>
+
+  <div class="auto-item">
+    <h3>Daily close-out<span class="saved">day ends reconciled</span></h3>
+    <p>One screen at close: loads in, loads out, tons, exceptions, anything still unmatched. Print
+    it and the day is done.</p>
+    <div class="now">Today: <b>discovered wrong on Friday.</b></div>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Today's close-out</div>
+      <div class="rpt-tools"><button data-print="closeTable">Print</button>
+      <button data-csv="closeTable" data-name="daily_closeout">CSV</button></div></div>
+    <div class="scroll"><table id="closeTable"></table></div>
+  </div>
+
+  <div class="card">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Flagged for attention · every loose end in the business</div>
+      <div class="rpt-tools"><button data-print="flagTable">Print</button>
+      <button data-csv="flagTable" data-name="exceptions">CSV</button></div></div>
+    <div class="scroll"><table id="flagTable"></table></div>
+    <div class="of-note" style="text-align:left">Nothing here stops the yard. It just means somebody
+    should look before it becomes a phone call.</div>
+  </div>
+</section>
+</div>
+
 <div class="tab" id="tab-reports">
 <section>
   <div class="eyebrow">Reports</div>
@@ -596,6 +1156,136 @@ body.printing .print-target .rpt-tools{display:none}
 </div>
 
 <!-- ============ SETUP ============ -->
+
+<!-- ============ PLANS ============ -->
+<div class="tab" id="tab-plans">
+<section>
+  <div class="eyebrow">What this costs</div>
+  <h1>Three tiers. Pick the one that matches how far down the chain you want to see.</h1>
+  <p class="lede">Every tier includes the scale, the tickets, the custody chain and the certificates —
+  the part that has to work on day one. Unlimited users, unlimited clients, no per-seat charge.</p>
+
+  <div class="seg" id="perSeg" role="group" aria-label="Billing period">
+    <button data-per="m" class="on">Monthly</button>
+    <button data-per="y">Annual · two months free</button>
+  </div>
+
+  <div class="plan-grid" id="planGrid">
+
+    <div class="plan co" data-tier="scale" data-price="350">
+      <div class="plan-top">
+        <div class="plan-name">Scale House</div>
+        <div class="plan-price" data-p>$350<span>/month</span></div>
+        <div class="plan-was" data-was></div>
+      </div>
+      <ul>
+        <li>Weights read off the scale and sealed at the moment of capture</li>
+        <li>Driver scans in on his own phone — paper ticket or phone only</li>
+        <li>Chain of custody from receipt through destruction</li>
+        <li>Certificates of destruction, verifiable by whoever holds one</li>
+        <li>Diversion rate by client and project, weight-based</li>
+        <li>Weight ticket register, every weighment reprintable</li>
+        <li>Client portal and accounting exports</li>
+      </ul>
+      <button class="plan-pick">Choose</button>
+    </div>
+
+    <div class="plan cn" data-tier="ops" data-price="650">
+      <div class="plan-top">
+        <div class="plan-name">Operations</div>
+        <div class="plan-price" data-p>$650<span>/month</span></div>
+        <div class="plan-was" data-was></div>
+      </div>
+      <ul>
+        <li><b>Everything in Scale House, plus:</b></li>
+        <li>Every container and trailer, where it is and how long it has sat</li>
+        <li>Idle-equipment flags before an asset quietly disappears</li>
+        <li>Customer service requests through the portal, timestamped</li>
+        <li>Standing pull schedules that create their own jobs</li>
+        <li>Draft invoices built from tickets, ready to send</li>
+        <li>Weight anomaly flags, contamination workflow, daily close-out</li>
+      </ul>
+      <button class="plan-pick">Choose</button>
+    </div>
+
+    <div class="plan tr" data-tier="trade" data-price="950">
+      <div class="plan-top">
+        <div class="plan-name">Trading</div>
+        <div class="plan-price" data-p>$950<span>/month</span></div>
+        <div class="plan-was" data-was></div>
+      </div>
+      <ul>
+        <li><b>Everything in Operations, plus:</b></li>
+        <li>Contracts and rate cards by grade, with load windows enforced at the scale</li>
+        <li>Billing audit — every invoice checked against its own scale ticket</li>
+        <li>Settlement reconciliation against what the buyer actually paid on</li>
+        <li>Payment matching by release number, so unapplied money surfaces</li>
+        <li>Published index uploaded monthly, generator rebates repriced automatically</li>
+        <li>Position and margin by grade — sold, rebated, processed</li>
+      </ul>
+      <button class="plan-pick">Choose</button>
+    </div>
+
+  </div>
+
+  <div class="addon" id="compAddon">
+    <div class="ao-t">
+      <h3>Compliance</h3>
+      <p>Audit trail on every record, hash chain across the whole ledger, void and reissue with both
+      versions preserved, named authorization on every certificate, six-year retention exportable on
+      demand. Add it if your clients audit you. Most do not.</p>
+    </div>
+    <div class="ao-p" id="compPrice">+$200<span style="font-family:'IBM Plex Mono';font-size:11px;
+      font-weight:500;letter-spacing:.1em;color:var(--steel);text-transform:uppercase;margin-left:4px">/month</span></div>
+    <label class="tog" style="margin-top:0"><input type="checkbox" id="compBox"
+      aria-label="Add the Compliance module"><i></i><span id="compLab">Not included</span></label>
+  </div>
+
+  <div class="total-bar">
+    <div>
+      <div class="tb-l" id="tbTitle">Everything switched on</div>
+      <div class="tb-s" id="tbSub">All six modules, one scale house, unlimited users and unlimited
+      clients. No per-seat charge.</div>
+      <div class="stripe-note">Billing runs on Stripe. Card details go to Stripe directly and never
+      touch this system — nothing to store, nothing to leak.</div>
+    </div>
+    <div style="text-align:right">
+      <div class="tb-p" id="tbPrice">$1,000<span>/month</span></div>
+      <button class="sub-btn" id="subBtn" style="margin-top:12px">Start subscription</button>
+    </div>
+  </div>
+
+  <div class="card" id="billCard">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Your subscription</div>
+      <div class="rpt-tools"><button data-csv="billTable" data-name="billing_history">CSV</button></div></div>
+    <div class="bill-grid">
+      <div class="bill-cell"><div class="k">Plan</div><div class="v" id="bPlan">—</div>
+        <div class="s" id="bPlanSub">—</div></div>
+      <div class="bill-cell"><div class="k">Next invoice</div><div class="v" id="bNext">—</div>
+        <div class="s">1 September 2026</div></div>
+      <div class="bill-cell"><div class="k">Payment method</div><div class="v">Visa ···· 4242</div>
+        <div class="s">Held by Stripe</div></div>
+      <div class="bill-cell"><div class="k">Status</div><div class="v" style="color:#1E4630">Active</div>
+        <div class="s">Since 1 June 2026</div></div>
+    </div>
+    <div class="scroll"><table id="billTable"></table></div>
+    <div class="of-note" style="text-align:left">Cancel, change modules or update a card from the
+    Stripe billing portal — no phone call, no notice period.</div>
+  </div>
+
+  <div class="card">
+    <div class="screen-label">One time, at the start</div>
+    <p style="font-size:14.5px;color:var(--steel);line-height:1.6;margin-bottom:10px">
+    <b style="font-family:'Archivo';font-size:19px;letter-spacing:-.02em;color:var(--ink)">$2,500
+    per site.</b> Wiring the indicator, the scale house computer, the ticket printer, setting up
+    drivers, importing your client, material and contract lists, and training the people who will
+    use it. Payable on commissioning, not on signature.</p>
+    <div class="of-note" style="text-align:left">The hardware that reads the scale is a small
+    computer that lives in the scale house. It keeps working when the internet does not.</div>
+  </div>
+</section>
+</div>
+
 <div class="tab" id="tab-setup">
 <section>
   <div class="eyebrow">Your lists, your data</div>
@@ -635,17 +1325,22 @@ body.printing .print-target .rpt-tools{display:none}
   </div>
 
   <div class="card">
-    <div class="screen-label">Accounting exports</div>
-    <p style="font-size:14.5px;color:var(--steel);margin-bottom:14px;max-width:56ch">Weights and
-    references go out in a format your accounting package imports. Rates and invoicing stay where
-    your bookkeeper already works.</p>
+    <div class="screen-label">Accounting exports · built for Wave</div>
+    <p style="font-size:14.5px;color:var(--steel);margin-bottom:14px;max-width:58ch">The invoice
+    export comes out in Wave Connect's layout — one row per line item, grouped into invoices by
+    customer — so it uploads straight through the Google Sheets add-on. Nobody retypes a ticket.
+    Rates and books stay in Wave where your bookkeeper already works.</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="ghost-btn" data-x="qb">QuickBooks CSV</button>
+      <button class="ghost-btn" data-x="qb">Wave invoice sheet</button>
       <button class="ghost-btn" data-x="tickets">Weight tickets CSV</button>
       <button class="ghost-btn" data-x="ship">Shipments CSV</button>
       <button class="ghost-btn" data-x="certs">Certificates CSV</button>
     </div>
     <div class="of-note" style="text-align:left" id="xNote">Downloads a real file — open it and look.</div>
+    <div class="of-note" style="text-align:left;margin-top:8px">Taking card and ACH through Stripe?
+    Stripe pays out net of fees, in batches — so one deposit almost never equals one invoice.
+    Every invoice here keeps its ticket numbers attached, which is what lets a payout be matched
+    back to the loads that earned it.</div>
   </div>
 
   <div class="card">
@@ -663,6 +1358,20 @@ body.printing .print-target .rpt-tools{display:none}
 <footer><span>Metropolitan Recycling · Dallas TX</span><span>DivertScan</span></footer>
 </div>
 
+<div class="tourbar" id="tourBar" role="region" aria-label="Guided tour">
+  <div class="tour-in">
+    <div class="tour-txt">
+      <div class="tour-step" id="tourStep">Step 1 of 9</div>
+      <div class="tour-say" id="tourSay">—</div>
+    </div>
+    <div class="tour-nav">
+      <button id="tourBack">Back</button>
+      <button id="tourNext" class="go">Next</button>
+      <button id="tourEnd">Close</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const $=id=>document.getElementById(id);
 const JOBS=[
@@ -677,10 +1386,10 @@ const CARRIER='Trinity Hauling LLC',CLERK='M. Alvarez',
 
 /* receipts already in custody — this is what makes the two-event model visible */
 let CUSTODY=[
- {id:'WT-8841',date:'Jul 18',days:18,client:'Lone Star Beverage Co.',wo:'LSB-4471',net:41220,veh:'TX 8RM-4417'},
- {id:'WT-8863',date:'Jul 24',days:12,client:'Lone Star Beverage Co.',wo:'LSB-4471',net:38940,veh:'TX 4LK-9920'},
- {id:'WT-8902',date:'Jul 31',days:5, client:'Trinity Foods Group',  wo:'TRF-2210',net:54120,veh:'TX 8RM-4417'},
- {id:'WT-8915',date:'Aug 3', days:2, client:'Panhandle Snack Brands',wo:'PSB-0885',net:29880,veh:'TX 2WQ-1180'}
+ {id:'WT-8841',date:'Jul 18',days:18,client:'Lone Star Beverage Co.',wo:'LSB-4471',net:41220,veh:'TX 8RM-4417',rel:'LSB-A-2261'},
+ {id:'WT-8863',date:'Jul 24',days:12,client:'Lone Star Beverage Co.',wo:'LSB-4471',net:38940,veh:'TX 4LK-9920',rel:'LSB-A-2274'},
+ {id:'WT-8902',date:'Jul 31',days:5, client:'Trinity Foods Group',  wo:'TRF-2210',net:54120,veh:'TX 8RM-4417',rel:'TRF-R-0912'},
+ {id:'WT-8915',date:'Aug 3', days:2, client:'Panhandle Snack Brands',wo:'PSB-0885',net:29880,veh:'TX 2WQ-1180',rel:null}
 ];
 const DESTROYED=[
  {client:'Lone Star Beverage Co.',recv:284600,dest:204440},
@@ -763,11 +1472,13 @@ function renderCustody(){
   $('kClients').textContent=clients.size;
   const rows=[...CUSTODY].sort((a,b)=>b.days-a.days).map(r=>
     '<tr><td class="mono">'+r.id+'</td><td class="mono">'+r.date+'</td><td>'+r.client+
-    '</td><td class="mono">'+r.wo+'</td><td class="mono r">'+comma(r.net)+'</td>'+
+    '</td><td class="mono">'+r.wo+'</td>'+
+    '<td class="mono">'+(r.rel?r.rel:'<span style="color:var(--oxblood);font-weight:600">missing</span>')+'</td>'+
+    '<td class="mono r">'+comma(r.net)+'</td>'+
     '<td class="r"><span class="tag '+(r.days>14?'red':r.days>7?'amber':'')+'">'+r.days+' days</span></td></tr>').join('');
   $('custodyTable').innerHTML='<tr><th>Ticket</th><th>Received</th><th>Client</th><th>Work order</th>'+
-    '<th class="r">Net lb</th><th class="r">In custody</th></tr>'+rows+
-    '<tr class="total"><td colspan="4">Total on hand</td><td class="mono r">'+comma(total)+'</td><td></td></tr>';
+    '<th>Client release</th><th class="r">Net lb</th><th class="r">In custody</th></tr>'+rows+
+    '<tr class="total"><td colspan="5">Total on hand</td><td class="mono r">'+comma(total)+'</td><td></td></tr>';
 }
 
 /* ---- destruction selection ---- */
@@ -995,6 +1706,10 @@ function renderOpen(){
   h+=OPEN.map(l=>'<div class="load"><div class="load-top">'+
      '<span class="load-veh">'+l.veh+'</span><span class="load-w">'+comma(l.gross)+' lb in</span></div>'+
      '<div class="load-job"><b>'+refLabel(l.ref)+'</b></div>'+
+     (l.ref && l.ref.wo ? (l.rel
+        ? '<div class="load-job" style="font-family:\'IBM Plex Mono\';font-size:12px">Release '+l.rel+'</div>'
+        : '<div class="load-job" style="font-family:\'IBM Plex Mono\';font-size:12px;color:var(--oxblood)">No inbound release \u2014 flagged</div>')
+      : '')+
      '<span class="tag">In '+l.inAt+'</span>'+
      '<span class="tag '+(isDest(l.ref)?'amber':'')+'">'+
      (isDest(l.ref)?'Destruction · cert due':'Recycling')+'</span></div>').join('');
@@ -1024,9 +1739,9 @@ async function capIn(){
   wirePickers('.pick','Office · '+CLERK);
   $('ofNote').textContent='Weight recorded and sealed before anyone identifies it';
   $('phVeh').textContent=VEH+' · '+comma(GROSS)+' lb';
-  $('phBody').innerHTML='<div class="ph-prompt">What are you delivering?</div>'+
+  $('phBody').innerHTML='<div class="ph-prompt">'+t('what')+'</div>'+
     JOBS.map((j,i)=>'<button class="opt" data-j="'+i+'"><b>'+j.wo+'</b><span>'+j.client+'</span></button>').join('')+
-    '<div class="ph-prompt" style="margin-top:6px">Or plain material</div>'+
+    '<div class="ph-prompt" style="margin-top:6px">'+t('plain')+'</div>'+
     MATERIALS.slice(0,3).map((m,i)=>'<button class="opt" data-m="'+i+'"><b>'+
     m.name.split(' — ')[0].toUpperCase()+'</b><span>Recycling receipt</span></button>').join('');
   wirePickers('.opt','Driver scan');
@@ -1046,28 +1761,68 @@ function wirePickers(sel,by){
   }));
 }
 
+let inRelease=null;
+const REL_REQUIRED=['Lone Star Beverage Co.','Trinity Foods Group','Panhandle Snack Brands'];
+
 function assign(r,by){
   if(job) return;
   job=r;identBy=by;
   $('officePanel').classList.remove('alert');
+  if(r.wo && REL_REQUIRED.indexOf(r.client)>=0){ askRelease(by); return; }
+  afterAssign(by);
+}
+
+function askRelease(by){
+  const r=job;
+  $('loadList').innerHTML='<div class="load needs"><div class="load-top">'+
+    '<span class="load-veh">'+VEH+'</span><span class="load-w">'+comma(GROSS)+' lb in</span></div>'+
+    '<div class="load-job"><b>'+r.wo+'</b> \u00b7 '+r.client+'</div>'+
+    '<span class="tag red">Release number required by this client</span>'+
+    '<div class="picker">'+
+    '<input id="inRelIn" placeholder="Inbound release / authorization no." '+
+    'aria-label="Inbound release number" style="width:100%;font-family:\'IBM Plex Mono\';'+
+    'font-size:14px;padding:10px 12px;border:1.5px solid var(--oxblood);border-radius:var(--r);'+
+    'text-transform:uppercase">'+
+    '<button class="pick" id="inRelOk" style="text-align:center;background:var(--panel-dk);'+
+    'color:var(--on-dk);border-color:var(--panel-dk)">Confirm release</button>'+
+    '<button class="pick" id="inRelSkip" style="text-align:center">No release \u2014 let him through and flag it</button>'+
+    '</div></div>';
+  $('phBody').innerHTML='<div class="ph-idle">'+t('wait')+'</div>';
+  $('ofNote').textContent='This client authorises every shipment. No release, and the load is flagged \u2014 never blocked.';
+  const go=v=>{ inRelease=v; afterAssign(by); };
+  $('inRelOk').addEventListener('click',()=>{
+    const v=$('inRelIn').value.trim().toUpperCase();
+    if(!v){$('inRelIn').focus();return}
+    go(v);
+  });
+  $('inRelIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('inRelOk').click()});
+  $('inRelSkip').addEventListener('click',()=>go(null));
+  try{$('inRelIn').focus()}catch(e){}
+}
+
+function afterAssign(by){
   if(by==='Driver scan'){
-    $('phBody').innerHTML='<div class="ph-prompt">Do you want a paper ticket?</div>'+
-      '<button class="opt" id="yesP"><b>YES — PRINT IT</b><span>Ready at the window on your way out</span></button>'+
-      '<button class="opt" id="noP"><b>NO — PHONE ONLY</b><span>Saved to your loadbook</span></button>';
+    $('phBody').innerHTML='<div class="ph-prompt">'+t('paper')+'</div>'+
+      '<button class="opt" id="yesP"><b>'+t('yes')+'</b><span>'+t('yesSub')+'</span></button>'+
+      '<button class="opt" id="noP"><b>'+t('no')+'</b><span>'+t('noSub')+'</span></button>';
     $('yesP').addEventListener('click',()=>parkLoad(true));
     $('noP').addEventListener('click',()=>parkLoad(false));
   }else{
-    $('phBody').innerHTML='<div class="ph-idle">Office handled it<br>—<br>driver never<br>touched a phone</div>';
+    $('phBody').innerHTML='<div class="ph-idle">'+t('office')+'</div>';
     parkLoad(true);
   }
 }
 
 function parkLoad(paper){
   OPEN.unshift({tk:'WT-'+String(Math.floor(Math.random()*900)+9000),veh:VEH,gross:GROSS,
-    inAt:hm(inStamp),ref:job,by:identBy,paper:paper});
-  job=null;identBy=null;
+    inAt:hm(inStamp),ref:job,by:identBy,paper:paper,rel:inRelease});
+  const wasOffline = (typeof NET!=='undefined' && !NET);
+  if(wasOffline){ QUEUED++; paintNet(); }
+  job=null;identBy=null;inRelease=null;
   renderOpen();
-  $('ofNote').textContent='On the yard. It will not be matched by weight or timing — a person or a scan does that.';
+  $('ofNote').textContent = wasOffline
+    ? 'Captured and held on the scale house computer. It will sync itself when the line comes back — nobody rekeys anything.'
+    : 'On the yard. It will not be matched by weight or timing — a person or a scan does that.';
   state='idle';
   $('mainBtn').disabled=false;$('mainBtn').textContent='Another truck arrives';
   $('outBtn').disabled=false;
@@ -1188,8 +1943,8 @@ async function capEmpty(){
       '<div class="picker"><input id="relIn" placeholder="Release number from the mill" '+
       'aria-label="Release number" style="width:100%;font-family:\'IBM Plex Mono\';font-size:14px;'+
       'padding:10px 12px;border:1.5px solid var(--oxblood);border-radius:var(--r);text-transform:uppercase">'+
-      '<button class="pick" id="relOk" style="text-align:center;background:var(--ink);'+
-      'color:var(--concrete);border-color:var(--ink)">Confirm release</button></div></div>';
+      '<button class="pick" id="relOk" style="text-align:center;background:var(--panel-dk);'+
+      'color:var(--on-dk);border-color:var(--panel-dk)">Confirm release</button></div></div>';
     const go=()=>{
       const v=$('relIn').value.trim().toUpperCase();
       if(!v){$('relIn').focus();return}
@@ -1247,7 +2002,7 @@ function printBOL(net,office){
   $('receipt').innerHTML=
    '<div class="ctr"><b>METROPOLITAN RECYCLING</b><br>4141 Singleton Blvd<br>Dallas, TX 75212</div><hr>'+
    '<div class="ctr big">BILL OF LADING</div><div class="ctr">'+bolId+'</div>'+
-   '<div class="ctr" style="font-size:9px;letter-spacing:.14em">'+
+   '<div class="ctr" style="font-size:10px;letter-spacing:.14em">'+
    (office?'OFFICE FILE COPY':'DRIVER COPY')+'</div><hr>'+
    '<div class="rw"><span>Release no.</span><b>'+release+'</b></div>'+
    '<div class="rw"><span>Ship to</span><b>'+mill.name.split(' — ')[0]+'</b></div>'+
@@ -1373,13 +2128,37 @@ function csv(rows){
 document.querySelectorAll('[data-x]').forEach(b=>b.addEventListener('click',()=>{
   const k=b.dataset.x;let rows,name;
   if(k==='qb'){
-    name='metropolitan_quickbooks.csv';
-    rows=[['RefNumber','TxnDate','Customer','Item','Description','Qty','UOM','Class','Memo']];
-    TICKETS.forEach(t=>rows.push([t.id,t.date,t.ref,t.type,t.veh,t.net,'lb',
-      t.type.indexOf('Outbound')>=0?'Sales':'Receipts','Weighed at Scale 01']));
-    REGISTER.filter(r=>r.status!=='Voided').forEach(r=>rows.push([r.id,r.date,r.client,
-      'Certified destruction','Certificate of destruction',r.lb,'lb','Destruction',
-      r.loads+' loads']));
+    // Wave Connect invoice upload: one row per LINE ITEM. Rows stay on the same invoice
+    // until the customer changes; a blank row forces a new invoice for the same customer.
+    name='metropolitan_wave_invoices.csv';
+    rows=[['Customer Name','Invoice Number','Invoice Date','Due Date','PO/SO Number',
+           'Product/Service','Item Description','Quantity','Price','Sales Tax','Memo']];
+    const due=d=>d;
+    let last=null, n=4400;
+    const byClient={};
+    REGISTER.filter(r=>r.status!=='Voided').forEach(r=>{
+      (byClient[r.client]=byClient[r.client]||[]).push(r);
+    });
+    Object.keys(byClient).forEach(client=>{
+      if(last!==null) rows.push([]);            // blank row = start a new invoice
+      last=client;
+      const inv='MET-'+(++n);
+      byClient[client].forEach((r,i)=>{
+        rows.push([
+          i===0?client:'',                       // customer only on the first line
+          i===0?inv:'',
+          i===0?r.date+', 2026':'',
+          i===0?'Net 15':'',
+          i===0?r.id:'',                         // certificate no. as the PO/SO reference
+          'Certified product destruction',
+          r.loads+' loads \u00b7 '+comma(r.lb)+' lb \u00b7 cert '+r.id,
+          (r.lb/2000).toFixed(2),
+          '125.00',
+          '',
+          i===0?'Weighed at Scale 01 \u00b7 sealed at capture':''
+        ]);
+      });
+    });
   }else if(k==='tickets'){
     name='metropolitan_weight_tickets.csv';
     rows=[['Ticket','Date','Time','Vehicle','Reference','Type','Net lb']];
@@ -1506,7 +2285,589 @@ $('addMat').addEventListener('click',()=>{
 });
 $('newMat').addEventListener('keydown',e=>{if(e.key==='Enter')$('addMat').click()});
 
+
+/* ================= TRADING ================= */
+/* Real grades and real contract rates. Buyer names are fictional — this page is public. */
+const RATES=[
+ {code:'SWL',name:'Sorted white ledger',buyer:'Northgate Fiber',rate:255,min:21,max:22,bale:1450},
+ {code:'CBS',name:'Coated book stock',buyer:'Northgate Fiber',rate:195,min:21,max:22,bale:1520},
+ {code:'SOP/PM',name:'Sorted office / mixed paper',buyer:'Rio Verde Recycling',rate:200,min:null,max:null,bale:1560},
+ {code:'DLK',name:'New double lined kraft cuttings',buyer:'Northgate Fiber',rate:155,min:21,max:22,bale:1980},
+ {code:'OCC',name:'Old corrugated containers',buyer:'either — both at $120',rate:120,min:21,max:22,bale:1680}
+];
+/* Scale reading vs the invoice line. Every variance below is a real error class. */
+const SETTLE=[
+ {bol:'BOL-293380',code:'OCC',buyer:'Rio Verde Recycling',lb:43680,billed:21.75,used:120,contract:120,
+  st:'Weight rounded down',lvl:'red'},
+ {bol:'BOL-293324',code:'SWL',buyer:'Northgate Fiber',lb:43720,billed:21.86,used:250,contract:255,
+  st:'Rate under contract',lvl:'red'},
+ {bol:'BOL-293240',code:'OCC',buyer:'Northgate Fiber',lb:41320,billed:20.66,used:120,contract:120,
+  st:'Under 21 ST minimum',lvl:'amber'},
+ {bol:'BOL-293301',code:'OCC',buyer:'Rio Verde Recycling',lb:43540,billed:21.77,used:120,contract:120,
+  st:'Clean',lvl:''},
+ {bol:'BOL-293288',code:'CBS',buyer:'Northgate Fiber',lb:42960,billed:21.48,used:195,contract:195,
+  st:'Clean',lvl:''},
+ {bol:'BOL-293255',code:'DLK',buyer:'Northgate Fiber',lb:43100,billed:21.55,used:155,contract:155,
+  st:'Clean',lvl:''}
+];
+const PAYMENTS=[
+ {ref:'Remittance 4024',buyer:'Northgate Fiber',got:5441.15,applied:5005.95,
+  note:'Price adjustment arrived and was never applied',lvl:'red'},
+ {ref:'ACH · RN 2608-01, 2608-02',buyer:'Rio Verde Recycling',got:4555.43,applied:4555.43,
+  note:'Matched to both releases on the addendum',lvl:''},
+ {ref:'Remittance 3987',buyer:'Northgate Fiber',got:2515.05,applied:2515.05,
+  note:'Matched on release number',lvl:''}
+];
+const POSITION=[
+ {mat:'OCC · old corrugated',hand:62.4,cmt:40.0,rate:'$120 / ST',buyer:'Contracted 200 ST'},
+ {mat:'SWL · sorted white ledger',hand:18.9,cmt:18.9,rate:'$255 / ST',buyer:'Contracted 40 ST'},
+ {mat:'CBS · coated book stock',hand:31.2,cmt:12.0,rate:'$195 / ST',buyer:'Contracted 60 ST'},
+ {mat:'DLK · kraft cuttings',hand:9.4,cmt:0,rate:'$155 / ST',buyer:'Open rate, no commitment'}
+];
+const LANDFILL=[
+ {m:'August (to date)',loads:9,tons:41.2,cost:2142},
+ {m:'July',loads:31,tons:148.6,cost:7727},
+ {m:'June',loads:28,tons:131.9,cost:6859},
+ {m:'May',loads:33,tons:161.4,cost:8393}
+];
+function renderTrade(){
+  let recov=0;
+  $('rateTable').innerHTML='<tr><th>Code</th><th>Grade</th><th>Buyer</th><th class="r">Rate / ST</th>'+
+   '<th class="r">Load window</th><th class="r">Bales to fill it</th></tr>'+
+   RATES.map(r=>{
+    const win = r.min ? r.min+' \u2013 '+r.max+' ST' : 'none stated';
+    const bal = r.min ? Math.ceil(r.min*2000/r.bale)+' \u2013 '+Math.floor(r.max*2000/r.bale)
+                        +' <span style="color:var(--steel-lt)">@ '+comma(r.bale)+' lb</span>' : '\u2014';
+    return '<tr><td class="mono">'+r.code+'</td><td>'+r.name+'</td>'+
+    '<td style="color:var(--steel)">'+r.buyer+'</td>'+
+    '<td class="mono r" style="font-weight:600">$'+r.rate.toFixed(2)+'</td>'+
+    '<td class="mono r">'+win+'</td><td class="mono r">'+bal+'</td></tr>'}).join('');
+
+  $('setlTable').innerHTML='<tr><th>BOL</th><th>Grade</th><th class="r">Scale lb</th>'+
+   '<th class="r">Scale ST</th><th class="r">Billed ST</th><th class="r">Rate used</th>'+
+   '<th class="r">Short by</th><th class="r">What happened</th></tr>'+
+   SETTLE.map(r=>{
+    const scaleST=r.lb/2000;
+    const should=scaleST*r.contract, was=r.billed*r.used, gap=should-was;
+    if(gap>0.005) recov+=gap;
+    const rateCell = r.used!==r.contract
+      ? '<span style="color:var(--oxblood);font-weight:600">$'+r.used+'</span>'
+        +' <span style="color:var(--steel-lt)">vs $'+r.contract+'</span>'
+      : '$'+r.used;
+    const stCell = Math.abs(r.billed-scaleST)>0.005
+      ? '<span style="color:var(--oxblood);font-weight:600">'+r.billed.toFixed(2)+'</span>'
+      : r.billed.toFixed(2);
+    return '<tr><td class="mono">'+r.bol+'</td><td class="mono">'+r.code+'</td>'+
+    '<td class="mono r">'+comma(r.lb)+'</td><td class="mono r">'+scaleST.toFixed(2)+'</td>'+
+    '<td class="mono r">'+stCell+'</td><td class="mono r">'+rateCell+'</td>'+
+    '<td class="mono r"'+(gap>0.005?' style="color:var(--oxblood);font-weight:600"':'')+'>'+
+      (gap>0.005?'$'+gap.toFixed(2):'\u2014')+'</td>'+
+    '<td class="r"><span class="tag '+r.lvl+'">'+r.st+'</span></td></tr>'}).join('')
+   +'<tr class="total"><td colspan="6">Left on the table this month</td>'+
+    '<td class="mono r">$'+recov.toFixed(2)+'</td><td></td></tr>';
+
+  $('payTable').innerHTML='<tr><th>Payment</th><th>Buyer</th><th class="r">Received</th>'+
+   '<th class="r">Applied</th><th class="r">Unapplied</th><th>What it was</th></tr>'+
+   PAYMENTS.map(r=>{const un=r.got-r.applied;
+    return '<tr><td class="mono">'+r.ref+'</td><td>'+r.buyer+'</td>'+
+    '<td class="mono r">$'+comma(r.got.toFixed(2))+'</td>'+
+    '<td class="mono r">$'+comma(r.applied.toFixed(2))+'</td>'+
+    '<td class="mono r"'+(un>0.005?' style="color:var(--oxblood);font-weight:600"':'')+'>'+
+      (un>0.005?'$'+un.toFixed(2):'\u2014')+'</td>'+
+    '<td><span class="tag '+r.lvl+'">'+r.note+'</span></td></tr>'}).join('');
+
+  $('posTable').innerHTML='<tr><th>Material</th><th class="r">On hand (tons)</th>'+
+   '<th class="r">Committed</th><th class="r">Uncommitted</th><th class="r">Rate</th><th>Against</th></tr>'+
+   POSITION.map(r=>{const un=r.hand-r.cmt;
+    return '<tr><td>'+r.mat+'</td><td class="mono r">'+r.hand.toFixed(1)+'</td>'+
+    '<td class="mono r">'+r.cmt.toFixed(1)+'</td>'+
+    '<td class="mono r"'+(un>20?' style="color:var(--oxblood);font-weight:600"':'')+'>'+un.toFixed(1)+'</td>'+
+    '<td class="mono r">'+r.rate+'</td><td style="color:var(--steel)">'+r.buyer+'</td></tr>'}).join('');
+
+  $('lfTable').innerHTML='<tr><th>Month</th><th class="r">Loads</th><th class="r">Tons</th>'+
+   '<th class="r">Cost</th><th class="r">Per ton</th></tr>'+
+   LANDFILL.map(r=>'<tr><td>'+r.m+'</td><td class="mono r">'+r.loads+'</td>'+
+    '<td class="mono r">'+r.tons.toFixed(1)+'</td>'+
+    '<td class="mono r">\u2212$'+comma(r.cost)+'</td>'+
+    '<td class="mono r">$'+(r.cost/r.tons).toFixed(2)+'</td></tr>').join('');
+}
+
+/* ================= CONTAINERS ================= */
+const CONTAINERS=[
+ {id:'TR-091',size:'48 ft trailer',client:'Wylie Freight',site:'Their yard, Wylie',placed:'Jul 14',idle:28,serv:'\u2014',st:'Chase it',lvl:'red'},
+ {id:'OT-1142',size:'40 yd',client:'Westside Grocery',site:'Irving',placed:'Jun 04',idle:41,serv:'Jun 04',st:'Pull or retrieve',lvl:'red'},
+ {id:'OT-1063',size:'20 yd',client:'Panhandle Snack Brands',site:'Mesquite',placed:'Jun 30',idle:33,serv:'Jul 12',st:'Review',lvl:'amber'},
+ {id:'OT-1108',size:'30 yd',client:'Trinity Foods Group',site:'Garland',placed:'Jul 22',idle:9,serv:'Aug 02',st:'Active',lvl:''},
+ {id:'OT-1097',size:'40 yd',client:'Lone Star Beverage Co.',site:'Dallas',placed:'Jul 28',idle:3,serv:'Aug 08',st:'Active',lvl:''}
+];
+const REQUESTS=[
+ {id:'SR-4471',client:'Westside Grocery',cont:'OT-1142',asked:'Aug 11',wait:'2 days',what:'Pull and return empty',st:'Not dispatched',lvl:'red'},
+ {id:'SR-4468',client:'Trinity Foods Group',cont:'OT-1108',asked:'Aug 12',wait:'1 day',what:'Extra pull, over-full',st:'Scheduled Thu',lvl:'amber'},
+ {id:'SR-4462',client:'Lone Star Beverage Co.',cont:'OT-1097',asked:'Aug 12',wait:'1 day',what:'Swap for 30 yd',st:'Scheduled Fri',lvl:'amber'},
+ {id:'SR-4455',client:'Panhandle Snack Brands',cont:'OT-1063',asked:'Aug 09',wait:'4 days',what:'Retrieve, job finished',st:'Not dispatched',lvl:'red'}
+];
+const SCHEDULE=[
+ {client:'Westside Grocery',cont:'OT-1142',day:'Tuesday',freq:'Weekly',next:'Aug 18'},
+ {client:'Trinity Foods Group',cont:'OT-1108',day:'Thursday',freq:'Weekly',next:'Aug 20'},
+ {client:'Lone Star Beverage Co.',cont:'OT-1097',day:'Monday',freq:'Fortnightly',next:'Aug 24'}
+];
+function renderCont(){
+  $('cntTable').innerHTML='<tr><th>Unit</th><th>Size</th><th>Client</th><th>Site</th>'+
+   '<th class="mono">Placed</th><th class="r">Idle</th><th class="r">Do this</th></tr>'+
+   CONTAINERS.map(c=>'<tr><td class="mono">'+c.id+'</td><td>'+c.size+'</td><td>'+c.client+'</td>'+
+    '<td style="color:var(--steel)">'+c.site+'</td><td class="mono">'+c.placed+'</td>'+
+    '<td class="mono r"'+(c.idle>30?' style="color:var(--oxblood);font-weight:600"':'')+'>'+c.idle+' days</td>'+
+    '<td class="r"><span class="tag '+c.lvl+'">'+c.st+'</span></td></tr>').join('');
+
+  $('srqTable').innerHTML='<tr><th>Request</th><th>Client</th><th>Unit</th><th>Asked for</th>'+
+   '<th class="mono">Raised</th><th class="r">Waiting</th><th class="r">Status</th></tr>'+
+   REQUESTS.map(r=>'<tr><td class="mono">'+r.id+'</td><td>'+r.client+'</td>'+
+    '<td class="mono">'+r.cont+'</td><td style="color:var(--steel)">'+r.what+'</td>'+
+    '<td class="mono">'+r.asked+'</td><td class="mono r">'+r.wait+'</td>'+
+    '<td class="r"><span class="tag '+r.lvl+'">'+r.st+'</span></td></tr>').join('');
+
+  $('schTable').innerHTML='<tr><th>Client</th><th>Unit</th><th>Day</th><th>Frequency</th><th class="r">Next</th></tr>'+
+   SCHEDULE.map(r=>'<tr><td>'+r.client+'</td><td class="mono">'+r.cont+'</td><td>'+r.day+'</td>'+
+    '<td style="color:var(--steel)">'+r.freq+'</td><td class="mono r">'+r.next+'</td></tr>').join('');
+}
+
+/* ================= AUTOMATIONS ================= */
+const CLOSEOUT=[
+ ['Inbound loads received','14','\u2014'],
+ ['  \u2014 destruction receipts','5','into custody'],
+ ['  \u2014 recycling receipts','9','counted to tonnage'],
+ ['Outbound mill shipments','3','all releases attached'],
+ ['Landfill loads','2','20.6 tons \u00b7 \u2212$1,071.20'],
+ ['Certificates issued','1','MR-2026-4417'],
+ ['Tickets printed','8','6 to phone only'],
+ ['Loads still unmatched','0','yard is clear'],
+ ['Open service requests','4','2 not dispatched']
+];
+const FLAGS=[
+ {what:'Received with no inbound release',ref:'WT-8915 \u00b7 Panhandle Snack',
+  act:'Client requires one \u2014 get it before destruction',lvl:'red'},
+ {what:'Load 3.1\u00d7 this account\u2019s normal weight',ref:'WT-8944 \u00b7 Trinity Foods',
+  act:'Confirm before it reaches a certificate',lvl:'red'},
+ {what:'Container idle 41 days',ref:'OT-1142 \u00b7 Westside Grocery',
+  act:'Schedule a pull or retrieve it',lvl:'red'},
+ {what:'Trailer out 28 days',ref:'TR-091 \u00b7 Wylie Freight',
+  act:'Chase it \u2014 that is your equipment',lvl:'red'},
+ {what:'Mill paid on 560 lb less than our scale',ref:'BOL-2208 \u00b7 Cedar Metals',
+  act:'Query the settlement',lvl:'amber'},
+ {what:'Release number on the invoice does not match the BOL',ref:'BOL-293324 \u00b7 one digit adrift',
+  act:'Their payment will quote the BOL number \u2014 fix before it is paid',lvl:'red'},
+ {what:'Payment received that was never applied',ref:'Remittance 4024 \u00b7 $435.20',
+  act:'Price adjustment sitting unallocated',lvl:'red'},
+ {what:'Receipt in custody 18 days',ref:'WT-8841 \u00b7 Lone Star Beverage',
+  act:'Client\u2019s product still sitting on your yard',lvl:'amber'},
+ {what:'Service request waiting 4 days',ref:'SR-4455 \u00b7 Panhandle Snack',
+  act:'Dispatch before they call',lvl:'amber'}
+];
+function renderAuto(){
+  $('closeTable').innerHTML='<tr><th>Today</th><th class="r">Count</th><th class="r">Note</th></tr>'+
+   CLOSEOUT.map(r=>{const ind=r[0].startsWith('  ');
+    return '<tr><td'+(ind?' style="padding-left:18px;color:var(--steel)"':'')+'>'+
+    r[0].trim()+'</td><td class="mono r">'+r[1]+'</td>'+
+    '<td class="r" style="color:var(--steel);font-size:13px">'+r[2]+'</td></tr>'}).join('');
+
+  $('flagTable').innerHTML='<tr><th>What</th><th>Which</th><th>Do this</th></tr>'+
+   FLAGS.map(f=>'<tr><td><span class="tag '+f.lvl+'">'+
+    (f.lvl==='red'?'attention':'watch')+'</span><div style="margin-top:5px">'+f.what+'</div></td>'+
+    '<td class="mono" style="font-size:12.5px">'+f.ref+'</td>'+
+    '<td style="color:var(--steel)">'+f.act+'</td></tr>').join('');
+}
+
+/* ================= NETWORK STATE ================= */
+let NET=true, QUEUED=0;
+function paintNet(){
+  $('netPill').classList.toggle('down',!NET);
+  $('netTxt').textContent = NET
+    ? (QUEUED?'Online \u00b7 synced '+QUEUED:'Online')
+    : 'Offline \u00b7 '+QUEUED+' held locally';
+  $('netBtn').textContent = NET?'Cut the internet':'Bring it back';
+}
+$('netBtn').addEventListener('click',()=>{
+  NET=!NET;
+  if(NET){
+    const n=QUEUED;
+    paintNet();
+    $('hintText').textContent = n
+      ? n+' ticket'+(n>1?'s':'')+' just synced. Nothing was lost and nobody had to do anything.'
+      : 'Back online.';
+    setTimeout(()=>{QUEUED=0;paintNet()},2600);
+  }else{
+    paintNet();
+    $('hintText').textContent='Internet is down. Weigh a truck anyway \u2014 the scale house keeps working.';
+  }
+});
+
+/* ================= GUIDED TOUR ================= */
+const TOUR=[
+ {t:'scale',sel:'.controls',say:'A truck lands on the scale. Nobody walks out to it, and the weight is captured before anyone knows whose load it is.'},
+ {t:'scale',sel:'.sign',say:'A sign at the scale, and that code is real — point a phone at it. No app, no clipboard, no walking outside.'},
+ {t:'scale',sel:'.screens',say:'The office is alerted the moment the weight settles. The driver checks himself in from his own phone, or the office assigns it from a chair.'},
+ {t:'scale',sel:'#netPill',say:'Cut the internet and weigh another truck. The scale house keeps working and syncs when the line comes back.'},
+ {t:'custody',sel:'#custodyTable',say:'The receipt lands on the yard and the clock starts. This is the client\u2019s product sitting on your ground, and the ageing column is what they will ask about.'},
+ {t:'destroy',sel:'#tab-destroy .card',say:'Several receipts get destroyed together as one run. Photographs are taken and sealed at the moment of capture.'},
+ {t:'cert',sel:'#tab-cert section',say:'The certificate covers the run, names every receipt inside it, and can be checked by anyone holding it without calling you.'},
+ {t:'portal',sel:'.portal',say:'Your client signs in and pulls their own certificates, weights and diversion rate. They stop ringing your office for numbers you already hold.'},
+ {t:'trade',sel:'#setlTable',say:'The same weights follow the material out the door and get checked against what the mill actually paid on.'},
+ {t:'reb',sel:'#idxTable',say:'Drop in the month’s published index and every generator rebate reprices itself — and you see the margin before you approve it.'},
+ {t:'cont',sel:'#cntTable',say:'Every container and trailer you own, where it is, and how long it has been sitting there earning nothing.'},
+ {t:'auto',sel:'#flagTable',say:'One screen showing every loose end in the business, and what to do about each one.'},
+ {t:'plans',sel:'#planGrid',say:'Priced by what you turn on. Core is the scale and the certificates; the rest are modules you add when you want them.'}
+];
+let tIdx=0, tOn=false;
+function clearFocus(){document.querySelectorAll('.tour-focus').forEach(e=>e.classList.remove('tour-focus'))}
+function goTour(i){
+  tIdx=Math.max(0,Math.min(TOUR.length-1,i));
+  const st=TOUR[tIdx];
+  const btn=document.querySelector('nav button[data-t="'+st.t+'"]');
+  if(btn) btn.click();
+  clearFocus();
+  $('tourStep').textContent='Step '+(tIdx+1)+' of '+TOUR.length;
+  $('tourSay').textContent=st.say;
+  $('tourBack').disabled = tIdx===0;
+  $('tourNext').textContent = tIdx===TOUR.length-1 ? 'Finish' : 'Next';
+  const el=document.querySelector(st.sel);
+  if(el){
+    const box=el.closest('.card')||el;
+    box.classList.add('tour-focus');
+    try{box.scrollIntoView({block:'center',behavior:'smooth'})}catch(e){}
+  }
+}
+function startTour(){
+  tOn=true;
+  $('tourBar').classList.add('on');
+  document.body.classList.add('touring');
+  goTour(0);
+}
+function endTour(){
+  tOn=false;
+  $('tourBar').classList.remove('on');
+  document.body.classList.remove('touring');
+  clearFocus();
+}
+$('tourStart').addEventListener('click',startTour);
+$('tourEnd').addEventListener('click',endTour);
+$('tourBack').addEventListener('click',()=>goTour(tIdx-1));
+$('tourNext').addEventListener('click',()=>{
+  if(tIdx===TOUR.length-1){endTour();return}
+  goTour(tIdx+1);
+});
+document.addEventListener('keydown',e=>{
+  if(!tOn) return;
+  if(e.key==='Escape') endTour();
+  if(e.key==='ArrowRight') $('tourNext').click();
+  if(e.key==='ArrowLeft' && tIdx>0) goTour(tIdx-1);
+});
+
+
 renderCustody();renderSel();updateRun();renderReports();renderSetup();renderOpen();
+renderTrade();renderCont();renderAuto();paintNet();
+
+/* ================= DRIVER LANGUAGE (EN / ES) ================= */
+const T={
+ en:{scan:'Scan the sign at the scale', idle:'Nothing<br>on the scale',
+     wait:'Waiting on<br>the office', office:'Office handled it<br>\u2014<br>driver never<br>touched a phone',
+     what:'What are you delivering?', plain:'Or plain material',
+     paper:'Do you want a paper ticket?',
+     yes:'YES \u2014 PRINT IT', yesSub:'Ready at the window on your way out',
+     no:'NO \u2014 PHONE ONLY', noSub:'Saved to your loadbook', btn:'ES'},
+ es:{scan:'Escanee el letrero en la b\u00e1scula', idle:'Nada<br>en la b\u00e1scula',
+     wait:'Esperando a<br>la oficina', office:'La oficina lo hizo<br>\u2014<br>el chofer no us\u00f3<br>el tel\u00e9fono',
+     what:'\u00bfQu\u00e9 est\u00e1 entregando?', plain:'O material sin trabajo',
+     paper:'\u00bfQuiere boleto impreso?',
+     yes:'S\u00cd \u2014 IMPR\u00cdMALO', yesSub:'Listo en la ventanilla al salir',
+     no:'NO \u2014 SOLO EN EL TEL\u00c9FONO', noSub:'Guardado en su libreta', btn:'EN'}
+};
+let LANG=(navigator.language||'en').toLowerCase().indexOf('es')===0?'es':'en';
+const t=k=>T[LANG][k];
+function swap(el,key,html){
+  if(!el) return;
+  const cur=html?el.innerHTML:el.textContent;
+  if(cur===T.en[key]||cur===T.es[key]){ if(html) el.innerHTML=t(key); else el.textContent=t(key) }
+}
+function paintLang(){
+  $('langBtn').textContent=t('btn');
+  swap($('phVeh'),'scan',false);
+  const idle=document.querySelector('#phBody .ph-idle');
+  ['idle','wait','office'].forEach(k=>swap(idle,k,true));
+  const ps=document.querySelectorAll('#phBody .ph-prompt');
+  if(ps[0]){ ['what','paper'].forEach(k=>swap(ps[0],k,true)) }
+  if(ps[1]) swap(ps[1],'plain',true);
+  const y=$('yesP'), nn=$('noP');
+  if(y) y.innerHTML='<b>'+t('yes')+'</b><span>'+t('yesSub')+'</span>';
+  if(nn) nn.innerHTML='<b>'+t('no')+'</b><span>'+t('noSub')+'</span>';
+}
+$('langBtn').addEventListener('click',()=>{LANG=LANG==='en'?'es':'en';paintLang()});
+paintLang();
+
+/* ================= DAY / NIGHT ================= */
+let LIGHT='auto';
+const mq=window.matchMedia?window.matchMedia('(prefers-color-scheme: dark)'):null;
+function isNightNow(){const h=new Date().getHours();return (mq&&mq.matches)||h>=19||h<7}
+function paintLight(){
+  document.body.classList.toggle('night', LIGHT==='night'||(LIGHT==='auto'&&isNightNow()));
+}
+document.querySelectorAll('#lightSeg button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#lightSeg button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); LIGHT=b.dataset.lt; paintLight();
+}));
+if(mq&&mq.addEventListener) mq.addEventListener('change',()=>{if(LIGHT==='auto')paintLight()});
+setInterval(()=>{if(LIGHT==='auto')paintLight()},60000);
+paintLight();
+
+
+/* ================= CLIENT PORTAL ================= */
+const P_CERTS=[
+ {id:'MR-2026-4417',date:'12 Aug 2026',loads:3,lb:112380,div:94},
+ {id:'MR-2026-3190',date:'14 Jul 2026',loads:4,lb:112380,div:93},
+ {id:'MR-2026-2871',date:'19 Jun 2026',loads:2,lb:74260,div:95},
+ {id:'MR-2026-2544',date:'21 May 2026',loads:3,lb:98120,div:92}
+];
+const P_LOADS=[
+ {tk:'WT-8863',date:'24 Jul 2026',veh:'TX 4LK-9920',lb:38940,st:'Destroyed \u00b7 MR-2026-4417'},
+ {tk:'WT-8841',date:'18 Jul 2026',veh:'TX 8RM-4417',lb:41220,st:'Destroyed \u00b7 MR-2026-4417'},
+ {tk:'WT-8802',date:'09 Jul 2026',veh:'TX 4LK-9920',lb:32220,st:'Destroyed \u00b7 MR-2026-4417'},
+ {tk:'WT-8744',date:'27 Jun 2026',veh:'TX 2WQ-1180',lb:39880,st:'Destroyed \u00b7 MR-2026-3190'},
+ {tk:'WT-8710',date:'19 Jun 2026',veh:'TX 8RM-4417',lb:37140,st:'Destroyed \u00b7 MR-2026-2871'}
+];
+const P_EQUIP=[
+ {id:'OT-1097',size:'40 yd',site:'Dallas \u00b7 Empire Central',placed:'28 Jul 2026',idle:3,st:'Active'},
+ {id:'OT-1044',size:'30 yd',site:'Dallas \u00b7 dock 3',placed:'02 Aug 2026',idle:1,st:'Active'}
+];
+function renderPortal(){
+  $('pCertTable').innerHTML='<tr><th>Certificate</th><th>Issued</th><th class="r">Receipts</th>'+
+   '<th class="r">Weight</th><th class="r">Diverted</th><th class="r"></th></tr>'+
+   P_CERTS.map(c=>'<tr><td class="mono">'+c.id+'</td><td class="mono">'+c.date+'</td>'+
+    '<td class="mono r">'+c.loads+'</td><td class="mono r">'+comma(c.lb)+' lb</td>'+
+    '<td class="mono r">'+c.div+'%</td>'+
+    '<td class="r"><span class="tag">Download</span></td></tr>').join('');
+
+  $('pLoadTable').innerHTML='<tr><th>Receipt</th><th>Received</th><th>Vehicle</th>'+
+   '<th class="r">Net lb</th><th class="r">Status</th></tr>'+
+   P_LOADS.map(l=>'<tr><td class="mono">'+l.tk+'</td><td class="mono">'+l.date+'</td>'+
+    '<td class="mono">'+l.veh+'</td><td class="mono r">'+comma(l.lb)+'</td>'+
+    '<td class="r" style="color:var(--steel)">'+l.st+'</td></tr>').join('');
+
+  $('pEquipTable').innerHTML='<tr><th>Unit</th><th>Size</th><th>Where</th>'+
+   '<th class="mono">Placed</th><th class="r">Days</th><th class="r">Status</th></tr>'+
+   P_EQUIP.map(e=>'<tr><td class="mono">'+e.id+'</td><td>'+e.size+'</td>'+
+    '<td style="color:var(--steel)">'+e.site+'</td><td class="mono">'+e.placed+'</td>'+
+    '<td class="mono r">'+e.idle+'</td>'+
+    '<td class="r"><span class="tag">'+e.st+'</span></td></tr>').join('');
+}
+$('pGo').addEventListener('click',()=>{
+  $('pLogin').style.display='none'; $('pApp').style.display='';
+});
+$('pOut').addEventListener('click',()=>{
+  $('pApp').style.display='none'; $('pLogin').style.display='';
+});
+$('pPass').addEventListener('keydown',e=>{if(e.key==='Enter')$('pGo').click()});
+$('pReq').addEventListener('click',()=>{
+  $('pReq').textContent='Request sent';
+  $('pReqNote').textContent='Raised at '+hm(new Date())+' today, reference SR-4482. It is already on '+
+    'Metropolitan\u2019s dispatch board with a clock running \u2014 you will see it move without ringing anyone.';
+  setTimeout(()=>{$('pReq').textContent='Request a pull'},5000);
+});
+renderPortal();
+
+
+/* ================= REBATES / PUBLISHED INDEX =================
+   Index values are the operator's own subscription data, entered here for
+   demonstration. In production DivertScan reads the PDF the subscriber
+   already receives; the figures never leave their account.            */
+const IDX_MONTHS=['Oct 2025','Dec 2025','Feb 2026','Mar 2026','Jun 2026'];
+const IDX={
+ 'Oct 2025':{OCC:[40,45],DLK:[55,60],SOP:[110,120],CBS:[110,120],SWL:[180,190],MIX:[10,15]},
+ 'Dec 2025':{OCC:[35,40],DLK:[50,55],SOP:[105,115],CBS:[105,115],SWL:[175,185],MIX:[5,10]},
+ 'Feb 2026':{OCC:[40,45],DLK:[60,65],SOP:[110,120],CBS:[110,120],SWL:[180,190],MIX:[5,10]},
+ 'Mar 2026':{OCC:[45,50],DLK:[65,70],SOP:[115,125],CBS:[115,125],SWL:[185,195],MIX:[10,15]},
+ 'Jun 2026':{OCC:[65,70],DLK:[85,90],SOP:[130,140],CBS:[130,140],SWL:[200,210],MIX:[20,25]}
+};
+const GRADE_NAME={OCC:'Old corrugated (11)',DLK:'Double lined kraft (13)',SOP:'Sorted office (37)',
+ CBS:'Coated book stock (43)',SWL:'Sorted white ledger (40)',MIX:'Mixed paper (54)'};
+const SELLS={SWL:255,CBS:195,DLK:155,OCC:120};
+const PROCESS=18.00;
+
+const TERMS=[
+ {who:'Westside Grocery',g:'OCC',desc:'70% of index high',fn:(l,h)=>0.70*h,floor:30,tons:84.2},
+ {who:'Trinity Foods Group',g:'OCC',desc:'Index high less $25',fn:(l,h)=>h-25,floor:25,tons:61.5},
+ {who:'Lone Star Beverage Co.',g:'SWL',desc:'60% of index average',fn:(l,h)=>0.60*(l+h)/2,floor:90,tons:22.4},
+ {who:'Panhandle Snack Brands',g:'DLK',desc:'Index low less $15',fn:(l,h)=>l-15,floor:25,tons:18.9},
+ {who:'Northside Print Co.',g:'CBS',desc:'65% of index high',fn:(l,h)=>0.65*h,floor:60,tons:31.7}
+];
+let idxAt=3;   // start on Mar 2026 so the first upload is the big June move
+
+const rebRate=(t,m)=>{const v=IDX[m][t.g];return Math.max(t.fn(v[0],v[1]),t.floor)};
+
+function renderReb(){
+  const m=IDX_MONTHS[idxAt], prev=idxAt>0?IDX_MONTHS[idxAt-1]:null;
+
+  $('idxTable').innerHTML='<tr><th>Grade</th><th class="r">Low</th><th class="r">High</th>'+
+   '<th class="r">Average</th><th class="r">Change</th></tr>'+
+   Object.keys(GRADE_NAME).map(g=>{
+    const v=IDX[m][g], pv=prev?IDX[prev][g]:null, ch=pv?v[1]-pv[1]:0;
+    const chc = !pv?'\u2014' : ch===0?'no change'
+      : '<span style="color:'+(ch>0?'#1E4630':'var(--oxblood)')+';font-weight:600">'+
+        (ch>0?'+':'\u2212')+'$'+Math.abs(ch)+'</span>';
+    return '<tr><td>'+GRADE_NAME[g]+'</td><td class="mono r">$'+v[0]+'</td>'+
+     '<td class="mono r" style="font-weight:600">$'+v[1]+'</td>'+
+     '<td class="mono r">$'+((v[0]+v[1])/2).toFixed(2)+'</td>'+
+     '<td class="mono r">'+chc+'</td></tr>'}).join('');
+
+  $('termTable').innerHTML='<tr><th>Account</th><th>Grade</th><th>Formula</th>'+
+   '<th class="r">Floor</th><th class="r">Rate now</th></tr>'+
+   TERMS.map(t=>{const r=rebRate(t,m), v=IDX[m][t.g], raw=t.fn(v[0],v[1]);
+    return '<tr><td>'+t.who+'</td><td class="mono">'+t.g+'</td>'+
+    '<td style="color:var(--steel)">'+t.desc+'</td>'+
+    '<td class="mono r">$'+t.floor.toFixed(2)+'</td>'+
+    '<td class="mono r" style="font-weight:600">$'+r.toFixed(2)+
+      (raw<t.floor?' <span class="tag amber">floor</span>':'')+'</td></tr>'}).join('');
+
+  let tot=0, prevTot=0;
+  $('rebTable').innerHTML='<tr><th>Account</th><th>Grade</th><th class="r">Tons in</th>'+
+   '<th class="r">Rate</th><th class="r">Was</th><th class="r">Rebate due</th></tr>'+
+   TERMS.map(t=>{
+    const r=rebRate(t,m), amt=r*t.tons; tot+=amt;
+    const pr=prev?rebRate(t,prev):r; prevTot+=pr*t.tons;
+    const d=r-pr;
+    return '<tr><td>'+t.who+'</td><td class="mono">'+t.g+'</td>'+
+    '<td class="mono r">'+t.tons.toFixed(1)+'</td>'+
+    '<td class="mono r">$'+r.toFixed(2)+'</td>'+
+    '<td class="mono r" style="color:var(--steel-lt)">'+(prev?'$'+pr.toFixed(2)+
+      (Math.abs(d)>0.005?' <span style="color:'+(d>0?'var(--oxblood)':'#1E4630')+'">('+
+      (d>0?'+':'\u2212')+'$'+Math.abs(d).toFixed(2)+')</span>':''):'\u2014')+'</td>'+
+    '<td class="mono r" style="font-weight:600">$'+comma(amt.toFixed(2))+'</td></tr>'}).join('')
+   +'<tr class="total"><td colspan="5">Owed to generators this month</td>'+
+    '<td class="mono r">$'+comma(tot.toFixed(2))+'</td></tr>';
+
+  let mtot=0;
+  $('marTable').innerHTML='<tr><th>Account</th><th>Grade</th><th class="r">Sold at</th>'+
+   '<th class="r">Rebated</th><th class="r">Processing</th><th class="r">Margin / ST</th>'+
+   '<th class="r">Margin</th></tr>'+
+   TERMS.map(t=>{const r=rebRate(t,m), sold=SELLS[t.g], per=sold-r-PROCESS, amt=per*t.tons;
+    mtot+=amt;
+    return '<tr><td>'+t.who+'</td><td class="mono">'+t.g+'</td>'+
+    '<td class="mono r">$'+sold.toFixed(2)+'</td><td class="mono r">\u2212$'+r.toFixed(2)+'</td>'+
+    '<td class="mono r">\u2212$'+PROCESS.toFixed(2)+'</td>'+
+    '<td class="mono r"'+(per<40?' style="color:var(--oxblood);font-weight:600"':'')+'>$'+per.toFixed(2)+'</td>'+
+    '<td class="mono r">$'+comma(amt.toFixed(2))+'</td></tr>'}).join('')
+   +'<tr class="total"><td colspan="6">Gross margin after rebate</td>'+
+    '<td class="mono r">$'+comma(mtot.toFixed(2))+'</td></tr>';
+
+  $('kIdxMonth').textContent=m;
+  $('kRebTot').textContent='$'+comma(Math.round(tot));
+  $('kRebDelta').textContent=prev?((tot-prevTot>=0?'+$':'\u2212$')+comma(Math.round(Math.abs(tot-prevTot)))):'\u2014';
+  $('kMargin').textContent='$'+comma(Math.round(mtot));
+  $('ppiBtn').textContent = idxAt>=IDX_MONTHS.length-1 ? 'Start over' : 'Upload next Yellow Sheet';
+}
+
+$('ppiBtn').addEventListener('click',()=>{
+  if(idxAt>=IDX_MONTHS.length-1){ idxAt=0; renderReb();
+    $('ppiNote').textContent='Back to the start of the series. Upload again to step forward.'; return }
+  const before=TERMS.reduce((a,t)=>a+rebRate(t,IDX_MONTHS[idxAt])*t.tons,0);
+  idxAt++;
+  const m=IDX_MONTHS[idxAt];
+  const after=TERMS.reduce((a,t)=>a+rebRate(t,m)*t.tons,0);
+  const moved=TERMS.filter(t=>Math.abs(rebRate(t,m)-rebRate(t,IDX_MONTHS[idxAt-1]))>0.005).length;
+  renderReb();
+  $('ppiNote').textContent=m+' read. '+moved+' of '+TERMS.length+
+    ' accounts reprice, changing what you owe by '+(after-before>=0?'+':'\u2212')+'$'+
+    comma(Math.abs(after-before).toFixed(2))+' this month. Nothing is paid until you approve it.';
+});
+
+renderReb();
+
+
+/* ================= SUBSCRIPTION BILLING (Stripe) =================
+   Payment Links are public URLs created in the Stripe dashboard
+   (Product catalogue > Payment links). They contain no secrets and are
+   safe in a static page. A SECRET KEY (sk_...) must NEVER appear here. */
+const STRIPE_LINKS={
+  scale_m:'', ops_m:'', trade_m:'',          // monthly
+  scale_y:'', ops_y:'', trade_y:'',          // annual, two months free
+  comp_m:'', comp_y:''                       // Compliance add-on
+};
+
+const TIERS={scale:'Scale House',ops:'Operations',trade:'Trading'};
+const COMP=200;
+const BILLING=[
+ {inv:'IN-2026-0087',date:'1 Aug 2026',desc:'Monthly subscription',st:'Paid'},
+ {inv:'IN-2026-0071',date:'1 Jul 2026',desc:'Monthly subscription',st:'Paid'},
+ {inv:'IN-2026-0058',date:'1 Jun 2026',desc:'Subscription + commissioning',st:'Paid'}
+];
+let tier='ops', period='m';
+const cards=()=>[...document.querySelectorAll('.plan[data-tier]')];
+const yr=m=>m*10;                      // annual = ten months
+
+function updatePlan(){
+  const annual = period==='y';
+  cards().forEach(c=>{
+    const on=c.dataset.tier===tier, m=+c.dataset.price;
+    c.classList.toggle('sel',on);
+    c.querySelector('.plan-pick').textContent = on?'Selected':'Choose';
+    c.querySelector('[data-p]').innerHTML = annual
+      ? '$'+comma(yr(m))+'<span>/year</span>'
+      : '$'+comma(m)+'<span>/month</span>';
+    c.querySelector('[data-was]').innerHTML = annual
+      ? 'was $'+comma(m*12)+' \u2014 two months free'
+      : '$'+comma(yr(m))+' a year if paid up front';
+  });
+
+  const withComp=$('compBox').checked;
+  $('compLab').textContent = withComp?'Included':'Not included';
+  $('compPrice').innerHTML = (annual?'+$'+comma(yr(COMP)):'+$'+COMP)+
+    '<span style="font-family:\'IBM Plex Mono\';font-size:11px;font-weight:500;letter-spacing:.1em;'+
+    'color:var(--steel);text-transform:uppercase;margin-left:4px">'+(annual?'/year':'/month')+'</span>';
+
+  const base=+document.querySelector('.plan[data-tier="'+tier+'"]').dataset.price;
+  const perMonth = base + (withComp?COMP:0);
+  const charge = annual ? yr(perMonth) : perMonth;
+
+  $('tbPrice').innerHTML='$'+comma(charge)+'<span>'+(annual?'/year':'/month')+'</span>';
+  $('tbTitle').textContent = TIERS[tier] + (withComp?' with Compliance':'');
+  $('tbSub').textContent = annual
+    ? 'Billed once a year at $'+comma(charge)+' \u2014 the same as ten months. Unlimited users, '
+      +'unlimited clients, no per-seat charge.'
+    : 'Billed monthly, cancel any time. Pay for the year instead and it is $'+comma(yr(perMonth))
+      +' \u2014 two months free.';
+  $('subBtn').textContent='Start subscription \u00b7 $'+comma(charge)+(annual?'/yr':'/mo');
+
+  $('bPlan').textContent='$'+comma(charge)+(annual?' / year':' / month');
+  $('bPlanSub').textContent=TIERS[tier]+(withComp?' + Compliance':'')+(annual?' \u00b7 annual':' \u00b7 monthly');
+  $('bNext').textContent='$'+comma(charge);
+  $('billTable').innerHTML='<tr><th>Invoice</th><th>Date</th><th>For</th>'+
+   '<th class="r">Amount</th><th class="r">Status</th></tr>'+
+   BILLING.map(b=>'<tr><td class="mono">'+b.inv+'</td><td class="mono">'+b.date+'</td>'+
+    '<td style="color:var(--steel)">'+b.desc+'</td>'+
+    '<td class="mono r">$'+comma(charge)+'.00</td>'+
+    '<td class="r"><span class="tag">'+b.st+'</span></td></tr>').join('');
+}
+
+cards().forEach(c=>c.querySelector('.plan-pick').addEventListener('click',()=>{
+  tier=c.dataset.tier; updatePlan();
+}));
+$('compBox').addEventListener('change',updatePlan);
+document.querySelectorAll('#perSeg button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#perSeg button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); period=b.dataset.per; updatePlan();
+}));
+
+$('subBtn').addEventListener('click',()=>{
+  const link=STRIPE_LINKS[tier+'_'+period];
+  if(link){ window.open(link,'_blank','noopener'); return }
+  $('subBtn').textContent='Opens Stripe Checkout';
+  $('tbSub').textContent='In production this hands off to Stripe Checkout for the tier selected. The '
+    +'card is entered on Stripe\u2019s page, the subscription starts, and DivertScan never sees a card '
+    +'number. Paste your Payment Link URLs into STRIPE_LINKS to make this button live.';
+  setTimeout(updatePlan,4200);
+});
+
+updatePlan();
+
 </script>
+
 </body>
 </html>
