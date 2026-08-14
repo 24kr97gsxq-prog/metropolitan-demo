@@ -544,7 +544,7 @@ color:var(--ink);cursor:pointer;white-space:nowrap}
 
 <header class="mast">
   <div class="mast-in">
-    <div class="brand">Metropolitan Recycling<span>Certified Product Destruction · Singleton Blvd, Dallas</span></div>
+    <div class="brand">Metropolitan Recycling<span>Recycling · Zero Waste · Certified Destruction · Dallas</span></div>
     <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
       <div class="mast-meta">Scale 01<br>Powered by DivertScan</div>
       <div class="mini-seg" id="lightSeg" role="group" aria-label="Screen brightness">
@@ -567,6 +567,7 @@ color:var(--ink);cursor:pointer;white-space:nowrap}
     <button data-t="reb">Rebates</button>
     <button data-t="cont">Containers</button>
     <button data-t="auto">Automations</button>
+    <button data-t="watch">Watchtower</button>
     <button data-t="reports">Reports</button>
     <button data-t="plans">Plans</button>
     <button data-t="setup">Setup</button>
@@ -885,6 +886,42 @@ color:var(--ink);cursor:pointer;white-space:nowrap}
   <div class="vrow"><input id="vInput" placeholder="MR-2026-0000" aria-label="Certificate number">
     <button id="vBtn">Verify</button></div>
   <div class="vout" id="vOut"></div>
+</section>
+</div>
+
+
+<!-- ============ WATCHTOWER ============ -->
+<div class="tab" id="tab-watch">
+<section>
+  <div class="eyebrow">What's moving in the industry<span class="tier auto">Operations tier</span></div>
+  <h1>The rules change. Somebody should notice before it costs you.</h1>
+  <p class="lede">A short feed of what matters in product destruction, recycling and LEED — pulled
+  from the trade press, the associations and the regulators, filtered down to what touches a Texas
+  destruction and recycling operation. New items simply appear; there is nothing to refresh.</p>
+
+  <div class="kpis">
+    <div class="kpi"><div class="n">6</div><div class="l">sources watched</div></div>
+    <div class="kpi"><div class="n">Every 6 hrs</div><div class="l">checked automatically</div></div>
+    <div class="kpi warn"><div class="n">2</div><div class="l">items need a look</div></div>
+    <div class="kpi"><div class="n">1</div><div class="l">deadline on the calendar</div></div>
+  </div>
+
+  <div class="card">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Current alerts · real items from the sources below</div>
+      <div class="rpt-tools"><button data-csv="watchTable" data-name="watchtower">CSV</button></div></div>
+    <div class="scroll"><table id="watchTable"></table></div>
+    <div class="of-note" style="text-align:left">Each item links to the source it came from. "Why it
+    matters" is written for this yard, not in general — an alert nobody can act on is noise.</div>
+  </div>
+
+  <div class="card">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">What it watches</div></div>
+    <div class="scroll"><table id="srcTable"></table></div>
+    <div class="of-note" style="text-align:left">How the automatic part works: a scheduled job reads
+    each source every few hours, keeps anything matching your materials, your certifications and
+    Texas, and publishes it here. The page picks up new items on its own — no refresh button,
+    nothing to remember. You can add or drop sources in Setup.</div>
+  </div>
 </section>
 </div>
 
@@ -2590,7 +2627,10 @@ const RATES=[
  {code:'CBS',name:'Coated book stock',buyer:'Northgate Fiber',rate:195,min:21,max:22,bale:1520},
  {code:'SOP/PM',name:'Sorted office / mixed paper',buyer:'Rio Verde Recycling',rate:200,min:null,max:null,bale:1560},
  {code:'DLK',name:'New double lined kraft cuttings',buyer:'Northgate Fiber',rate:155,min:21,max:22,bale:1980},
- {code:'OCC',name:'Old corrugated containers',buyer:'either — both at $120',rate:120,min:21,max:22,bale:1680}
+ {code:'OCC',name:'Old corrugated containers',buyer:'either — both at $120',rate:120,min:21,max:22,bale:1680},
+ {code:'PET',name:'PET bottles, baled',buyer:'Rio Verde Recycling',rate:220,min:null,max:null,bale:900},
+ {code:'UBC',name:'Aluminum cans, baled',buyer:'Bluestem Metals',rate:1240,min:null,max:null,bale:620},
+ {code:'PLT',name:'Pallets · GMA grade A',buyer:'resold per unit, not per ton',rate:null,min:null,max:null,bale:null}
 ];
 /* Scale reading vs the invoice line. Every variance below is a real error class. */
 const SETTLE=[
@@ -2619,7 +2659,9 @@ const POSITION=[
  {mat:'OCC · old corrugated',hand:62.4,cmt:40.0,rate:'$120 / ST',buyer:'Contracted 200 ST'},
  {mat:'SWL · sorted white ledger',hand:18.9,cmt:18.9,rate:'$255 / ST',buyer:'Contracted 40 ST'},
  {mat:'CBS · coated book stock',hand:31.2,cmt:12.0,rate:'$195 / ST',buyer:'Contracted 60 ST'},
- {mat:'DLK · kraft cuttings',hand:9.4,cmt:0,rate:'$155 / ST',buyer:'Open rate, no commitment'}
+ {mat:'DLK · kraft cuttings',hand:9.4,cmt:0,rate:'$155 / ST',buyer:'Open rate, no commitment'},
+ {mat:'PET · baled bottles',hand:6.8,cmt:0,rate:'$220 / ST',buyer:'Open rate, no commitment'},
+ {mat:'UBC · aluminum cans',hand:2.3,cmt:2.3,rate:'$1,240 / ST',buyer:'Committed — highest $/ton on the yard'}
 ];
 const LANDFILL=[
  {m:'August (to date)',loads:9,tons:41.2,cost:2142},
@@ -2637,7 +2679,7 @@ function renderTrade(){
                         +' <span style="color:var(--steel-lt)">@ '+comma(r.bale)+' lb</span>' : '\u2014';
     return '<tr><td class="mono">'+r.code+'</td><td>'+r.name+'</td>'+
     '<td style="color:var(--steel)">'+r.buyer+'</td>'+
-    '<td class="mono r" style="font-weight:600">$'+r.rate.toFixed(2)+'</td>'+
+    '<td class="mono r" style="font-weight:600">'+(r.rate!=null?'$'+r.rate.toFixed(2):'per unit')+'</td>'+
     '<td class="mono r">'+win+'</td><td class="mono r">'+bal+'</td></tr>'}).join('');
 
   $('setlTable').innerHTML='<tr><th>BOL</th><th>Grade</th><th class="r">Scale lb</th>'+
@@ -2819,6 +2861,7 @@ const TOUR=[
  {t:'reb',sel:'#idxTable',say:'Drop in the month’s published index and every generator rebate reprices itself — and you see the margin before you approve it.'},
  {t:'cont',sel:'#eqMapCard',say:'Every container and trailer on a map — who has it, when it last reported, and the red ones pulsing are your assets earning nothing.'},
  {t:'auto',sel:'#flagTable',say:'One screen showing every loose end in the business, and what to do about each one.'},
+ {t:'watch',sel:'#watchTable',say:'And the rules themselves are watched — LEED deadlines, Texas requirements, destruction-industry changes — pulled automatically and translated into what it means for this yard.'},
  {t:'plans',sel:'#planGrid',say:'Priced by what you turn on. Core is the scale and the certificates; the rest are modules you add when you want them.'}
 ];
 let tIdx=0, tOn=false;
@@ -2870,6 +2913,49 @@ document.addEventListener('keydown',e=>{
 
 renderCustody();renderSel();updateRun();renderReports();renderSetup();renderOpen();
 renderTrade();renderCont();renderAuto();paintNet();
+
+/* ================= WATCHTOWER ================= */
+/* Every URL below was checked and loading as of Aug 14, 2026. */
+const WATCH_ITEMS=[
+ {tag:'LEED',lvl:'amber',what:'LEED v4 / v4.1 commercial project registration extended to June 30, 2027',
+  why:'Your GC clients get more runway on v4 jobs \u2014 expect mixed v4 and v5 reporting for two more years. The per-project reports already handle both.',
+  src:'USGBC',url:'https://www.usgbc.org/articles'},
+ {tag:'DESTRUCTION',lvl:'red',what:'California DELETE Act milestone hit Aug 1 \u2014 applies to anyone handling data tied to California residents',
+  why:'If a destruction client ships you material containing CA-resident data, the paper trail requirements just tightened. Your sealed chain of custody is the answer \u2014 mention it.',
+  src:'i-SIGMA',url:'https://isigmaonline.org/'},
+ {tag:'TEXAS',lvl:'red',what:'HB 3229: annual reporting and financial assurance for renewable-component recyclers, effective Sept 1, 2025',
+  why:'Only bites if you accept wind, solar or battery components. If a load like that shows up at the scale, do not take it before checking this.',
+  src:'TCEQ',url:'https://www.tceq.texas.gov/permitting/waste_permits/ihw_permits/renewable-energy-component-recycling-reporting'},
+ {tag:'TEXAS',lvl:'amber',what:'Recycling facilities on a Notice of Intent must file their annual operating-status report by December 31',
+  why:'A fixed deadline with your name on it. The system will surface it again in November \u2014 this is the calendar item above.',
+  src:'TCEQ',url:'https://www.tceq.texas.gov/permitting/waste_permits/msw_permits/recycling'},
+ {tag:'DESTRUCTION',lvl:'',what:'NAID AAA carries a specific Product Destruction endorsement \u2014 no added cost at the next scheduled audit',
+  why:'If Metropolitan ever pursues NAID AAA, the product-destruction endorsement is the one that matches this business. Worth knowing before a client asks "are you NAID certified?"',
+  src:'i-SIGMA',url:'https://isigmaonline.org/certifications/naid-aaa-certification/'}
+];
+const WATCH_SRC=[
+ {name:'Waste Dive',what:'Daily industry news \u2014 regulation, PFAS, EPR, markets',url:'https://www.wastedive.com/'},
+ {name:'Recycling Today',what:'Paper, metals and plastics markets; company moves',url:'https://www.recyclingtoday.com/news/'},
+ {name:'i-SIGMA',what:'The destruction industry\u2019s association \u2014 NAID AAA, compliance notes',url:'https://isigmaonline.org/'},
+ {name:'USGBC',what:'LEED versions, credits and deadlines, straight from the source',url:'https://www.usgbc.org/articles'},
+ {name:'TCEQ \u00b7 waste permits',what:'Texas rules for waste and recycling facilities',url:'https://www.tceq.texas.gov/permitting/waste_permits'},
+ {name:'TCEQ \u00b7 recycling facilities',what:'30 TAC 328 \u2014 the rules this yard operates under, including the Dec 31 report',url:'https://www.tceq.texas.gov/permitting/waste_permits/msw_permits/recycling'}
+];
+function renderWatch(){
+  $('watchTable').innerHTML='<tr><th></th><th>What changed</th><th>Why it matters here</th><th class="r">Source</th></tr>'+
+   WATCH_ITEMS.map(i=>'<tr><td><span class="tag '+i.lvl+'">'+i.tag+'</span></td>'+
+    '<td style="font-weight:600">'+i.what+'</td>'+
+    '<td style="color:var(--steel)">'+i.why+'</td>'+
+    '<td class="r"><a href="'+i.url+'" target="_blank" rel="noopener" '+
+    'style="color:var(--oxblood);font-weight:600;white-space:nowrap">'+i.src+' \u2197</a></td></tr>').join('');
+  $('srcTable').innerHTML='<tr><th>Source</th><th>What it covers</th><th class="r"></th></tr>'+
+   WATCH_SRC.map(x=>'<tr><td style="font-weight:600">'+x.name+'</td>'+
+    '<td style="color:var(--steel)">'+x.what+'</td>'+
+    '<td class="r"><a href="'+x.url+'" target="_blank" rel="noopener" '+
+    'style="color:var(--oxblood);font-weight:600;white-space:nowrap">Open \u2197</a></td></tr>').join('');
+}
+renderWatch();
+
 
 /* ================= DISPATCH ================= */
 const DISP=[
