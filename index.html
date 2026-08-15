@@ -216,7 +216,7 @@ text-align:center;transform:rotate(-3.5deg);flex-shrink:0}
 font-size:11px;letter-spacing:.08em;line-height:2}
 
 .verify{background:var(--panel-dk);color:var(--on-dk);border-radius:var(--r);padding:22px 20px}
-.verify h2{color:var(--paper)}
+.verify h2{color:var(--on-dk)}
 .verify p{color:var(--mute-dk);font-size:14.5px;max-width:52ch;margin-bottom:16px}
 .vrow{display:flex;gap:9px;flex-wrap:wrap}
 .vrow input{flex:1;min-width:180px;font-family:'IBM Plex Mono';font-size:13px;padding:11px 13px;
@@ -295,7 +295,7 @@ letter-spacing:.1em;color:var(--steel);text-transform:uppercase;margin-left:4px}
 border-radius:50%;background:var(--concrete-dk)}
 .total-bar{background:var(--panel-dk);color:var(--on-dk);border-radius:var(--r);padding:19px 22px;
 display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:16px}
-.total-bar .tb-l{font-family:'Archivo';font-weight:800;font-size:18px;letter-spacing:-.02em;color:var(--paper)}
+.total-bar .tb-l{font-family:'Archivo';font-weight:800;font-size:18px;letter-spacing:-.02em;color:var(--on-dk)}
 .total-bar .tb-s{font-size:13.5px;color:var(--mute-dk);margin-top:4px;max-width:46ch}
 .total-bar .tb-p{font-family:'Archivo';font-weight:800;font-size:31px;letter-spacing:-.03em;color:var(--phosphor)}
 .total-bar .tb-p span{font-family:'IBM Plex Mono';font-size:11px;font-weight:500;
@@ -319,10 +319,10 @@ transform:translateY(105%);transition:transform .28s ease}
 .tour-txt{flex:1;min-width:200px}
 .tour-step{font-family:'IBM Plex Mono';font-size:10.5px;font-weight:600;letter-spacing:.15em;
 text-transform:uppercase;color:var(--phosphor);margin-bottom:3px}
-.tour-say{font-size:14.5px;line-height:1.45;color:var(--paper)}
+.tour-say{font-size:14.5px;line-height:1.45;color:#E9E7E2}
 .tour-nav{display:flex;gap:7px;flex:0 0 auto}
 .tourbar button{font-size:13px;padding:8px 14px;border-radius:var(--r);border:1.5px solid #6E7A86;
-background:transparent;color:var(--concrete);font-family:'Public Sans';cursor:pointer}
+background:transparent;color:var(--on-dk);font-family:'Public Sans';cursor:pointer}
 .tourbar button.go{background:var(--phosphor);border-color:var(--phosphor);color:var(--ink);font-weight:600}
 .tourbar button:focus-visible{outline:2px solid var(--phosphor);outline-offset:2px}
 body.touring{padding-bottom:96px}
@@ -459,11 +459,11 @@ align-items:flex-start;flex-wrap:wrap}
 /* ---- driver scan sign ---- */
 .sign{background:var(--panel-dk);border-radius:var(--r);padding:26px;display:flex;gap:26px;
 align-items:center;flex-wrap:wrap;justify-content:center;text-align:center}
-.sign-qr{background:var(--paper);padding:14px;border-radius:var(--r);flex:0 0 auto;line-height:0}
+.sign-qr{background:#FFFFFF;padding:14px;border-radius:var(--r);flex:0 0 auto;line-height:0}
 .sign-qr svg{display:block;width:172px;height:172px}
 .sign-t{flex:1;min-width:230px;text-align:left}
 .sign-t .sh{font-family:'Archivo';font-weight:800;font-size:27px;line-height:1.1;letter-spacing:-.03em;
-color:var(--paper);margin-bottom:10px}
+color:var(--on-dk);margin-bottom:10px}
 .sign-t .sp{font-size:15px;color:var(--mute-dk);line-height:1.55;margin-bottom:14px;max-width:38ch}
 .sign-t .sn{font-family:'IBM Plex Mono';font-size:11px;letter-spacing:.13em;text-transform:uppercase;
 color:var(--phosphor)}
@@ -779,7 +779,7 @@ font-size:13.5px;cursor:pointer}
     </div>
     <div class="of-note" style="text-align:left">That code is live — scan it with your own phone
     and it opens straight into the driver's check-in, not this dashboard. Or
-    <a href="#driver" style="color:var(--oxblood);font-weight:600">try the driver view here</a>.
+    <button id="tryDrv" style="background:none;border:none;padding:0;cursor:pointer;color:var(--oxblood);font-weight:600;font-size:inherit;font-family:inherit;text-decoration:underline;text-underline-offset:2px">try the driver view here</button>.
     A shared sign identifies the scale, not the person — the driver picks his job, and in
     production his phone remembers him after the first visit.</div>
   </div>
@@ -2937,10 +2937,10 @@ $('netBtn').addEventListener('click',()=>{
 
 /* ================= GUIDED TOUR ================= */
 const TOUR=[
- {t:'scale',sel:'.controls',say:'A truck lands on the scale. Nobody walks out to it, and the weight is captured before anyone knows whose load it is.'},
+ {t:'scale',sel:'.controls',say:'Watch — a truck is landing on the scale right now. Nobody walks out to it, and the weight is captured before anyone knows whose load it is.',act:()=>{const b=$('mainBtn');if(b&&!b.disabled&&/arrives/i.test(b.textContent))b.click();}},
  {t:'scale',sel:'.sign',say:'A sign at the scale, and that code is real — point a phone at it. No app, no clipboard, no walking outside.'},
  {t:'scale',sel:'.screens',say:'The office is alerted the moment the weight settles. The driver checks himself in from his own phone, or the office assigns it from a chair.'},
- {t:'scale',sel:'#netPill',say:'Cut the internet and weigh another truck. The capture laptop in your office keeps working and syncs when the line comes back — and the rest of this is just a website, viewable from anywhere.'},
+ {t:'scale',sel:'#netPill',say:'The internet just got cut — by this tour. The capture laptop in your office keeps working and syncs when the line comes back. Everything else here is just a website, viewable from anywhere.',act:()=>{const t=$('netTxt');if(t&&/online/i.test(t.textContent)){$('netBtn').click();return ()=>{const t2=$('netTxt');if(t2&&/offline/i.test(t2.textContent))$('netBtn').click();}}}},
  {t:'custody',sel:'#custodyTable',say:'The receipt lands on the yard and the clock starts. This is the client\u2019s product sitting on your ground, and the ageing column is what they will ask about.'},
  {t:'destroy',sel:'#tab-destroy .card',say:'Several receipts get destroyed together as one run. Photographs are taken and sealed at the moment of capture.'},
  {t:'cert',sel:'#tab-cert section',say:'The certificate covers the run, names every receipt inside it, and can be checked by anyone holding it without calling you.'},
@@ -2957,11 +2957,13 @@ const TOUR=[
 let tIdx=0, tOn=false;
 function clearFocus(){document.querySelectorAll('.tour-focus').forEach(e=>e.classList.remove('tour-focus'))}
 function goTour(i){
+  if(window._tundo){ try{window._tundo()}catch(e){} window._tundo=null }
   tIdx=Math.max(0,Math.min(TOUR.length-1,i));
   const st=TOUR[tIdx];
   const btn=document.querySelector('nav button[data-t="'+st.t+'"]');
   if(btn) btn.click();
   if(st.t==='portal' && $('pApp').style.display==='none') $('pGo').click();
+  if(st.act){ try{ window._tundo = st.act()||null }catch(e){} }
   clearFocus();
   $('tourStep').textContent='Step '+(tIdx+1)+' of '+TOUR.length;
   $('tourSay').textContent=st.say;
@@ -3003,6 +3005,12 @@ document.addEventListener('keydown',e=>{
 
 renderCustody();renderSel();updateRun();renderReports();renderSetup();renderOpen();
 renderTrade();renderCont();renderAuto();paintNet();
+
+$('tryDrv').addEventListener('click',()=>{
+  drvStep='who'; drvPaint(); $('drv').classList.add('on');
+  try{ history.replaceState(null,'',location.pathname+location.search+'#driver') }catch(e){}
+});
+
 
 /* ================= FIRST-VISIT WELCOME =================
    Two cold viewers bounced off the tab bar before finding the tour.
