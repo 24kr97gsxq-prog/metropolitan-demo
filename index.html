@@ -2044,6 +2044,14 @@ async function issueCert(){
   REGISTER.unshift({id:certId,date:md(now),client:j.client,lb:lb,loads:sel.length,status:'Valid',coverage:coverage});
   picked.clear();runPhotos=0;runData=null;
   $('runCard').style.display='none';$('rPhotos').textContent='0';$('certBtn').disabled=true;
+  /* the payoff: jump to the certificate that just issued */
+  const cb=document.querySelector('nav button[data-t="cert"]');
+  if(cb){ cb.click();
+    setTimeout(()=>{ const cw=$('certWrap');
+      if(cw){ cw.style.scrollMarginTop='84px';
+        try{cw.scrollIntoView({block:'start'})}catch(e){}
+        cw.classList.remove('of-land'); void cw.offsetWidth; cw.classList.add('of-land'); }
+    },150); }
   renderCustody();renderSel();updateRun();renderReports();
   document.querySelector('nav button[data-t="cert"]').click();
 }
@@ -2234,7 +2242,7 @@ async function capIn(){
   wirePickers('.opt','Driver scan');
   state='needs';$('mainBtn').disabled=true;$('mainBtn').textContent='Waiting to be identified';
   $('hintText').textContent='Pick a job on EITHER screen — whichever happens first wins';
-  if(!tOn) document.querySelector('.screens').scrollIntoView({block:'center'});
+  if(camFree()) document.querySelector('.screens').scrollIntoView({block:'center'});
 }
 
 function pickerHTML(){
@@ -2294,6 +2302,7 @@ function afterAssign(by){
       '<button class="opt" id="noP"><b>'+t('no')+'</b><span>'+t('noSub')+'</span></button>';
     $('yesP').addEventListener('click',()=>parkLoad(true));
     $('noP').addEventListener('click',()=>parkLoad(false));
+    if(camFree()) setTimeout(()=>{try{$('phBody').scrollIntoView({block:'center'})}catch(e){}},200);
   }else{
     $('phBody').innerHTML='<div class="ph-idle">'+t('office')+'</div>';
     parkLoad(true);
@@ -2301,7 +2310,8 @@ function afterAssign(by){
 }
 
 function parkLoad(paper){
-  OPEN.unshift({tk:'WT-'+String(Math.floor(Math.random()*900)+9000),veh:VEH,gross:GROSS,
+  const tkNo='WT-'+String(Math.floor(Math.random()*900)+9000);
+  OPEN.unshift({tk:tkNo,veh:VEH,gross:GROSS,
     inAt:hm(inStamp),ref:job,by:identBy,paper:paper,rel:inRelease});
   const wasOffline = (typeof NET!=='undefined' && !NET);
   if(wasOffline){ QUEUED++; paintNet(); }
@@ -2309,13 +2319,14 @@ function parkLoad(paper){
   renderOpen();
   $('ofNote').textContent = wasOffline
     ? 'Captured and held on the capture laptop in the scale office. It will sync itself when the line comes back — nobody rekeys anything.'
-    : 'On the yard. It will not be matched by weight or timing — a person or a scan does that.';
+    : (paper ? 'Ticket '+tkNo+' sent to the window printer — ready when the driver rolls past. '
+             : '')+'On the yard. It will not be matched by weight or timing — a person or a scan does that.';
   state='idle';
   $('mainBtn').disabled=false;$('mainBtn').textContent='Another truck arrives';
   $('outBtn').disabled=false;
   /* the handoff moment: pull the eye back to the office screen */
   const op=$('officePane');
-  if(op && !tOn){
+  if(op && camFree()){
     setTimeout(()=>{
       try{op.scrollIntoView({behavior:'smooth',block:'center'})}catch(e){op.scrollIntoView()}
       op.classList.remove('of-land'); void op.offsetWidth; op.classList.add('of-land');
@@ -2345,7 +2356,7 @@ async function capTare(){
   state='matching';$('mainBtn').disabled=true;$('outBtn').disabled=true;
   $('outBtn').textContent='Waiting to be matched';
   $('hintText').textContent='Match it on EITHER screen — never on weight, never on timing';
-  if(!tOn) document.querySelector('.screens').scrollIntoView({block:'center'});
+  if(camFree()) document.querySelector('.screens').scrollIntoView({block:'center'});
 }
 
 async function matchOut(ix,by){
@@ -3027,7 +3038,9 @@ const TOUR=[
 ];
 let tIdx=0, tOn=false;
 function clearFocus(){document.querySelectorAll('.tour-focus').forEach(e=>e.classList.remove('tour-focus'))}
+function camFree(){return !tOn || (Date.now()-(window._tourNavAt||0))>1600}
 function goTour(i){
+  window._tourNavAt=Date.now();
   if(window._tundo){ try{window._tundo()}catch(e){} window._tundo=null }
   tIdx=Math.max(0,Math.min(TOUR.length-1,i));
   const st=TOUR[tIdx];
@@ -3051,7 +3064,10 @@ function goTour(i){
          a second scroll call would cancel the first on iOS. */
       try{
         target.style.scrollMarginTop='84px';
-        target.scrollIntoView({block:'start', behavior:'smooth'});
+        /* instant, not smooth: a long smooth glide can be interrupted on iOS
+           (by touch, by momentum, by anything) and die mid-flight.
+           An instant jump cannot miss. */
+        target.scrollIntoView({block:'start', behavior:'auto'});
       }catch(e){ try{target.scrollIntoView()}catch(e2){} }
     },120);
   }
