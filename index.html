@@ -536,6 +536,24 @@ padding:8px 11px;border-radius:var(--r);border:1.5px solid var(--panel-dk);backg
 color:var(--ink);cursor:pointer;white-space:nowrap}
 .win-btn:hover{background:var(--panel-dk);color:var(--phosphor)}
 .win-btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+/* ---- first-visit welcome ---- */
+.welc{position:fixed;inset:0;z-index:300;background:rgba(22,25,28,.82);display:none;
+align-items:center;justify-content:center;padding:22px}
+.welc.on{display:flex}
+.welc-card{max-width:430px;width:100%;background:var(--paper);border-radius:6px;
+border-top:5px solid var(--phosphor-dim);padding:30px 28px;text-align:center}
+.welc-card h2{font-family:'Archivo';font-weight:800;font-size:24px;letter-spacing:-.02em;
+color:var(--ink);margin-bottom:12px}
+.welc-card p{font-size:14.5px;color:var(--steel);line-height:1.6;margin-bottom:22px}
+.welc-go{display:block;width:100%;padding:15px;border:none;border-radius:var(--r);
+background:var(--panel-dk);color:var(--phosphor);font-family:'Public Sans';font-weight:700;
+font-size:16px;cursor:pointer;margin-bottom:10px}
+.welc-go:hover{background:#000}
+.welc-skip{display:block;width:100%;padding:12px;border:1.5px solid var(--concrete-dk);
+border-radius:var(--r);background:transparent;color:var(--steel);font-family:'Public Sans';
+font-size:13.5px;cursor:pointer}
+.welc-go:focus-visible,.welc-skip:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 </style>
 </head>
 <body>
@@ -1498,14 +1516,14 @@ color:var(--ink);cursor:pointer;white-space:nowrap}
         <div class="plan-was" data-was></div>
       </div>
       <ul>
-        <li>Weights read off the scale and sealed at the moment of capture</li>
-        <li>Driver scans in on his own phone — paper ticket or phone only</li>
-        <li>Chain of custody from receipt through destruction</li>
-        <li>Certificates of destruction, verifiable by whoever holds one</li>
-        <li>Diversion rate by client and project, weight-based</li>
-        <li>LEED-ready diversion reports per project — MRp2 / MRc5, contractor-grade</li>
-        <li>Weight ticket register, every weighment reprintable</li>
-        <li>Client portal and accounting exports</li>
+        <li>Weights read off the scale and sealed at the moment of capture — works offline, views from anywhere</li>
+        <li>Driver scans a sign and checks in from his own phone — English or Spanish, no app</li>
+        <li>Chain of custody from receipt through destruction, photographed and hashed</li>
+        <li>Certificates of destruction anyone can verify without calling you</li>
+        <li>Per-project LEED diversion reports — MRp2 / MRc5, never blended</li>
+        <li>Monthly reports emailed on the 1st, automatically</li>
+        <li>Client portal: their certificates, reports, projects, photos and loads</li>
+        <li>Weight ticket register and accounting exports</li>
       </ul>
       <button class="plan-pick">Choose</button>
     </div>
@@ -1518,12 +1536,13 @@ color:var(--ink);cursor:pointer;white-space:nowrap}
       </div>
       <ul>
         <li><b>Everything in Scale House, plus:</b></li>
-        <li>Every container and trailer, where it is and how long it has sat</li>
+        <li>Every container and trailer on a live map — who has it, when it last reported</li>
         <li>Idle-equipment flags before an asset quietly disappears</li>
-        <li>Customer service requests through the portal, timestamped</li>
-        <li>Standing pull schedules that create their own jobs</li>
-        <li>Draft invoices built from tickets, ready to send</li>
+        <li>Client service requests flow to a dispatch board — pick a window, they're notified. No phone calls either direction</li>
+        <li>Standing schedules build the day board on their own</li>
+        <li>Draft invoices from tickets, ready to send</li>
         <li>Weight anomaly flags, contamination workflow, daily close-out</li>
+        <li>Watchtower — industry, LEED and Texas rule changes, translated into what to do</li>
       </ul>
       <button class="plan-pick">Choose</button>
     </div>
@@ -1536,10 +1555,11 @@ color:var(--ink);cursor:pointer;white-space:nowrap}
       </div>
       <ul>
         <li><b>Everything in Operations, plus:</b></li>
-        <li>Contracts and rate cards by grade, with load windows enforced at the scale</li>
+        <li>Rate cards for every commodity — paper grades, PET, metals, even per-unit pallets — with load windows enforced at the scale</li>
         <li>Billing audit — every invoice checked against its own scale ticket</li>
         <li>Settlement reconciliation against what the buyer actually paid on</li>
-        <li>Payment matching by release number, so unapplied money surfaces</li>
+        <li>Payment matching by release number — bank file in, unapplied money surfaces</li>
+        <li>Receivables — every load that left, what's owed, days outstanding</li>
         <li>Published index uploaded monthly, generator rebates repriced automatically</li>
         <li>Position and margin by grade — sold, rebated, processed</li>
       </ul>
@@ -1691,6 +1711,16 @@ color:var(--ink);cursor:pointer;white-space:nowrap}
     <div class="drv-body" id="drvBody"></div>
   </div>
   <button class="drv-exit" id="drvExit">View the full demo instead</button>
+</div>
+
+<div class="welc" id="welc" role="dialog" aria-modal="true" aria-label="Welcome">
+  <div class="welc-card">
+    <h2>Two minutes, guided.</h2>
+    <p>This is a working demo of a scale house that runs itself — truck on the scale through
+    to a certificate anyone can verify. Easiest way in is the walkthrough. It drives, you watch.</p>
+    <button class="welc-go" id="welcGo">▶ Show me how it works</button>
+    <button class="welc-skip" id="welcSkip">I'll look around on my own</button>
+  </div>
 </div>
 <div class="tourbar" id="tourBar" role="region" aria-label="Guided tour">
   <div class="tour-in">
@@ -2914,6 +2944,26 @@ document.addEventListener('keydown',e=>{
 renderCustody();renderSel();updateRun();renderReports();renderSetup();renderOpen();
 renderTrade();renderCont();renderAuto();paintNet();
 
+/* ================= FIRST-VISIT WELCOME =================
+   Two cold viewers bounced off the tab bar before finding the tour.
+   So the tour now offers itself. Once per browser; never over the
+   driver deep link. */
+(function(){
+  if(typeof drvWanted==='function' && drvWanted()) return;
+  let seen=false;
+  try{ seen = localStorage.getItem('ms_welcomed')==='1' }catch(e){}
+  if(seen) return;
+  $('welc').classList.add('on');
+  const done=()=>{ $('welc').classList.remove('on');
+    try{ localStorage.setItem('ms_welcomed','1') }catch(e){} };
+  $('welcGo').addEventListener('click',()=>{ done(); startTour(); });
+  $('welcSkip').addEventListener('click',done);
+  document.addEventListener('keydown',function esc(e){
+    if(e.key==='Escape' && $('welc').classList.contains('on')){ done();
+      document.removeEventListener('keydown',esc); } });
+})();
+
+
 /* ================= WATCHTOWER ================= */
 /* Every URL below was checked and loading as of Aug 14, 2026. */
 const WATCH_ITEMS=[
@@ -3158,7 +3208,7 @@ const DT={
      paper:'Do you want a paper ticket?',
      yes:'YES \u2014 PRINT IT', yesSub:'Ready at the window on your way out',
      no:'NO \u2014 PHONE ONLY', noSub:'Saved to your loadbook',
-     done:'You\u2019re checked in', doneP:'Pull onto the scale. The office already knows who you are.',
+     done:'You\u2019re checked in', doneP:'Pull forward to the dumping station. The office already knows who you are.',
      again:'Check in another truck', btn:'ES'},
  es:{sub:'B\u00e1scula 01 \u00b7 Registro', who:'\u00bfQu\u00e9 est\u00e1 entregando?',
      jobs:[['LSB-4471','Lone Star Beverage \u00b7 destrucci\u00f3n'],
@@ -3167,7 +3217,7 @@ const DT={
      paper:'\u00bfQuiere boleto impreso?',
      yes:'S\u00cd \u2014 IMPR\u00cdMALO', yesSub:'Listo en la ventanilla al salir',
      no:'NO \u2014 SOLO EN EL TEL\u00c9FONO', noSub:'Guardado en su libreta',
-     done:'Registrado', doneP:'Suba a la b\u00e1scula. La oficina ya sabe qui\u00e9n es.',
+     done:'Registrado', doneP:'Pase adelante a la zona de descarga. La oficina ya sabe qui\u00e9n es.',
      again:'Registrar otro cami\u00f3n', btn:'EN'}
 };
 let DLANG=(navigator.language||'en').toLowerCase().indexOf('es')===0?'es':'en';
