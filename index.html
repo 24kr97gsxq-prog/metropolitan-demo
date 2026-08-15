@@ -3046,11 +3046,12 @@ function goTour(i){
     box.classList.add('tour-focus');
     const target=document.querySelector(st.scrollSel)||box;
     setTimeout(()=>{
-      /* uniform rule: every step lands at the TOP of its subject —
-         title first, then the viewer scrolls down for the rest */
+      /* uniform rule: every step lands at the TOP of its subject.
+         scroll-margin gives breathing room INSIDE the one scroll —
+         a second scroll call would cancel the first on iOS. */
       try{
+        target.style.scrollMarginTop='84px';
         target.scrollIntoView({block:'start', behavior:'smooth'});
-        setTimeout(()=>{ try{window.scrollBy({top:-76,behavior:'smooth'})}catch(e){} },80);
       }catch(e){ try{target.scrollIntoView()}catch(e2){} }
     },120);
   }
