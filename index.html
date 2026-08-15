@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{if(Math.min(screen.width,screen.height)<=500)document.documentElement.classList.add('force-phone')}catch(e){}</script>
 <title>Metropolitan Recycling — Certified Destruction</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -620,6 +621,57 @@ button:active,.opt:active,.pick:active,.drv-opt:active,.win-btn:active,.plan-pic
 transform:scale(.97);transition:transform .06s}
 @media (prefers-reduced-motion:reduce){
 button:active,.opt:active,.pick:active,.drv-opt:active,.win-btn:active,.plan-pick:active{transform:none}}
+
+/* ---- physical-phone override: defeats Request Desktop Website ---- */
+html.force-phone nav{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;
+      scrollbar-width:none;padding-bottom:2px}
+html.force-phone nav::-webkit-scrollbar{display:none}
+html.force-phone nav button{font-size:12px;padding:12px 11px;white-space:nowrap;flex:0 0 auto}
+html.force-phone .mast{padding-top:16px;margin-bottom:20px}
+html.force-phone .mast-in{flex-direction:column;align-items:flex-start;gap:10px}
+html.force-phone .tourbtn{font-size:10.5px;padding:11px 12px}
+html.force-phone .mini-seg button{padding:9px 10px}
+html.force-phone h1{font-size:clamp(23px,7.5vw,28px)}
+html.force-phone .lede{font-size:15px}
+html.force-phone section{margin-bottom:30px}
+html.force-phone .card{padding:14px 12px}
+html.force-phone .kpis{grid-template-columns:repeat(2,1fr)}
+html.force-phone .kpi .n{font-size:21px}
+html.force-phone .indicator{padding:12px 10px}
+html.force-phone .lcd{padding:12px 10px;gap:8px}
+html.force-phone .annun{font-size:9px;gap:4px}
+html.force-phone .controls{gap:8px}
+html.force-phone .controls button, html.force-phone .controls .ghost-btn{flex:1 1 46%;padding:13px 8px;font-size:13.5px}
+html.force-phone .netpill{flex:1 1 100%;justify-content:center}
+html.force-phone .scroll table{min-width:560px}
+html.force-phone #rateTable, html.force-phone #setlTable, html.force-phone #leedTix{min-width:640px}
+html.force-phone .screens{gap:14px}
+html.force-phone .total-bar{flex-direction:column;align-items:flex-start}
+html.force-phone .total-bar .tb-p{font-size:26px}
+html.force-phone .sub-btn{width:100%}
+html.force-phone .plan-grid{grid-template-columns:1fr}
+html.force-phone .sign{padding:18px;gap:18px}
+html.force-phone .sign-qr svg{width:150px;height:150px}
+html.force-phone .sign-t .sh{font-size:22px}
+html.force-phone .steps3{grid-template-columns:1fr}
+html.force-phone .eq-detail{grid-template-columns:repeat(2,1fr)}
+html.force-phone .tourbar{padding:10px 14px}
+html.force-phone .tour-say{font-size:13px}
+html.force-phone .tourbar button{padding:8px 11px;font-size:12px}
+html.force-phone body.touring{padding-bottom:118px}
+html.force-phone .welc-card{padding:24px 20px}
+html.force-phone .pbody{padding:14px 10px}
+html.force-phone .win-btn{padding:9px 10px}
+html.force-phone .sub-btn{width:100%}
+
+/* ---- width clamp: no element may widen the page ---- */
+html,body{max-width:100%;overflow-x:clip}
+@supports not (overflow-x:clip){html,body{overflow-x:hidden}}
+img,svg,video{max-width:100%}
+/* ---- ?debug badge ---- */
+#dbgBadge{position:fixed;left:8px;bottom:8px;z-index:999;background:#7A2E2E;color:#FFF;
+font-family:'IBM Plex Mono',monospace;font-size:10px;line-height:1.5;padding:8px 10px;
+border-radius:4px;max-width:88vw;word-break:break-all;opacity:.95}
 </style>
 </head>
 <body>
@@ -3011,6 +3063,39 @@ document.addEventListener('keydown',e=>{
 
 renderCustody();renderSel();updateRun();renderReports();renderSetup();renderOpen();
 renderTrade();renderCont();renderAuto();paintNet();
+
+/* ================= ?debug WIDTH DIAGNOSTIC ================= */
+(function(){
+  try{ if(!new URLSearchParams(location.search).has('debug')) return }catch(e){ return }
+  const b=document.createElement('div'); b.id='dbgBadge'; document.body.appendChild(b);
+  function scan(){
+    const vw=document.documentElement.clientWidth;
+    const dw=document.documentElement.scrollWidth;
+    let out='view '+vw+'px · doc '+dw+'px';
+    if(dw>vw+2){
+      const bad=[];
+      document.querySelectorAll('body *').forEach(el=>{
+        const r=el.getBoundingClientRect();
+        if(r.width>vw+2 || r.right>vw+20){
+          bad.push({el,w:Math.round(r.width),r:Math.round(r.right)});
+        }
+      });
+      bad.sort((a,b2)=>b2.w-a.w);
+      out+=' — OVERFLOW:';
+      bad.slice(0,3).forEach(x=>{
+        const e=x.el;
+        out+='\n'+e.tagName.toLowerCase()+(e.id?'#'+e.id:'')+
+          (e.className&&typeof e.className==='string'?'.'+e.className.split(' ')[0]:'')+
+          ' w='+x.w+' right='+x.r;
+      });
+    } else out+=' — no overflow';
+    b.textContent=out;
+  }
+  scan();
+  setInterval(scan,1500);
+  document.addEventListener('click',()=>setTimeout(scan,600),true);
+})();
+
 
 /* ================= KPI COUNT-UP =================
    Numbers tick to their value the first time a tab shows them.
