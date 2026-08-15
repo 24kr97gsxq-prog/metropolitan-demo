@@ -3008,8 +3008,8 @@ $('netBtn').addEventListener('click',()=>{
 
 /* ================= GUIDED TOUR ================= */
 const TOUR=[
- {t:'scale',sel:'.controls',say:'Watch — a truck is landing on the scale right now. Nobody walks out to it, and the weight is captured before anyone knows whose load it is.',act:()=>{const b=$('mainBtn');if(b&&!b.disabled&&/arrives/i.test(b.textContent))b.click();}},
- {t:'scale',sel:'.sign',say:'A sign at the scale, and that code is real — point a phone at it. No app, no clipboard, no walking outside.'},
+ {t:'scale',sel:'.sign',say:'It starts here — a sign posted at the scale. The driver scans it with his own phone while he sits on the deck. That code is real: point your phone at it. No app, no clipboard, no walking outside.'},
+ {t:'scale',sel:'.controls',say:'And watch — a truck is landing on the scale right now. Nobody walks out to it, and the weight is captured before anyone knows whose load it is.',act:()=>{const b=$('mainBtn');if(b&&!b.disabled&&/arrives/i.test(b.textContent))b.click();}},
  {t:'scale',sel:'.screens',say:'The office is alerted the moment the weight settles. The driver checks himself in from his own phone, or the office assigns it from a chair.'},
  {t:'scale',sel:'#netPill',say:'The internet just got cut — by this tour. The capture laptop in your office keeps working and syncs when the line comes back. Everything else here is just a website, viewable from anywhere.',act:()=>{const t=$('netTxt');if(t&&/online/i.test(t.textContent)){$('netBtn').click();return ()=>{const t2=$('netTxt');if(t2&&/offline/i.test(t2.textContent))$('netBtn').click();}}}},
  {t:'custody',sel:'#custodyTable',say:'The receipt lands on the yard and the clock starts. This is the client\u2019s product sitting on your ground, and the ageing column is what they will ask about.'},
@@ -3044,7 +3044,11 @@ function goTour(i){
   if(el){
     const box=el.closest('.card')||el;
     box.classList.add('tour-focus');
-    try{box.scrollIntoView({block:'center',behavior:'smooth'})}catch(e){}
+    try{
+      const tall = box.getBoundingClientRect().height > window.innerHeight*0.55;
+      box.scrollIntoView({block: tall?'start':'center', behavior:'smooth'});
+      if(tall) setTimeout(()=>{ try{window.scrollBy({top:-64,behavior:'smooth'})}catch(e){} },80);
+    }catch(e){ try{box.scrollIntoView()}catch(e2){} }
   }
 }
 function startTour(){
