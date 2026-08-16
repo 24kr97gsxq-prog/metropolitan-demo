@@ -1,12 +1,18 @@
 # DIVERTSCAN — MASTER TO-DO (priority-ordered)
 
-**Last updated: Thursday, August 13, 2026 (late).** Replaces the July 7 version.
+**Last updated: Saturday, August 15, 2026.** Replaces the July 7 version.
 Update the date whenever you change something.
 
 **TWO TRACKS, ONE LIST.** Product work is ordered by risk to a running system.
 Commercial work is ordered by Mark's calendar. They are kept apart on purpose —
 nothing that could disrupt live capture gets bumped up the queue for a sales
 reason. Items that block the deal are tagged **[BLOCKS DEAL]**.
+
+**Demo status: FEATURE-FROZEN as of Aug 15.** 14 tabs, 16-step self-driving tour,
+driver deep link (#driver), EN/ES, day/night, phone-hardened, embedded one-pager /
+driver sign / sample XLSX. Full receive→destroy→certificate flow closes visually.
+Only bug fixes until Metropolitan responds. Judge only at the live URL in Safari
+(publish → kill tab → fresh load); never from the Claude preview pane.
 
 **System status:** Fully operational. Pi captures + syncs. Client portal login
 working. Admin client management + login log via passphrase-gated RPCs. Pi health
@@ -29,8 +35,12 @@ These were housekeeping while it was only DalMex data. The moment Metropolitan's
 weights are in play they are negligence. Nothing else on this list matters until
 these are done.
 
-- [ ] **Back up `scale_capture.py` + `scale_capture.service` to GitHub.
-      STILL NOT DONE — has been top of this list since July.** [BLOCKS DEAL]
+- [ ] **Make repo `24kr97gsxq-prog/Metro` PRIVATE** — verified publicly readable
+      Aug 15 (raw fetch, no auth). It names DalMex + Metropolitan + DivertScan in
+      one file. Settings → Danger Zone → Change visibility. Then move TODO,
+      Rollout, both contract drafts there. Default private, publish deliberately.
+- [ ] **Back up `scale_capture.py` + `scale_capture.service` to that private repo.
+      STILL NOT DONE — top of this list since July.** [BLOCKS DEAL]
       Only copy is the Pi's SD card, which has died before. You cannot sell a
       product whose capture code exists in one place on hardware that has already
       failed. Termius SFTP → iPad Files → GitHub upload. One evening.
@@ -165,6 +175,10 @@ hauler approval table.
 # TRACK 2 — COMMERCIAL
 
 ## 🤝 METROPOLITAN — the deal
+- [ ] **This weekend:** George in-person demo (dress rehearsal — collect notes,
+      patch Sunday, never live). **Monday 8–10am:** send the held email to Mark,
+      Greg, Haniya — RETYPE real @metropolitanrecycling.com addresses; last
+      draft autocompleted wrong xrayce.com contacts. Fresh-load the URL first.
 - [ ] **Publish the current demo.** Repo `metropolitan-demo`, `index.html`,
       pencil → select all → paste → commit. The live copy was Aug 6 and is missing
       half the app.
@@ -224,6 +238,43 @@ product destruction + diversion reporting for operators too small for enterprise
 procurement.
 
 ---
+
+
+## 🗺️ DFW PIPELINE (mapped Aug 14) — who to sell to after Metropolitan
+
+**Capacity rule first:** clone-per-customer means a realistic ceiling of 5–8 sites
+until there's help. So: only two clone types — (A) destruction-recycler like
+Metropolitan, (B) LEED C&D like DalMex — and only inside driving distance of a
+commissioning. Everything else is pipeline, not pursuit.
+
+**Ring 1 — sellable with Scale House, same pitch:**
+- [ ] **Pull the TCEQ NOI recycling-facility list** (30 TAC 328 registry — public
+      record, already linked in Watchtower). Filter to DFW. That's the cold-call
+      list, and the opener is free: *"the Dec 31 operating-status report — the
+      system files that for you."*
+- [ ] **Pull the i-SIGMA member directory filtered to Texas** — destruction shops
+      already selling certificates they produce in Word.
+- [ ] C&D recyclers serving LEED GCs — the DalMex clone, busiest construction
+      market in the country.
+
+**Ring 2 — minor product stretch:** pallet recyclers (per-unit tickets — pricing
+row already exists), demolition contractors (generator-side diversion reports),
+reverse-logistics / returns processors along the I-35W corridor (brand-protection
+certificates ARE the sale), organics/compost intake.
+
+**Ring 3 — channels, not customers:**
+- [ ] **Ask Metropolitan's scale service company for a referral relationship** —
+      the dealer who seals their ZM305 stands in every scale house in the region
+      on a maintenance cycle. Highest-leverage contact on this list. (You need
+      their written comms config anyway — same conversation.)
+- [ ] LEED consultants — one who prefers your report format pulls facilities in.
+- [ ] NCTCOG materials-management program + STAR (State of Texas Alliance for
+      Recycling) — vendor directories and rooms full of buyers.
+
+**Ring 4 — deliberate NOs (revisit at customer ~10):** municipal/transfer stations
+(procurement wants SOC 2 + a bench; bus factor disqualifies today), metal scrap
+yards (ReMatter/ScrapRight own theft-compliance — per the Aug 13 scan, don't
+fight it), enterprise haulers/MRFs (cieTrade's turf, six-month procurement).
 
 ## 📓 DALMEX MONEY ITEMS FOUND AUG 13 (operational, not code)
 Evidence base for the Trading tier. Act on these regardless of what gets built.
