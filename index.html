@@ -3018,11 +3018,51 @@ $('netBtn').addEventListener('click',()=>{
 });
 
 /* ================= GUIDED TOUR ================= */
+/* Several steps act on UI that only exists a beat later - the scale animation
+   runs about 2.3 seconds, and the office pickers do not exist until it lands.
+   Polling instead of firing once is the whole fix: the old version clicked
+   into thin air and the step silently did nothing.
+   Keep trying while the tour is open and the person has not gone BACK past this
+   step. Racing forward is fine - actions still complete in order, because each
+   target only appears once the previous one has finished. Give up after ~12s;
+   if a giveUp element is supplied, fire that so nothing is left stranded. */
+function tourDo(getEl,then,giveUp){
+  const at=tIdx; let n=0;
+  (function go(){
+    if(!tOn||tIdx<at) return;
+    let el=null; try{ el=getEl() }catch(e){}
+    if(el && !el.disabled){ el.click();
+      if(then) setTimeout(()=>{ if(tOn&&tIdx>=at) then() },260);
+      return; }
+    if(++n<80) setTimeout(go,150);
+    else if(giveUp){ try{ const g=giveUp(); if(g&&!g.disabled) g.click() }catch(e){} }
+  })();
+}
 const TOUR=[
- {t:'scale',sel:'.sign',scrollSel:'.sign-qr',say:'It starts here — a sign posted at the scale. The driver scans it with his own phone while he sits on the deck. That code is real: point your phone at it. No app, no clipboard, no walking outside.'},
- {t:'scale',sel:'.controls',say:'And watch — a truck is landing on the scale right now. Nobody walks out to it, and the weight is captured before anyone knows whose load it is.',act:()=>{const b=$('mainBtn');if(b&&!b.disabled&&/arrives/i.test(b.textContent))b.click();}},
- {t:'scale',sel:'.screens',say:'The office is alerted the moment the weight settles. The driver checks himself in from his own phone, or the office assigns it from a chair.'},
- {t:'scale',sel:'#netPill',say:'The internet just got cut — by this tour. The capture laptop in your office keeps working and syncs when the line comes back. Everything else here is just a website, viewable from anywhere.',act:()=>{const t=$('netTxt');if(t&&/online/i.test(t.textContent)){$('netBtn').click();return ()=>{const t2=$('netTxt');if(t2&&/offline/i.test(t2.textContent))$('netBtn').click();}}}},
+ {t:'scale',sel:'.sign',scrollSel:'.sign-qr',say:'It starts here \u2014 a sign posted at the scale. The driver scans it with his own phone while he sits on the deck. That code is real: point your phone at it. No app, no clipboard, no walking outside.'},
+ {t:'scale',sel:'.controls',say:'And watch \u2014 a truck is landing on the scale right now. Nobody walks out to it, and the weight is captured and sealed before anyone knows whose load it is.',
+  act:()=>{tourDo(()=>{const b=$('mainBtn');
+    return (state==='idle'&&b&&/arrives/i.test(b.textContent))?b:null})}},
+ {t:'scale',sel:'.screens',say:'The office is alerted the moment it settles \u2014 and the driver is picking his own job on his own phone, from the cab. Watch the office screen update before he has his window down.',
+  act:()=>{tourDo(()=>document.querySelector('#phBody .opt[data-m]'))}},
+ {t:'scale',sel:'.screens',say:'One question, in his language: does he want paper? He says yes, the ticket goes to the printer at your office window, and the load is on the yard. Nobody walked outside and nobody typed a number.',
+  act:()=>{tourDo(()=>$('yesP'))}},
+ {t:'scale',sel:'#netPill',say:'Now the internet gets cut \u2014 by this tour. The capture laptop in your scale office does not care. Weigh a truck anyway: capture is local, so nothing stops.',
+  act:()=>{tourDo(()=>{const n=$('netTxt');
+    return (n&&/online/i.test(n.textContent))?$('netBtn'):null})}},
+ {t:'scale',sel:'.screens',say:'And there it is \u2014 landed, assigned from the office chair this time, held on the laptop. The pill says one ticket waiting. The yard never paused, and nobody had to be told the line was down.',
+  act:()=>{tourDo(()=>{const b=$('mainBtn');
+      return (state==='idle'&&b&&/arrives/i.test(b.textContent))?b:null},
+    ()=>tourDo(()=>document.querySelector('#loadList .pick[data-m]')))}},
+ {t:'scale',sel:'#netPill',say:'Line is back. Watch the pill \u2014 what the laptop was holding syncs itself and clears. Nobody rekeys a ticket. Nobody even has to remember it happened.',
+  act:()=>{tourDo(()=>{const n=$('netTxt');
+      return (QUEUED>0&&n&&/offline/i.test(n.textContent))?$('netBtn'):null},null,
+    ()=>{const n=$('netTxt');return (n&&/offline/i.test(n.textContent))?$('netBtn'):null})}},
+ {t:'scale',sel:'.screens',say:'Now the empty comes back to the scale. The tare is captured and sealed first \u2014 then a person says which load it belongs to. Never matched on weight, never on timing. That is the whole custody argument, in one tap.',
+  act:()=>{tourDo(()=>{const b=$('outBtn');
+      return (state==='idle'&&OPEN.length&&b&&/returns/i.test(b.textContent))?b:null},
+    ()=>tourDo(()=>document.querySelector('#loadList .pick[data-match]')))}},
+ {t:'scale',sel:'#receiptZone',say:'And the ticket writes itself \u2014 gross, tare, net, tare source, who confirmed it. These same sealed weights follow the load all the way to the certificate, and nothing about them can be retyped.'},
  {t:'custody',sel:'#custodyTable',say:'The receipt lands on the yard and the clock starts. This is the client\u2019s product sitting on your ground, and the ageing column is what they will ask about.'},
  {t:'destroy',sel:'#tab-destroy .card',say:'Several receipts get destroyed together as one run. Photographs are taken and sealed at the moment of capture.'},
  {t:'cert',sel:'#tab-cert section',say:'The certificate covers the run, names every receipt inside it, and can be checked by anyone holding it without calling you.'},
