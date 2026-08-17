@@ -638,7 +638,7 @@ line-height:1.65;margin-top:7px}
    so they breathe out of sync -- a page throbbing in unison reads as broken,
    not inviting. */
 .try{animation:signpulse 2s ease-out infinite}
-body.touring .try{animation:none}
+body.touring .try:not(.try-live){animation:none}
 @media print{.try{animation:none}}
 @media (prefers-reduced-motion:reduce){
  .try{animation:none;box-shadow:0 0 0 3px rgba(107,232,150,.5)}}
@@ -4416,7 +4416,11 @@ const TRY_SPEC=[
  ['#printAll','printall'],['#pdfBtn2','planspdf']
 ];
 const TRY_USED=new Set();
-const TRY_MAX=6;
+const TRY_MAX_GROUPS=5;
+/* The only things allowed to pulse mid-tour: the moments where the system is
+   actually waiting on a person. A six-option list is one decision, so it lights
+   as one -- capping by element would light half a list and look like a fault. */
+const TRY_INTOUR=new Set(['pick','opt']);
 
 /* An element counts as reachable if it is outside every tab (the masthead) or
    inside the one currently showing. */
@@ -4437,27 +4441,34 @@ function tryVisible(el){
 }
 function markTry(){
   document.querySelectorAll('.try').forEach(e=>{
-    e.classList.remove('try'); e.style.animationDelay='';
+    e.classList.remove('try'); e.classList.remove('try-live'); e.style.animationDelay='';
   });
-  if(document.body.classList.contains('touring')) return;
   if($('drv') && $('drv').classList.contains('on')) return;
   if($('welc') && $('welc').classList.contains('on')) return;
+  const touring=document.body.classList.contains('touring');
   /* Cap it. A dozen things throbbing at once is noise, not an invitation --
      so take them in TRY_SPEC order, which is priority order, and let the next
      one light up only as earlier ones get used. The demo leads rather than
      shouts. */
-  const queue=[];
-  TRY_SPEC.forEach(spec=>{
-    if(TRY_USED.has(spec[1])) return;
+  const groups=[]; let n=0;
+  for(let k=0;k<TRY_SPEC.length && n<TRY_MAX_GROUPS;k++){
+    const spec=TRY_SPEC[k];
+    if(TRY_USED.has(spec[1])) continue;
+    if(touring && !TRY_INTOUR.has(spec[1])) continue;
+    const els=[];
     document.querySelectorAll(spec[0]).forEach(el=>{
-      if(el.disabled) return;
-      if(!tryVisible(el)) return;
-      queue.push(el);
+      if(!el.disabled && tryVisible(el)) els.push(el);
     });
-  });
-  queue.slice(0,TRY_MAX).forEach((el,i)=>{
-    el.classList.add('try');
-    el.style.animationDelay=((i % 5) * 0.45).toFixed(2)+'s';
+    if(!els.length) continue;
+    groups.push(spec[1]); n++;
+    els.forEach(el=>{
+      el.classList.add('try');
+      if(TRY_INTOUR.has(spec[1])) el.classList.add('try-live');
+    });
+  }
+  let i=0;
+  document.querySelectorAll('.try').forEach(el=>{
+    el.style.animationDelay=((i++ % 5) * 0.45).toFixed(2)+'s';
   });
 }
 /* Capture phase: record the press before a handler re-renders the element away. */
@@ -4486,6 +4497,7 @@ try{
     clearTimeout(tryTimer); tryTimer=setTimeout(markTry,120);
   }).observe(document.body,{childList:true,subtree:true});
 }catch(e){}
+document.addEventListener('keydown',()=>{ setTimeout(markTry,140) },true);
 setTimeout(markTry,600);
 
 </script>
