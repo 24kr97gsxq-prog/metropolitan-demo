@@ -360,6 +360,22 @@ border:1.5px solid var(--concrete-dk);border-radius:var(--r);background:var(--pa
 .roi-f input:focus{outline:2px solid var(--oxblood);outline-offset:1px}
 #roiTable td.money{font-family:'IBM Plex Mono';font-weight:600;text-align:right;white-space:nowrap}
 #roiTable .how{font-size:11.5px;color:var(--steel-lt);margin-top:2px}
+/* ---- SMS module ---- */
+.sms-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px 18px;margin-bottom:14px}
+.sms-bub{background:var(--panel-dk);color:var(--on-dk);border-radius:14px 14px 14px 4px;
+padding:11px 14px;font-size:13px;line-height:1.5;max-width:52ch;margin-bottom:9px}
+/* ---- connections grid ---- */
+.conn-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:1px;
+background:var(--concrete-dk);border:1px solid var(--concrete-dk);border-radius:var(--r);overflow:hidden}
+.conn{background:var(--paper);padding:15px 16px}
+.conn-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:7px}
+.conn-top b{font-family:'Archivo';font-weight:700;font-size:14.5px;letter-spacing:-.01em}
+.conn p{font-size:12.5px;color:var(--steel);line-height:1.55;margin-bottom:9px}
+.conn .tag.off{color:var(--steel-lt)}
+.conn-rows div{font-family:'IBM Plex Mono';font-size:10.5px;line-height:1.5;padding:6px 0;
+border-bottom:1px dashed var(--concrete-dk)}
+.conn-rows div span{display:block;color:var(--steel-lt)}
+.conn-note{font-family:'IBM Plex Mono';font-size:10.5px;color:var(--steel);margin-top:7px;line-height:1.5}
 /* ---- hand-scanner input on the destruction tab (keyboard-wedge scanners) ---- */
 .scan-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:14px 0 6px}
 .scan-ic{font-size:17px;letter-spacing:1px;color:var(--steel);line-height:1}
@@ -1370,6 +1386,19 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
         </div>
 
         <div class="card" style="margin-bottom:14px">
+          <div class="rpt-head"><div class="screen-label" style="margin:0">Open invoice
+            <span id="pInvSt" class="tag amber" style="margin-left:8px">Due Aug 18</span></div>
+            <div class="rpt-tools"><button class="ghost-btn" id="pPayBtn">Pay by ACH &middot; $1,862.40</button></div></div>
+          <div style="font-family:'IBM Plex Mono';font-size:12px;color:var(--steel);margin-bottom:10px">
+            INV-7742 &middot; Net 15 &middot; certified destruction, 3 receipts &middot; every line points
+            back to its weight ticket</div>
+          <div id="pPayTrail" style="display:none"></div>
+          <div class="of-note" style="text-align:left">Card and bank details go to the processor
+            directly and never touch this system. Demonstration &mdash; this payment is simulated;
+            production runs on Stripe ACH.</div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
           <div class="rpt-head"><div class="screen-label" style="margin:0">Your certificates of destruction</div>
             <div class="rpt-tools"><button data-csv="pCertTable" data-name="my_certificates">CSV</button></div></div>
           <div class="scroll"><table id="pCertTable"></table></div>
@@ -1688,6 +1717,32 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
   <p class="lede">None of these are clever. They are all things the system already holds the data for,
   which somebody is still doing manually from a stack of tickets.</p>
 
+  <div class="card">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Text alerts
+      <span class="tag amber" style="margin-left:8px">Module &middot; $75 / mo</span></div></div>
+    <p style="font-size:14px;color:var(--steel);line-height:1.6;margin-bottom:12px">This industry runs
+    on texts, not dashboards. Each event below fires an SMS the moment it happens &mdash; and every
+    text it sends is a phone call nobody has to answer.</p>
+    <div class="sms-grid">
+      <label class="tog"><input type="checkbox" checked aria-label="Certificate ready alert"><i></i>
+        <span>Certificate ready &rarr; the client</span></label>
+      <label class="tog"><input type="checkbox" checked aria-label="Container full alert"><i></i>
+        <span>Container reported full &rarr; dispatch</span></label>
+      <label class="tog"><input type="checkbox" checked aria-label="Truck inbound alert"><i></i>
+        <span>Truck 20 min out &rarr; scale house</span></label>
+      <label class="tog"><input type="checkbox" aria-label="COI expiring alert"><i></i>
+        <span>Hauler COI expiring &rarr; office</span></label>
+    </div>
+    <div class="sms-demo">
+      <div class="sms-bub">Metropolitan: Certificate MR-2026-4417 has issued for your Jul 18&ndash;24
+        receipts &mdash; view or download: mr.link/c/4417. No reply needed.</div>
+      <div class="sms-bub">Metropolitan: OT-1108 at Garland reported full. Pull scheduled Thu &mdash;
+        reply CHANGE to move it.</div>
+    </div>
+    <div class="of-note" style="text-align:left">Demonstration &mdash; production sends through
+    Twilio; delivery is logged against the load or certificate it refers to.</div>
+  </div>
+
   <div class="auto-item">
     <h3>Draft invoices from tickets<span class="saved">biggest time saver</span></h3>
     <p>Every ticket already carries the account, material, tonnage and rate. Month end produces
@@ -1895,7 +1950,7 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
       <div class="kpi"><div class="n" id="roiMonth">&mdash;</div><div class="l">saved / month</div></div>
       <div class="kpi"><div class="n" id="roiYear">&mdash;</div><div class="l">saved / year</div></div>
       <div class="kpi"><div class="n" id="roiHours">&mdash;</div><div class="l">office hours back / month</div></div>
-      <div class="kpi warn"><div class="n" id="roiPay">&mdash;</div><div class="l">vs Full Chain at $950 / mo</div></div>
+      <div class="kpi warn"><div class="n" id="roiPay">&mdash;</div><div class="l">vs Trading tier at $1,250 / mo</div></div>
     </div>
     <div class="of-note" style="text-align:left" id="roiNote"></div>
     <div class="of-note" style="text-align:left;margin-top:8px">What is NOT in this total: recovered
@@ -1916,10 +1971,10 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
 
   <div class="plan-grid" id="planGrid">
 
-    <div class="plan co" data-tier="scale" data-price="350">
+    <div class="plan co" data-tier="scale" data-price="450">
       <div class="plan-top">
         <div class="plan-name">Scale House</div>
-        <div class="plan-price" data-p>$350<span>/month</span></div>
+        <div class="plan-price" data-p>$450<span>/month</span></div>
         <div class="plan-was" data-was></div>
       </div>
       <ul>
@@ -1935,10 +1990,10 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
       <button class="plan-pick">Choose</button>
     </div>
 
-    <div class="plan cn" data-tier="ops" data-price="650">
+    <div class="plan cn" data-tier="ops" data-price="700">
       <div class="plan-top">
         <div class="plan-name">Operations</div>
-        <div class="plan-price" data-p>$650<span>/month</span></div>
+        <div class="plan-price" data-p>$700<span>/month</span></div>
         <div class="plan-was" data-was></div>
       </div>
       <ul>
@@ -1954,10 +2009,10 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
       <button class="plan-pick">Choose</button>
     </div>
 
-    <div class="plan tr" data-tier="trade" data-price="950">
+    <div class="plan tr" data-tier="trade" data-price="1250">
       <div class="plan-top">
         <div class="plan-name">Trading</div>
-        <div class="plan-price" data-p>$950<span>/month</span></div>
+        <div class="plan-price" data-p>$1,250<span>/month</span></div>
         <div class="plan-was" data-was></div>
       </div>
       <ul>
@@ -2024,14 +2079,46 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
   <div class="card">
     <div class="screen-label">One time, at the start</div>
     <p style="font-size:14.5px;color:var(--steel);line-height:1.6;margin-bottom:10px">
-    <b style="font-family:'Archivo';font-size:19px;letter-spacing:-.02em;color:var(--ink)">$2,500
-    per site.</b> Wiring the indicator, the capture laptop in your scale office, the ticket printer, setting up
-    drivers, importing your client, material and contract lists, and training the people who will
-    use it. Payable on commissioning, not on signature.</p>
-    <div class="of-note" style="text-align:left">The hardware that reads the scale is a
-    laptop in the office next to the scale. It keeps capturing when the internet does not — and
-    everything else (dashboard, certificates, client portal) is just a website, viewable from any
-    computer, anywhere.</div>
+    <b style="font-family:'Archivo';font-size:19px;letter-spacing:-.02em;color:var(--ink)">$2,500&ndash;$7,500
+    per site,</b> depending on scale count and hardware. Wiring the indicator, the capture laptop,
+    the ticket printer, setting up drivers, importing your client, material and contract lists, and
+    training the people who will use it. Payable on commissioning, not on signature &mdash; free
+    setup trains customers to leave, so this is never waived, only earned back.</p>
+    <div class="scroll"><table id="hwTable">
+      <tr><th>Hardware kit</th><th>What it does</th><th class="r">Installed</th></tr>
+      <tr><td style="font-weight:600">Scale bridge</td><td style="color:var(--steel)">Serial-to-network
+        adapter on the indicator's RS-232 port &mdash; weights land without a keystroke</td>
+        <td class="mono r">$450</td></tr>
+      <tr><td style="font-weight:600">Rugged tablet, tipping floor</td><td style="color:var(--steel)">Glove-friendly,
+        drop-rated &mdash; the contamination camera and AI read live here</td><td class="mono r">$700</td></tr>
+      <tr><td style="font-weight:600">Bluetooth hand scanner</td><td style="color:var(--steel)">Scans
+        receipt QRs into destruction runs and gate check-ins</td><td class="mono r">$180</td></tr>
+      <tr><td style="font-weight:600">Gate camera (ALPR), optional</td><td style="color:var(--steel)">Reads
+        the plate before the driver even scans</td><td class="mono r">$1,100</td></tr>
+    </table></div>
+    <div class="of-note" style="text-align:left">The capture laptop keeps recording when the internet
+    does not &mdash; everything else is a website, viewable anywhere.</div>
+  </div>
+
+  <div class="card">
+    <div class="screen-label">Revenue add-ons &middot; priced separately on purpose</div>
+    <div class="scroll"><table id="addonTable">
+      <tr><th>Add-on</th><th>Who pays &middot; why</th><th class="r">Price</th></tr>
+      <tr><td style="font-weight:600">Text alerts (SMS)</td><td style="color:var(--steel)">Cert ready,
+        container full, truck inbound, COI expiring &mdash; yards run on texts</td>
+        <td class="mono r">$75 / mo</td></tr>
+      <tr><td style="font-weight:600">Portal payments</td><td style="color:var(--steel)">Clients pay
+        invoices by ACH or card inside the portal &mdash; you clip the flow</td>
+        <td class="mono r">0.8% + processor</td></tr>
+      <tr><td style="font-weight:600">LEED documentation package</td><td style="color:var(--steel)">Sold
+        to the GC per project, not to the yard &mdash; the audit-ready pack you already generate</td>
+        <td class="mono r">$350 / project</td></tr>
+      <tr><td style="font-weight:600">White-label portal</td><td style="color:var(--steel)">A broker's
+        logo on the client portal, your engine underneath</td><td class="mono r">$250 / mo</td></tr>
+    </table></div>
+    <div class="of-note" style="text-align:left"><b>Design partners:</b> the first three yards get
+    year one at half rate, locked in writing, in exchange for a case study, reference calls, and
+    patience with rough edges. After three, the offer closes.</div>
   </div>
 </section>
 </div>
@@ -2098,6 +2185,82 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
     Stripe pays out net of fees, in batches — so one deposit almost never equals one invoice.
     Every invoice here keeps its ticket numbers attached, which is what lets a payout be matched
     back to the loads that earned it.</div>
+  </div>
+
+  <div class="card">
+    <div class="screen-label">Connections &middot; how the outside world reaches this system</div>
+    <div class="conn-grid">
+      <div class="conn">
+        <div class="conn-top"><b>QuickBooks Online</b><span class="tag amber">Stubbed in demo</span></div>
+        <p>Two-way: invoices out, payments back. Wave is built in today; QBO is the one that closes
+        deals, and it slots into the same export layer.</p>
+        <button class="ghost-btn" id="qboBtn">Connect QuickBooks</button>
+        <div class="conn-note" id="qboNote"></div>
+      </div>
+      <div class="conn">
+        <div class="conn-top"><b>Email-in remittance</b><span class="tag">Live in demo</span></div>
+        <p>Mills email remittance PDFs. Forward them to
+        <span class="mono" style="font-size:11px">remit@metropolitan.divertscan.com</span> and the OCR
+        runs itself &mdash; matched, posted, reconciled while nobody is looking.</p>
+        <button class="ghost-btn" id="emailSimBtn">Simulate an inbound email</button>
+        <div class="conn-note" id="emailNote"></div>
+      </div>
+      <div class="conn">
+        <div class="conn-top"><b>SFTP drops</b><span class="tag">Live in demo</span></div>
+        <p>Old-school and exactly what conservative accounts want: tickets pushed nightly to the
+        generator's server, settlement files pulled from the mill's.</p>
+        <div class="conn-rows">
+          <div>PUSH &middot; tickets.csv &rarr; sftp.trinityfoods.com <span>nightly 11:30 PM &middot; last run OK</span></div>
+          <div>PULL &middot; settlements &larr; sftp.northgatefiber.com <span>daily 6:00 AM &middot; last run OK</span></div>
+        </div>
+        <button class="ghost-btn" id="sftpBtn" style="margin-top:9px">Preview tonight's file</button>
+      </div>
+      <div class="conn">
+        <div class="conn-top"><b>Gate camera &middot; ALPR</b><span class="tag">Live in demo</span></div>
+        <p>Reads the plate before the driver even scans &mdash; the truck is identified while it is
+        still rolling onto the deck. Try it: turn it on, then run a truck on the Scale house tab.</p>
+        <button class="ghost-btn" id="alprBtn">Turn gate camera on</button>
+      </div>
+      <div class="conn">
+        <div class="conn-top"><b>Container GPS</b><span class="tag">Partly live</span></div>
+        <p>Cheap LTE trackers webhook their position in &mdash; 2 of 5 units reporting today. The
+        rest show last manual log, which is why OT-1142 pulses red on the map.</p>
+      </div>
+      <div class="conn">
+        <div class="conn-top"><b>Bank feed &middot; Plaid</b><span class="tag off">Planned</span></div>
+        <p>Deposits match themselves against settlements and the Wave/QBO ledger &mdash; the
+        reconciliation CSV you export today, with the export step removed.</p>
+      </div>
+      <div class="conn">
+        <div class="conn-top"><b>Webhooks / Zapier</b><span class="tag">Live in demo</span></div>
+        <p>One-off customer requests should not each become a build.
+        <span class="mono" style="font-size:11px">POST hooks.divertscan.com/metro/&hellip;</span></p>
+        <div class="conn-rows">
+          <div>cert.issued &rarr; client's Teams channel <span>3 sent today</span></div>
+          <div>load.flagged &rarr; owner's phone <span>1 sent today</span></div>
+          <div>request.raised &rarr; dispatch board <span>2 sent today</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Compliance vault &middot; hauler
+      insurance</div><div class="rpt-tools"><button data-csv="coiTable" data-name="hauler_coi">CSV</button></div></div>
+    <div class="scroll"><table id="coiTable">
+      <tr><th>Hauler</th><th>COI on file</th><th class="r">Expires</th><th class="r">Days</th><th class="r">Status</th></tr>
+      <tr><td>Trinity Hauling LLC</td><td class="mono">COI-2026-118</td><td class="mono r">Nov 12</td>
+        <td class="mono r">88</td><td class="r"><span class="tag">Current</span></td></tr>
+      <tr><td>Redbird Transport</td><td class="mono">COI-2026-042</td><td class="mono r">Aug 25</td>
+        <td class="mono r" style="color:var(--oxblood);font-weight:600">9</td>
+        <td class="r"><span class="tag amber">Expiring &mdash; alert sent</span></td></tr>
+      <tr><td>Wylie Freight Co.</td><td class="mono">COI-2025-201</td><td class="mono r">Jul 30</td>
+        <td class="mono r" style="color:var(--oxblood);font-weight:600">&minus;16</td>
+        <td class="r"><span class="tag red">Expired &mdash; do not dispatch</span></td></tr>
+    </table></div>
+    <div class="of-note" style="text-align:left">An uninsured hauler on your yard is your problem the
+    moment something happens. Expiry alerts go out at 30, 14 and 7 days &mdash; by email, or by text
+    with the SMS module &mdash; and an expired COI blocks that hauler from the dispatch board.</div>
   </div>
 
   <div class="card">
@@ -2628,7 +2791,9 @@ async function capIn(){
      '<div class="load-job">'+refLabel(l.ref)+'</div>'+
      '<span class="tag">On the yard since '+l.inAt+'</span></div>').join('');
   wirePickers('.pick','Office · '+CLERK);
-  $('ofNote').textContent='Weight recorded and sealed before anyone identifies it';
+  $('ofNote').textContent=window.ALPR_ON
+    ? 'Plate '+VEH+' read by the gate camera (98.9%) while the truck was still rolling \u2014 weight recorded and sealed before anyone identifies the load'
+    : 'Weight recorded and sealed before anyone identifies it';
   $('phVeh').textContent=VEH+' · '+comma(GROSS)+' lb';
   $('phBody').innerHTML='<div class="ph-prompt">'+t('what')+'</div>'+
     JOBS.map((j,i)=>'<button class="opt" data-j="'+i+'"><b>'+j.wo+'</b><span>'+j.client+'</span></button>').join('')+
@@ -3480,6 +3645,10 @@ const FLAGS=[
   act:'Schedule a pull or retrieve it',lvl:'red'},
  {what:'Trailer out 28 days',ref:'TR-091 \u00b7 Wylie Freight',
   act:'Chase it \u2014 that is your equipment',lvl:'red'},
+ {what:'Hauler insurance expiring in 9 days',ref:'Redbird Transport \u00b7 COI-2026-042',
+  act:'Request the updated certificate before it lapses',lvl:'amber'},
+ {what:'Hauler insurance EXPIRED',ref:'Wylie Freight Co. \u00b7 lapsed Jul 30',
+  act:'Blocked from dispatch until a current COI is on file',lvl:'red'},
  {what:'Mill paid on 560 lb less than our scale',ref:'BOL-2208 \u00b7 Cedar Metals',
   act:'Query the settlement',lvl:'amber'},
  {what:'Release number on the invoice does not match the BOL',ref:'BOL-293324 \u00b7 one digit adrift',
@@ -3905,6 +4074,43 @@ function renderQual(reprint){
   e.addEventListener('change',()=>renderQual());
 });
 
+/* ================= CONNECTIONS: QBO stub / email-in / SFTP / ALPR ================= */
+if($('qboBtn')) $('qboBtn').addEventListener('click',()=>{
+  $('qboNote').textContent='Demo build \u2014 the OAuth handshake is stubbed here. In production this '+
+    'opens Intuit sign-in and syncs invoices out, payments back, on the same layer the Wave exports use.';
+});
+let emailPosted=false;
+if($('emailSimBtn')) $('emailSimBtn').addEventListener('click',()=>{
+  const n=$('emailNote');
+  n.textContent='Inbound: \u201cRemittance 4133.pdf\u201d from ap@rioverde\u2026 \u00b7 OCR running';
+  setTimeout(()=>{
+    if(!emailPosted){ emailPosted=true;
+      const now=new Date();
+      const d=String(now.getMonth()+1).padStart(2,'0')+'/'+
+              String(now.getDate()).padStart(2,'0')+'/'+now.getFullYear();
+      PAYMENTS.unshift({ref:'Remittance 4133',buyer:'Rio Verde Recycling',got:2204.80,applied:2204.80,d:d,
+        note:'Arrived by email \u00b7 OCR \u00b7 matched on release numbers',lvl:''});
+      renderTrade();
+    }
+    n.textContent='Parsed \u00b7 Rio Verde \u00b7 $2,204.80 \u00b7 matched on releases \u00b7 posted to '+
+      'payments and the Wave reconciliation. Check the Trading tab \u2014 it is already there.';
+  },1400);
+});
+if($('sftpBtn')) $('sftpBtn').addEventListener('click',()=>{
+  const stamp=new Date().toISOString().slice(0,10).replace(/-/g,'');
+  const rows=[['Ticket','Date','Time','Vehicle','Reference','Type','Net lb']];
+  TICKETS.forEach(x=>rows.push([x.id,x.date,x.time,x.veh,x.ref,x.type,x.net]));
+  download('metropolitan_sftp_tickets_'+stamp+'.csv',csv(rows));
+  const b=$('sftpBtn'); b.textContent='Saved \u2014 this exact file lands on their server tonight';
+  setTimeout(()=>{b.textContent='Preview tonight\u2019s file'},2600);
+});
+window.ALPR_ON=false;
+if($('alprBtn')) $('alprBtn').addEventListener('click',()=>{
+  window.ALPR_ON=!window.ALPR_ON;
+  $('alprBtn').textContent=window.ALPR_ON?'Gate camera ON \u2014 run a truck on the Scale house tab'
+                                         :'Turn gate camera on';
+});
+
 /* ================= WHY THIS PAYS: features -> benefit -> dollars =================
    Deliberately conservative per-unit assumptions, shown right in the table so a
    skeptic can argue with each one instead of dismissing the total:
@@ -3959,7 +4165,7 @@ function roiCalc(){
   $('roiMonth').textContent=money(mo);
   $('roiYear').textContent=money(mo*12);
   $('roiHours').textContent=hrs.toFixed(0)+' h';
-  const ratio=mo/950;
+  const ratio=mo/1250;
   $('roiPay').textContent=ratio>=1?ratio.toFixed(1)+'\u00d7':Math.round(ratio*100)+'%';
   $('roiNote').textContent = ratio>=1
     ? 'At these numbers the top tier pays for itself '+ratio.toFixed(1)+
@@ -4079,7 +4285,7 @@ const TOUR=[
   say:'Before the price, the arithmetic. Three numbers about your yard \u2014 trucks a day, calls the portal prevents, what an office hour costs \u2014 and every feature turns into hours back and dollars saved, with the per-unit assumption printed next to each line so a skeptic can argue with the inputs instead of the total.',
   rev:'At a typical 35-truck yard the saved labor alone covers the top tier several times over \u2014 and the recoveries and deductions come on top.'},
  {t:'plans',sel:'#planGrid',
-  say:'Priced by what you turn on. Core is the scale and the certificates; everything you just saw making money \u2014 tipping floor, portal, trading, rebates, containers \u2014 are modules you add when you want them.'}
+  say:'Priced by what you turn on \u2014 core is the scale and the certificates, the rest are modules. One-time setup wires the scale and pays for the hardware kit, and the add-ons \u2014 texts, portal payments, LEED packs sold to the GC \u2014 are where the yard makes money back on top.'}
 ];
 let tIdx=0, tOn=false;
 function clearFocus(){document.querySelectorAll('.tour-focus').forEach(e=>e.classList.remove('tour-focus'))}
@@ -4746,6 +4952,27 @@ $('pOut').addEventListener('click',()=>{
   $('pApp').style.display='none'; $('pLogin').style.display='';
 });
 $('pPass').addEventListener('keydown',e=>{if(e.key==='Enter')$('pGo').click()});
+/* ---- portal payment (simulated ACH): the client pays without calling anyone ---- */
+let payBusy=false, payDone=false;
+if($('pPayBtn')) $('pPayBtn').addEventListener('click',()=>{
+  if(payBusy||payDone) return; payBusy=true;
+  const tr=$('pPayTrail'); tr.style.display='';
+  const t0=hm(new Date());
+  tr.innerHTML=trailRow('Sent '+t0,'ACH authorization for $1,862.40 \u00b7 INV-7742','now');
+  $('pPayBtn').textContent='Authorizing\u2026';
+  setTimeout(()=>{
+    tr.innerHTML=trailRow('Sent '+t0,'ACH authorization for $1,862.40 \u00b7 INV-7742','done')+
+      trailRow('Authorized','Bank confirmed \u00b7 reference PAY-88214','now');
+  },900);
+  setTimeout(()=>{
+    tr.innerHTML=trailRow('Sent '+t0,'ACH authorization for $1,862.40 \u00b7 INV-7742','done')+
+      trailRow('Authorized','Bank confirmed \u00b7 reference PAY-88214','done')+
+      trailRow('Posted','Applied to INV-7742 and written to the Wave reconciliation \u2014 nobody at the yard touched it','done');
+    $('pInvSt').textContent='Paid'; $('pInvSt').classList.remove('amber');
+    $('pPayBtn').textContent='Paid \u2713'; $('pPayBtn').disabled=true;
+    payBusy=false; payDone=true;
+  },2000);
+});
 let reqBusy=false;
 function trailRow(label,detail,state){
   return '<div style="display:flex;gap:10px;align-items:baseline;padding:9px 12px;'+
