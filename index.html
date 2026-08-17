@@ -30,7 +30,8 @@ font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
 letter-spacing:.16em;text-transform:uppercase;color:var(--steel);margin-top:5px}
 .mast-meta{font-family:'IBM Plex Mono';font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
 color:var(--steel);text-align:right}
-nav{display:flex;gap:0;flex-wrap:wrap;margin-bottom:-1.5px}
+nav{display:flex;gap:0;flex-wrap:wrap;margin-bottom:-1.5px;align-items:stretch}
+.nav-div{flex:0 0 1px;width:1px;align-self:center;height:16px;background:var(--concrete-dk);margin:0 6px}
 nav button{background:none;border:none;border-bottom:3px solid transparent;color:var(--steel);
 font-family:'IBM Plex Mono';font-size:10.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;
 padding:10px 15px;border-radius:0}
@@ -844,20 +845,24 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
       <button class="tourbtn" id="pdfBtn" style="background:var(--oxblood)">⤓ One-pager (PDF)</button>
     </div>
   </div>
-  <nav>
+  <nav aria-label="Sections, grouped by stage">
     <button class="on" data-t="scale">Scale house</button>
     <button data-t="tip">Tipping floor</button>
+    <span class="nav-div" aria-hidden="true"></span>
     <button data-t="custody">In custody</button>
     <button data-t="destroy">Destruction</button>
     <button data-t="cert">Certificates</button>
+    <span class="nav-div" aria-hidden="true"></span>
     <button data-t="portal">Client portal</button>
     <button data-t="disp">Dispatch</button>
+    <span class="nav-div" aria-hidden="true"></span>
     <button data-t="trade">Trading</button>
     <button data-t="reb">Rebates</button>
     <button data-t="cont">Containers</button>
     <button data-t="auto">Automations</button>
     <button data-t="watch">Watchtower</button>
     <button data-t="reports">Reports</button>
+    <span class="nav-div" aria-hidden="true"></span>
     <button data-t="plans">Plans</button>
     <button data-t="setup">Setup</button>
   </nav>
@@ -1387,7 +1392,8 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
 
         <div class="card" style="margin-bottom:14px">
           <div class="rpt-head"><div class="screen-label" style="margin:0">Open invoice
-            <span id="pInvSt" class="tag amber" style="margin-left:8px">Due Aug 18</span></div>
+            <span id="pInvSt" class="tag amber" style="margin-left:8px">Due Aug 18</span>
+            <span class="tag" style="margin-left:6px">Simulated</span></div>
             <div class="rpt-tools"><button class="ghost-btn" id="pPayBtn">Pay by ACH &middot; $1,862.40</button></div></div>
           <div style="font-family:'IBM Plex Mono';font-size:12px;color:var(--steel);margin-bottom:10px">
             INV-7742 &middot; Net 15 &middot; certified destruction, 3 receipts &middot; every line points
@@ -1533,7 +1539,8 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
   </div>
 
   <div class="card">
-    <div class="rpt-head"><div class="screen-label" style="margin:0">Remittance OCR · photograph it, never type it</div>
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Remittance OCR · photograph it, never type it
+      <span class="tag amber" style="margin-left:8px">Simulated</span></div>
       <div class="rpt-tools"><button id="ocrBtn">Scan remittance advice</button></div></div>
     <div id="ocrStage" style="display:none;margin-bottom:10px"></div>
     <div class="of-note" style="text-align:left">Photograph the mill's remittance PDF or the bank's
@@ -2293,8 +2300,10 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
 <div class="welc" id="welc" role="dialog" aria-modal="true" aria-label="Welcome">
   <div class="welc-card">
     <h2>Two minutes, guided.</h2>
-    <p>This is a working demo of a scale house that runs itself — truck on the scale through
-    to a certificate anyone can verify. Easiest way in is the walkthrough. It drives, you watch.</p>
+    <p>A scale house that runs itself — truck on the scale through to a certificate anyone can
+    verify. At a typical 35-truck yard that is <b style="color:var(--phosphor)">about 100 office
+    hours and $2,800 back every month</b>, before a single recovered settlement. The walkthrough
+    proves it: it drives, you watch, and every slide shows where the money is.</p>
     <button class="welc-go" id="welcGo">▶ Show me how it works</button>
     <button class="welc-skip" id="welcSkip">I'll look around on my own</button>
   </div>
