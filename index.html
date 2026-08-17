@@ -323,6 +323,15 @@ text-transform:uppercase;color:var(--phosphor);margin-bottom:3px}
 .tour-say{font-size:14.5px;line-height:1.45;color:#E9E7E2}
 .tour-rev{display:none;font-family:'IBM Plex Mono';font-size:11px;font-weight:600;letter-spacing:.05em;line-height:1.6;color:var(--phosphor);margin-top:7px}
 .tour-rev::before{content:'$ WHERE THE MONEY IS \2014  ';color:var(--phosphor);opacity:.75}
+/* ---- hand-scanner input on the destruction tab (keyboard-wedge scanners) ---- */
+.scan-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:14px 0 6px}
+.scan-ic{font-size:17px;letter-spacing:1px;color:var(--steel);line-height:1}
+.scan-row input{flex:1;min-width:210px;font-family:'IBM Plex Mono';font-size:14px;padding:11px 12px;
+border:1.5px solid var(--concrete-dk);border-radius:var(--r);background:var(--paper);color:var(--ink)}
+.scan-row input:focus{outline:2px solid var(--oxblood);outline-offset:1px}
+.scan-note{flex-basis:100%;font-size:12px;color:var(--steel-lt);line-height:1.55}
+#runClient{font-family:'IBM Plex Mono';font-size:11px;padding:7px 9px;border:1.5px solid var(--concrete-dk);
+border-radius:var(--r);background:var(--paper);color:var(--ink);max-width:280px}
 .tour-nav{display:flex;gap:7px;flex:0 0 auto}
 .tourbar button{font-size:13px;padding:8px 14px;border-radius:var(--r);border:1.5px solid #6E7A86;
 background:transparent;color:var(--on-dk);font-family:'Public Sans';cursor:pointer}
@@ -1052,10 +1061,21 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
   usually get destroyed together, and the certificate covers all of them.</p>
 
   <div class="card">
-    <div class="screen-label">Lone Star Beverage Co. · receipts on hand</div>
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Receipts on hand</div>
+      <div class="rpt-tools"><select id="runClient" aria-label="Client for this run"></select></div></div>
+    <div class="scan-row">
+      <span class="scan-ic" aria-hidden="true">&#9612;&#9615;&#9612;&#9613;&#9615;&#9612;</span>
+      <input id="scanIn" type="text" placeholder="Scan a receipt ticket &mdash; or type WT-8902 and press Enter"
+        autocomplete="off" autocapitalize="characters" aria-label="Scan or type a receipt ticket number">
+      <span class="scan-note">Any Bluetooth or USB hand scanner works here &mdash; it types like a keyboard.
+      Scan the QR on a printed receipt and that load joins the run. Wrong client? It switches for you.
+      Already destroyed? It tells you which certificate covered it.</span>
+    </div>
+    <div id="scanMsg" class="of-note" style="display:none;text-align:left"></div>
     <div id="selList"></div>
     <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
       <button id="runBtn" disabled>Record destruction</button>
+      <button id="restockBtn" class="ghost-btn" style="display:none">Restock sample receipts (demo)</button>
       <span class="hint" id="selHint">Select at least one receipt</span>
     </div>
   </div>
@@ -1067,6 +1087,8 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
       <div class="kpi"><div class="n" id="rLoads">—</div><div class="l">receipts covered</div></div>
       <div class="kpi"><div class="n" id="rPhotos">0</div><div class="l">photos sealed</div></div>
     </div>
+    <div class="screen-label" style="margin-top:16px">Receipts going into this run</div>
+    <div class="scroll"><table id="runManifest"></table></div>
     <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
       <button id="photoBtn" class="ghost-btn">Add destruction photo</button>
       <button id="certBtn" disabled>Issue certificate</button>
@@ -1446,7 +1468,8 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
   <div class="card">
     <div class="rpt-head"><div class="screen-label" style="margin:0">Money in · what arrived against what it was for</div>
       <div class="rpt-tools"><button data-print="payTable">Print</button>
-      <button data-csv="payTable" data-name="payments_applied">CSV</button></div></div>
+      <button data-csv="payTable" data-name="payments_applied">CSV</button>
+      <button data-x="wavepay">Wave CSV</button></div></div>
     <div class="scroll"><table id="payTable"></table></div>
     <div class="of-note" style="text-align:left">Buyers pay in batches covering several releases, so no
     deposit ever equals a load. Matching on the reference is the only thing that works — and it is
@@ -1509,7 +1532,8 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
   <div class="card">
     <div class="rpt-head"><div class="screen-label" style="margin:0">This month's rebate run</div>
       <div class="rpt-tools"><button data-print="rebTable">Print</button>
-      <button data-csv="rebTable" data-name="rebate_run">CSV</button></div></div>
+      <button data-csv="rebTable" data-name="rebate_run">CSV</button>
+      <button data-x="wavereb">Wave CSV</button></div></div>
     <div class="scroll"><table id="rebTable"></table></div>
     <div class="of-note" style="text-align:left">Every line traces back to weighed loads. A rebate
     statement a customer can argue with is a rebate statement you will end up discounting.</div>
@@ -1978,11 +2002,18 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
     Rates and books stay in Wave where your bookkeeper already works.</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="ghost-btn" data-x="qb">Wave invoice sheet</button>
+      <button class="ghost-btn" data-x="waverec">Wave reconciliation CSV</button>
       <button class="ghost-btn" data-x="tickets">Weight tickets CSV</button>
       <button class="ghost-btn" data-x="ship">Shipments CSV</button>
       <button class="ghost-btn" data-x="certs">Certificates CSV</button>
     </div>
     <div class="of-note" style="text-align:left" id="xNote">Downloads a real file — open it and look.</div>
+    <div class="of-note" style="text-align:left;margin-top:8px">The reconciliation CSV is Wave's
+    transactions layout — Date, Description, one signed Amount column — so it uploads under
+    Accounting &rsaquo; Transactions against your bank account. Mill settlements come in positive,
+    generator rebates go out negative, every line carrying its remittance or account reference.
+    Match it against the bank feed and the deposit that never arrived, or the rebate check that
+    cleared for the wrong amount, has nowhere to hide.</div>
     <div class="of-note" style="text-align:left;margin-top:8px">Taking card and ACH through Stripe?
     Stripe pays out net of fees, in batches — so one deposit almost never equals one invoice.
     Every invoice here keeps its ticket numbers attached, which is what lets a payout be matched
@@ -2066,6 +2097,9 @@ let CUSTODY=[
  {id:'WT-8902',date:'Jul 31',days:5, client:'Trinity Foods Group',  wo:'TRF-2210',net:54120,veh:'TX 8RM-4417',rel:'TRF-R-0912'},
  {id:'WT-8915',date:'Aug 3', days:2, client:'Panhandle Snack Brands',wo:'PSB-0885',net:29880,veh:'TX 2WQ-1180',rel:null}
 ];
+/* pristine copy so the demo can restock after a tour destroys everything */
+const CUSTODY_SEED=CUSTODY.map(r=>({...r}));
+let RUN_CLIENT='Lone Star Beverage Co.', RESTOCK_N=8920;
 const DESTROYED=[
  {client:'Lone Star Beverage Co.',recv:284600,dest:204440},
  {client:'Trinity Foods Group',recv:196800,dest:142680},
@@ -2162,8 +2196,19 @@ function renderCustody(){
 
 /* ---- destruction selection ---- */
 function renderSel(){
-  const mine=CUSTODY.filter(r=>r.client==='Lone Star Beverage Co.');
-  if(!mine.length){$('selList').innerHTML='<div class="empty">Nothing on hand for this client</div>';return}
+  /* one client at a time, but any client — the picker shows on-hand counts live */
+  const cs=$('runClient');
+  if(cs){
+    const counts={}; CUSTODY.forEach(r=>{counts[r.client]=(counts[r.client]||0)+1});
+    const names=CLIENTS.filter(c=>c.type==='Destruction').map(c=>c.name);
+    if(!names.includes(RUN_CLIENT)) RUN_CLIENT=names[0];
+    cs.innerHTML=names.map(c=>'<option value="'+c+'"'+(c===RUN_CLIENT?' selected':'')+'>'+
+      c+' \u00b7 '+(counts[c]||0)+' on hand</option>').join('');
+  }
+  const mine=CUSTODY.filter(r=>r.client===RUN_CLIENT);
+  const rb=$('restockBtn'); if(rb) rb.style.display=mine.length?'none':'inline-block';
+  if(!mine.length){$('selList').innerHTML='<div class="empty">Nothing on hand for this client \u2014 '+
+    'the demo destroyed them. Restock below, or pick another client above.</div>';return}
   $('selList').innerHTML=mine.map(r=>
     '<div class="sel'+(picked.has(r.id)?' picked':'')+'" data-id="'+r.id+'" tabindex="0" role="checkbox" '+
     'aria-checked="'+picked.has(r.id)+'"><div class="box">'+(picked.has(r.id)?'✓':'')+'</div>'+
@@ -2200,7 +2245,55 @@ $('runBtn').addEventListener('click',()=>{
   $('runCard').style.display='block';
   $('rWeight').textContent=comma(runData.lb);
   $('rLoads').textContent=sel.length;
+  $('runManifest').innerHTML='<tr><th>Ticket</th><th>Received</th><th class="r">Days held</th>'+
+    '<th>Vehicle</th><th>Client release</th><th class="r">Net lb</th></tr>'+
+    sel.map(r=>'<tr><td class="mono">'+r.id+'</td><td class="mono">'+r.date+'</td>'+
+      '<td class="mono r">'+r.days+'</td><td class="mono">'+r.veh+'</td>'+
+      '<td class="mono">'+(r.rel||'<span style="color:var(--oxblood)">none \u2014 flagged</span>')+'</td>'+
+      '<td class="mono r">'+comma(r.net)+'</td></tr>').join('')+
+    '<tr class="total"><td colspan="5">Total going into this run</td><td class="mono r">'+
+    comma(runData.lb)+'</td></tr>';
   if(camFree()) $('runCard').scrollIntoView({block:'center'});
+});
+$('runClient').addEventListener('change',e=>{
+  RUN_CLIENT=e.target.value; picked.clear(); renderSel(); updateRun();
+});
+$('restockBtn').addEventListener('click',()=>{
+  /* demo only: bring back this client's sample receipts under fresh ticket numbers */
+  const fresh=CUSTODY_SEED.filter(x=>x.client===RUN_CLIENT).map(x=>({...x,id:'WT-'+(++RESTOCK_N)}));
+  CUSTODY=CUSTODY.concat(fresh);
+  renderCustody(); renderSel(); updateRun();
+});
+/* ---- hand scanner: any keyboard-wedge (Bluetooth/USB) scanner types here and sends Enter ---- */
+function scanFlash(msg,bad){
+  const m=$('scanMsg'); if(!m) return;
+  m.style.display='block'; m.style.color=bad?'var(--oxblood)':'var(--ink)'; m.textContent=msg;
+  clearTimeout(window._scanT); window._scanT=setTimeout(()=>{m.style.display='none'},4200);
+}
+$('scanIn').addEventListener('keydown',e=>{
+  if(e.key!=='Enter') return;
+  e.preventDefault();
+  const raw=$('scanIn').value.trim(); $('scanIn').value='';
+  if(!raw) return;
+  /* scanners often send a whole QR payload — pull the ticket pattern out of it */
+  const hit=raw.toUpperCase().match(/(WT|BOL)-\d+/);
+  const id=hit?hit[0]:raw.toUpperCase();
+  const r=CUSTODY.find(x=>x.id.toUpperCase()===id);
+  if(r){
+    if(r.client!==RUN_CLIENT){ RUN_CLIENT=r.client; picked.clear(); }
+    if(recHeld(r)){ renderSel(); updateRun();
+      scanFlash(id+' is inside the CBP notice period \u2014 it cannot join a run yet.',true);
+    } else {
+      picked.add(r.id); renderSel(); updateRun();
+      scanFlash(id+' added to the run \u2014 '+comma(r.net)+' lb, '+r.client+'.');
+    }
+  } else {
+    const cert=REGISTER.find(c=>c.status!=='Voided'&&c.tks&&c.tks.includes(id));
+    scanFlash(cert
+      ? id+' was already destroyed \u2014 covered by certificate '+cert.id+' on '+cert.date+'.'
+      : 'No open receipt '+id+' on the yard \u2014 already destroyed, or not a receipt ticket.',true);
+  }
+  $('scanIn').focus();
 });
 $('photoBtn').addEventListener('click',()=>{
   runPhotos++;$('rPhotos').textContent=runPhotos;
@@ -2214,7 +2307,7 @@ $('certBtn').addEventListener('click',issueCert);
 async function issueCert(){
   const now=new Date(),sel=runData.sel,lb=runData.lb;
   certId='MR-2026-'+String(Math.floor(Math.random()*8000)+1000);
-  const j=JOBS[0];job=j;
+  const j=JOBS.find(x=>x.client===sel[0].client)||JOBS[0];job=j;
   certHash=await sha256(now.toISOString()+lb+sel.map(r=>r.id).join()+j.wo);
   $('certNo').textContent=certId;
   $('certDate').textContent=md(now);
@@ -2246,7 +2339,7 @@ async function issueCert(){
   $('certEmpty').style.display='none';$('certWrap').style.display='block';
 
   CUSTODY=CUSTODY.filter(r=>!picked.has(r.id));
-  REGISTER.unshift({id:certId,date:md(now),client:j.client,lb:lb,loads:sel.length,status:'Valid',coverage:coverage});
+  REGISTER.unshift({id:certId,date:md(now),client:j.client,lb:lb,loads:sel.length,status:'Valid',coverage:coverage,tks:sel.map(r=>r.id)});
   picked.clear();runPhotos=0;runData=null;
   $('runCard').style.display='none';$('rPhotos').textContent='0';$('certBtn').disabled=true;
   /* the payoff: jump to the certificate that just issued */
@@ -2907,6 +3000,27 @@ document.querySelectorAll('[data-x]').forEach(b=>b.addEventListener('click',()=>
     name='metropolitan_shipments.csv';
     rows=[['BOL','Date','Release','Destination','Material','Tare source','Net lb','Tons','Rate per ton','Value']];
     SHIPMENTS.forEach(x=>rows.push([x.id,x.date,x.rel||'',x.dest,x.mat,x.tare,x.net,(x.net/2000).toFixed(2),(x.rate||0).toFixed(2),(x.net/2000*(x.rate||0)).toFixed(2)]));
+  }else if(k==='wavepay'||k==='wavereb'||k==='waverec'){
+    /* Wave TRANSACTIONS upload format for reconciliation: exactly Date, Description, Amount.
+       MM/DD/YYYY, one signed amount column (money in positive, money out negative),
+       plain-text descriptions. Upload in Wave under Accounting > Transactions > Upload,
+       against the bank account the deposits and rebate checks actually clear through —
+       then every line here matches (or exposes) a line on the bank feed. */
+    const IDX_D={'Oct 2025':'10/31/2025','Dec 2025':'12/31/2025','Feb 2026':'02/28/2026',
+                 'Mar 2026':'03/31/2026','Jun 2026':'06/30/2026'};
+    const clean=t=>t.replace(/[",#&*\u00b7]/g,' ').replace(/\s+/g,' ').trim();
+    rows=[['Date','Description','Amount']];
+    if(k!=='wavereb') PAYMENTS.forEach(p=>rows.push([p.d,
+      clean(p.buyer+' '+p.ref+' fiber settlement received'),p.got.toFixed(2)]));
+    if(k!=='wavepay'){
+      const m=IDX_MONTHS[idxAt], dd=IDX_D[m]||IDX_D['Jun 2026'];
+      TERMS.forEach(t=>{const r=rebRate(t,m);
+        rows.push([dd,clean('Generator rebate '+m+' '+t.who+' '+t.g+' '+
+          t.tons.toFixed(1)+' ST at '+r.toFixed(2)+' per ST'),(-(r*t.tons)).toFixed(2)]);});
+    }
+    name = k==='wavepay' ? 'metropolitan_wave_money_in.csv'
+         : k==='wavereb' ? 'metropolitan_wave_rebates_payable.csv'
+         : 'metropolitan_wave_reconciliation.csv';
   }else{
     name='metropolitan_certificates.csv';
     rows=[['Certificate','Issued','Client','Loads','Net lb','Status','Reason','Superseded by']];
@@ -2914,7 +3028,11 @@ document.querySelectorAll('[data-x]').forEach(b=>b.addEventListener('click',()=>
       r.reason||'',r.superseded||'']));
   }
   download(name,csv(rows));
-  $('xNote').textContent=name+' downloaded — open it and look.';
+  const xn=$('xNote'); if(xn) xn.textContent=name+' downloaded — open it and look.';
+  if(!b.closest('#tab-setup')){
+    const t0=b.textContent; b.textContent='Saved';
+    setTimeout(()=>{b.textContent=t0},1400);
+  }
 }));
 $('fullX').addEventListener('click',()=>{
   download('metropolitan_full_export.json',JSON.stringify({
@@ -3054,11 +3172,11 @@ const SETTLE=[
   st:'Clean',lvl:''}
 ];
 const PAYMENTS=[
- {ref:'Remittance 4024',buyer:'Northgate Fiber',got:5441.15,applied:5005.95,
+ {ref:'Remittance 4024',buyer:'Northgate Fiber',got:5441.15,applied:5005.95,d:'08/12/2026',
   note:'Price adjustment arrived and was never applied',lvl:'red'},
- {ref:'ACH · RN 2608-01, 2608-02',buyer:'Rio Verde Recycling',got:4555.43,applied:4555.43,
+ {ref:'ACH · RN 2608-01, 2608-02',buyer:'Rio Verde Recycling',got:4555.43,applied:4555.43,d:'08/08/2026',
   note:'Matched to both releases on the addendum',lvl:''},
- {ref:'Remittance 3987',buyer:'Northgate Fiber',got:2515.05,applied:2515.05,
+ {ref:'Remittance 3987',buyer:'Northgate Fiber',got:2515.05,applied:2515.05,d:'07/31/2026',
   note:'Matched on release number',lvl:''}
 ];
 const POSITION=[
@@ -3653,9 +3771,14 @@ const TOUR=[
   say:'The receipt lands in custody and the clock starts. This is the client\u2019s product sitting on your ground \u2014 and the ageing column is the number they will ask about.',
   rev:'Ageing loads are billable storage and at-risk service promises \u2014 seen daily, not discovered at month end.'},
  {t:'destroy',sel:'#tab-destroy .card',
-  say:'Flagged, weighed, aged \u2014 now destroyed. Watch the run build itself: receipts selected, weights totalled from the sealed tickets, destruction photographed and sealed at the moment of capture.',
+  say:'Flagged, weighed, aged \u2014 now destroyed. Watch the run build itself: receipts picked by tap or by hand scanner, the manifest listing every ticket going in, weights totalled from the sealed receipts, destruction photographed and sealed at the moment of capture.',
   rev:'Certified destruction is the premium service line \u2014 this screen is what lets you charge for it.',
-  act:()=>{const pick=()=>[...document.querySelectorAll('#selList .sel:not(.picked)')].find(e=>!/hold/i.test(e.textContent))||null;
+  act:()=>{const pick=()=>{
+      const el=[...document.querySelectorAll('#selList .sel:not(.picked)')].find(e=>!/hold/i.test(e.textContent));
+      if(el) return el;
+      const rb=$('restockBtn');
+      if(rb&&rb.style.display!=='none') rb.click();  /* demo ran dry — restock and keep polling */
+      return null;};
     tourDo(pick,()=>{tourDo(pick,()=>{
       tourDo(()=>{const b=$('runBtn');return (b&&!b.disabled)?b:null},()=>{
         tourDo(()=>$('photoBtn'),()=>{tourDo(()=>$('photoBtn'))})})})})}},
