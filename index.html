@@ -378,6 +378,17 @@ min-height:48px}
 color:var(--steel-lt)}
 .bp-phase[open] summary::after{content:'\2212'}
 .bp-phase p{padding:0 14px 13px;font-size:13px;color:var(--steel);line-height:1.6;margin:0}
+/* ---- material passport ---- */
+.pp-sec{border:1px solid var(--concrete-dk);border-radius:var(--r);background:var(--paper);
+padding:11px 14px;margin-top:10px}
+.pp-hd{font-family:'IBM Plex Mono';font-size:9.5px;font-weight:600;letter-spacing:.14em;
+text-transform:uppercase;color:var(--steel);margin-bottom:7px}
+.pp-row{display:flex;justify-content:space-between;gap:14px;padding:4px 0;font-size:13px;
+border-bottom:1px dashed var(--concrete-dk)}
+.pp-row:last-child{border-bottom:none}
+.pp-row span{color:var(--steel);flex:0 0 auto}
+.pp-row b{font-weight:600;text-align:right;font-family:'IBM Plex Mono';font-size:12px;
+word-break:break-word}
 @media (prefers-reduced-motion:reduce){.tip-toast{transition:none}}
 /* ---- remittance OCR stage lines ---- */
 .ocr-line{font-family:'IBM Plex Mono';font-size:11.5px;padding:6px 0;border-bottom:1px dashed var(--concrete-dk);line-height:1.5}
@@ -1082,6 +1093,38 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
     production his phone remembers him after the first visit.</div>
   </div>
 </section>
+
+<section>
+  <div class="card">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Scale health &middot; the
+      measurement itself is auditable</div>
+      <div class="rpt-tools"><span class="tag">Scale 01 &middot; online</span></div></div>
+    <div class="bill-grid" style="margin-bottom:12px">
+      <div class="bill-cell"><div class="k">Last calibration</div>
+        <div class="v" style="font-size:14px">Jun 12, 2026</div>
+        <div class="s">Cert CAL-26-0612 on file</div></div>
+      <div class="bill-cell"><div class="k">Next due</div>
+        <div class="v" style="font-size:14px">Sep 12, 2026</div>
+        <div class="s">Reminder fires at 30 / 14 days</div></div>
+      <div class="bill-cell"><div class="k">Captures today</div>
+        <div class="v" style="font-size:14px" id="shCaptures">0</div>
+        <div class="s">Weights locked and sealed</div></div>
+      <div class="bill-cell"><div class="k">Motion rejects today</div>
+        <div class="v" style="font-size:14px">8</div>
+        <div class="s">Refused to lock while moving</div></div>
+      <div class="bill-cell"><div class="k">Comm errors</div>
+        <div class="v" style="font-size:14px">0</div>
+        <div class="s">Malformed frames logged, never sealed</div></div>
+      <div class="bill-cell"><div class="k">Heartbeat</div>
+        <div class="v" style="font-size:14px" id="shBeat">2 sec ago</div>
+        <div class="s">Scale offline is its own alarm &mdash; distinct from internet offline</div></div>
+    </div>
+    <div class="of-note" style="text-align:left">When someone challenges a certified weight, the
+    answer comes from this same record: which scale, its calibration certificate, its tolerance,
+    and the raw frames it streamed at the moment of capture. The number is defensible because the
+    instrument is.</div>
+  </div>
+</section>
 </div>
 
 <!-- ============ TIPPING FLOOR ============ -->
@@ -1203,6 +1246,23 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
 <section id="certEmpty">
   <div class="empty">No certificate issued yet.<br>Run a destruction to generate one.</div>
 </section>
+<section>
+  <div class="card" id="passportCard">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Material passport &middot; the
+      permanent identity of a load</div>
+      <div class="rpt-tools"><button data-print="ppBody">Print</button></div></div>
+    <div class="scan-row" style="margin-top:2px">
+      <span class="scan-ic" aria-hidden="true">&#9612;&#9615;&#9612;&#9613;&#9615;&#9612;</span>
+      <input id="ppScan" type="text" placeholder="Scan or type a certificate or ticket &mdash; MR-2026-3190"
+        autocomplete="off" autocapitalize="characters" aria-label="Look up a material passport">
+      <span class="scan-note">One scan answers every question a client, GC, consultant or auditor
+      will ever ask about a load &mdash; origin, sealed weights, inspection, destruction evidence,
+      money, verification. One record from arrival to proof.</span>
+    </div>
+    <div id="ppBody"></div>
+  </div>
+</section>
+
 <section id="certWrap" style="display:none">
   <div class="eyebrow">What the client receives</div>
   <div class="cert">
@@ -1841,7 +1901,7 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
   </div>
 
   <div class="card">
-    <div class="rpt-head"><div class="screen-label" style="margin:0">Flagged for attention · every loose end in the business</div>
+    <div class="rpt-head"><div class="screen-label" style="margin:0" id="flagHead">Flagged for attention · every loose end in the business</div>
       <div class="rpt-tools"><button data-print="flagTable">Print</button>
       <button data-csv="flagTable" data-name="exceptions">CSV</button></div></div>
     <div class="scroll"><table id="flagTable"></table></div>
@@ -1863,6 +1923,67 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
     on its own</span>
   </div>
 
+
+  <div class="card">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Mass balance &middot; this month
+      &mdash; the three numbers that never blur</div>
+      <div class="rpt-tools"><button data-print="massTable">Print</button>
+      <button data-csv="massTable" data-name="mass_balance">CSV</button></div></div>
+    <p style="font-size:13.5px;color:var(--steel);line-height:1.6;margin-bottom:10px"><b>Certified
+    mass</b> is what physically crossed the certified scale. <b>Commercial adjustment</b> is what
+    was agreed after inspection. <b>Disposition</b> is where the material actually went. A
+    contamination deduction changes the invoice &mdash; never the certified weight on the
+    certificate.</p>
+    <div class="scroll"><table id="massTable">
+      <tr><th>Certified mass</th><th class="r">Tons</th><th class="r">Share</th></tr>
+      <tr><td>Received across the scale</td><td class="mono r">1,284.6</td><td class="mono r">100%</td></tr>
+      <tr><td style="padding-left:18px;color:var(--steel)">Destroyed under certificate</td><td class="mono r">642.2</td><td class="mono r">50.0%</td></tr>
+      <tr><td style="padding-left:18px;color:var(--steel)">Recycled &mdash; documented downstream</td><td class="mono r">421.8</td><td class="mono r">32.8%</td></tr>
+      <tr><td style="padding-left:18px;color:var(--steel)">Reused / salvaged</td><td class="mono r">143.7</td><td class="mono r">11.2%</td></tr>
+      <tr><td style="padding-left:18px;color:var(--steel)">Landfill</td><td class="mono r">76.9</td><td class="mono r">6.0%</td></tr>
+      <tr><td style="padding-left:18px;color:var(--steel)">On hand, in custody</td><td class="mono r">0.0</td><td class="mono r">0%</td></tr>
+      <tr class="total"><td><b>UNACCOUNTED</b></td>
+        <td class="mono r" style="color:#2F6B4F;font-weight:700">0.0</td>
+        <td class="mono r" style="color:#2F6B4F;font-weight:700">0%</td></tr>
+    </table></div>
+    <div class="of-note" style="text-align:left">Received must equal destroyed plus recovered plus
+    landfill plus on-hand. The day UNACCOUNTED is not zero it screams &mdash; that is material
+    somebody weighed in that nobody can explain.</div>
+    <div class="kpis" style="margin-top:14px">
+      <div class="kpi"><div class="n">$184,220</div><div class="l">material value</div></div>
+      <div class="kpi warn"><div class="n">&minus;$12,840</div><div class="l">commercial adjustments</div></div>
+      <div class="kpi"><div class="n">$171,380</div><div class="l">customer settlements</div></div>
+      <div class="kpi"><div class="n" style="color:#2F6B4F">$0</div><div class="l">unbilled</div></div>
+    </div>
+    <div class="of-note" style="text-align:left">Adjustments trace to sealed contamination reports;
+    settlements trace to sealed weights. Unbilled at zero means every ton that left has an
+    invoice.</div>
+  </div>
+
+  <div class="card">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">LEED documentation readiness
+      &middot; Meridian Pediatric Tower</div>
+      <div class="rpt-tools"><span class="tag" style="border-color:#2F6B4F;color:#2F6B4F">96% &middot;
+      14 of 15 evidence items</span></div></div>
+    <p style="font-size:13.5px;color:var(--steel);line-height:1.6;margin-bottom:10px">This is not a
+    report &mdash; it is whether the report will <b>survive</b>. Every number the GC submits traces
+    to a scale ticket, a disposition record and its evidence, checked continuously instead of
+    discovered at submission. USGBC decides the credit; this decides whether the file is ready.</p>
+    <div class="scroll"><table id="leedEvTable">
+      <tr><th>Evidence item</th><th class="r">Status</th></tr>
+      <tr><td>Total C&amp;D waste generated &middot; from scale tickets</td><td class="mono r" style="color:#2F6B4F">&#10003;</td></tr>
+      <tr><td>Material breakdown by stream</td><td class="mono r" style="color:#2F6B4F">&#10003;</td></tr>
+      <tr><td>Diversion calculation &middot; formula shown</td><td class="mono r" style="color:#2F6B4F">&#10003;</td></tr>
+      <tr><td>Scale tickets attached, sealed</td><td class="mono r" style="color:#2F6B4F">&#10003;</td></tr>
+      <tr><td>Facility + hauler documentation</td><td class="mono r" style="color:#2F6B4F">&#10003;</td></tr>
+      <tr><td>Disposition evidence + photos</td><td class="mono r" style="color:#2F6B4F">&#10003;</td></tr>
+      <tr><td>Reporting period boundaries</td><td class="mono r" style="color:#2F6B4F">&#10003;</td></tr>
+      <tr class="total"><td style="color:var(--oxblood)"><b>&#9888; Receiving documentation missing
+        for 4.2 tons of mixed C&amp;D</b> &mdash; one gap could hold up a clean submission.
+        Chase the receiving facility now, not in the submission week.</td>
+        <td class="mono r" style="color:var(--oxblood)">OPEN</td></tr>
+    </table></div>
+  </div>
 
   <div class="card" id="leedCard">
     <div class="rpt-head"><div class="screen-label" style="margin:0">Sample monthly diversion report · what the GC's LEED consultant receives</div>
@@ -2400,7 +2521,7 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
 </section>
 </div>
 
-<footer><span>Metropolitan Recycling · Dallas TX</span><span>DivertScan <span style="opacity:.55;font-size:.9em" title="Deployed build">· build v3.7 — Aug 17</span></span></footer>
+<footer><span>Metropolitan Recycling · Dallas TX</span><span>DivertScan <span style="opacity:.55;font-size:.9em" title="Deployed build">· build v3.8 — Aug 17</span></span></footer>
 </div>
 
 
@@ -2573,6 +2694,9 @@ This prompt requests PHASE 0 and PHASE 1 ONLY. Later phases will be requested on
 
 <div class="welc" id="welc" role="dialog" aria-modal="true" aria-label="Welcome">
   <div class="welc-card">
+    <div style="font-family:'IBM Plex Mono';font-size:10px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--phosphor);margin-bottom:10px">Every pound has a story
+    — and we can prove it</div>
     <h2>Two minutes, guided.</h2>
     <p>A scale house that runs itself — truck on the scale through to a certificate anyone can
     verify. At a typical 35-truck yard that is <b style="color:var(--phosphor)">about 100 office
@@ -2790,6 +2914,70 @@ $('restockBtn').addEventListener('click',()=>{
   CUSTODY=CUSTODY.concat(fresh);
   renderCustody(); renderSel(); updateRun();
 });
+/* ---- material passport: one record from arrival to proof ---- */
+function ppRow(k,v){return '<div class="pp-row"><span>'+k+'</span><b>'+v+'</b></div>'}
+function ppSec(t,rows){return '<div class="pp-sec"><div class="pp-hd">'+t+'</div>'+rows+'</div>'}
+const PP_EXEMPLAR={
+  id:'MR-2026-3190',client:'Lone Star Beverage Co.',wo:'LSB-4471',
+  mat:'Mislabeled 20 oz PET bottles',lot:'L4471-A / L4471-B',lb:112380,loads:4,date:'Jul 14'
+};
+function renderPassport(q){
+  const b=$('ppBody'); if(!b) return;
+  if(!q){ b.innerHTML='<div class="of-note" style="text-align:left;margin-top:10px">Try it: type '+
+    '<b>MR-2026-3190</b> and press Enter \u2014 or issue a certificate on this page and scan that '+
+    'one instead.</div>'; return; }
+  const id=q.toUpperCase();
+  const live=REGISTER.find(c=>c.id===id&&c.tks);           // issued this session
+  const seed=REGISTER.find(c=>c.id===id)||((id===PP_EXEMPLAR.id)?PP_EXEMPLAR:null);
+  const c=live||seed;
+  if(!c){ b.innerHTML='<div class="of-note" style="text--align:left;margin-top:10px;color:var(--oxblood)">'+
+    'No certificate or ticket '+id+' found \u2014 check the register below.</div>'; return; }
+  const isLive=!!live;
+  const j=JOBS.find(x=>x.client===c.client)||JOBS[0];
+  const flag=TIP_LOG.find(r=>!r.clean&&(isLive?(c.tks||[]).includes(r.tk):true));
+  b.innerHTML='<div id="ppSheet">'+
+   ppSec('Origin',
+     ppRow('Client',c.client)+ppRow('Work order',j.wo)+ppRow('Material',j.mat)+
+     ppRow('Lot / batch',j.lot)+ppRow('Carrier',CARRIER))+
+   ppSec('Physical record \u00b7 certified mass',
+     ppRow('Certified net',comma(c.lb||PP_EXEMPLAR.lb)+' lb')+
+     ppRow('Receipts covered',(c.loads||c.tks&&c.tks.length||4)+(c.tks?' \u2014 '+c.tks.join(', '):''))+
+     ppRow('Scale','Scale 01 \u00b7 cal CAL-26-0612 \u00b7 due Sep 12')+
+     ppRow('Captured','sealed at settle, before identification'))+
+   ppSec('Inspection \u00b7 commercial adjustment',
+     flag
+       ? ppRow('Finding',flag.type+(flag.pct?' \u00b7 '+flag.pct.toFixed(1)+'%':''))+
+         (flag.ai?ppRow('AI read',flag.ai.pct.toFixed(1)+'% \u00b1'+flag.ai.conf.toFixed(1)+
+           ' \u00b7 '+(flag.over?'spotter overrode':'spotter confirmed')+' \u00b7 model '+
+           (flag.ai.model||'demo-sim-1')):'')+
+         ppRow('Evidence',flag.photos+' photos, sealed \u00b7 '+flag.by.split(' \u00b7 ')[0]+' \u00b7 '+flag.at)+
+         ppRow('Effect','deduction on the invoice \u2014 certified weight unchanged')
+       : ppRow('Finding','Clean \u2014 inspected at the tip')+
+         ppRow('Effect','no adjustment \u00b7 certified weight stands'))+
+   ppSec('Destruction \u00b7 disposition',
+     ppRow('Method',METHOD)+ppRow('Operator',CLERK)+ppRow('Witness',WITNESS)+
+     ppRow('Evidence','before / during / after photographed and sealed')+
+     ppRow('Date',c.date||'Jul 14'))+
+   ppSec('Financial',
+     ppRow('Commodity line','settlement audited against sealed weights')+
+     ppRow('Adjustments','traced to the sealed inspection above')+
+     ppRow('Invoice','every line points to its ticket'))+
+   ppSec('Verification',
+     ppRow('Certificate',c.id)+
+     ppRow('Chain',(isLive&&certHash)?('sealed \u00b7 '+String(certHash).slice(0,24)+'\u2026'):'sealed \u00b7 verifiable by QR, no login')+
+     ppRow('Status',(c.status||'Valid')))+
+   '</div>';
+}
+if($('ppScan')){
+  renderPassport('');
+  $('ppScan').addEventListener('keydown',e=>{
+    if(e.key!=='Enter') return; e.preventDefault();
+    const raw=$('ppScan').value.trim(); $('ppScan').value='';
+    const m=raw.toUpperCase().match(/(MR-\d{4}-\d+|WT-\d+)/);
+    renderPassport(m?m[0]:raw);
+  });
+}
+
 /* ---- production build plan: carry the engineering prompt inside the demo ---- */
 function bpText(){ const el=$('bpPromptSrc'); return el?el.textContent.trim():''; }
 if($('bpCopy')) $('bpCopy').addEventListener('click',async()=>{
@@ -2914,6 +3102,7 @@ async function issueCert(){
 
   CUSTODY=CUSTODY.filter(r=>!picked.has(r.id));
   REGISTER.unshift({id:certId,date:md(now),client:j.client,lb:lb,loads:sel.length,status:'Valid',coverage:coverage,tks:sel.map(r=>r.id)});
+  renderPassport(certId);
   picked.clear();runPhotos=0;runData=null;
   $('runCard').style.display='none';$('rPhotos').textContent='0';$('certBtn').disabled=true;
   /* the payoff: jump to the certificate that just issued */
@@ -3056,8 +3245,12 @@ function settle(target,done){
       const pn2=$('phLiveN'), ps=$('phLiveS');
       if(pn2) pn2.textContent=comma(target);
       if(ps) ps.textContent=t('liveLock');
-      weighing=false; if($('dirBtn')) $('dirBtn').disabled=false; done()}},110);
+      weighing=false; if($('dirBtn')) $('dirBtn').disabled=false;
+      const sc=$('shCaptures'); if(sc) sc.textContent=(+sc.textContent||0)+1;
+      done()}},110);
 }
+/* scale heartbeat readout ticks so the card feels alive */
+setInterval(()=>{const b=$('shBeat'); if(b) b.textContent=(1+Math.floor(Math.random()*2))+' sec ago'},2000);
 
 function refLabel(r){return r.wo? r.wo+' · '+r.client : r.material}
 function isDest(r){return !!r.wo}
@@ -3998,6 +4191,10 @@ function renderAuto(){
     r[0].trim()+'</td><td class="mono r">'+r[1]+'</td>'+
     '<td class="r" style="color:var(--steel);font-size:13px">'+r[2]+'</td></tr>'}).join('');
 
+  const nRed=FLAGS.filter(f=>f.lvl==='red').length, nAmb=FLAGS.length-nRed;
+  const eh=$('flagHead'); if(eh) eh.innerHTML='EXCEPTIONS \u2014 '+FLAGS.length+
+    ' <span class="tag red" style="margin-left:8px">'+nRed+' critical</span>'+
+    ' <span class="tag amber" style="margin-left:6px">'+nAmb+' warnings</span>';
   $('flagTable').innerHTML='<tr><th>What</th><th>Which</th><th>Do this</th></tr>'+
    FLAGS.map(f=>'<tr><td><span class="tag '+f.lvl+'">'+
     (f.lvl==='red'?'attention':'watch')+'</span><div style="margin-top:5px">'+f.what+'</div></td>'+
@@ -4694,7 +4891,7 @@ const TOUR=[
   say:'Before the price, the arithmetic. Three numbers about your yard \u2014 trucks a day, calls the portal prevents, what an office hour costs \u2014 and every feature turns into hours back and dollars saved, with the per-unit assumption printed next to each line so a skeptic can argue with the inputs instead of the total.',
   rev:'At a typical 35-truck yard the saved labor alone covers the top tier several times over \u2014 and the recoveries and deductions come on top.'},
  {t:'plans',sel:'#planGrid',
-  say:'Priced by what you turn on \u2014 core is the scale and the certificates, the rest are modules. One-time setup wires the scale and pays for the hardware kit, and the add-ons \u2014 texts, portal payments, LEED packs sold to the GC \u2014 are where the yard makes money back on top.'}
+  say:'Priced by what you turn on \u2014 core is the scale and the certificates, the rest are modules. One-time setup wires the scale and pays for the hardware kit, and the add-ons \u2014 texts, portal payments, LEED packs sold to the GC \u2014 are where the yard makes money back on top. One load, one record, every downstream system updated: every pound has a story, and this is the proof.'}
 ];
 let tIdx=0, tOn=false;
 function clearFocus(){document.querySelectorAll('.tour-focus').forEach(e=>e.classList.remove('tour-focus'))}
