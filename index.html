@@ -347,6 +347,24 @@ background:var(--paper);border-radius:var(--r);padding:11px 13px;margin:10px 0;l
 text-transform:uppercase;color:var(--steel);display:block;margin-bottom:7px}
 .ai-row{display:flex;justify-content:space-between;gap:10px;font-family:'IBM Plex Mono';font-size:11.5px}
 .ai-row b{font-weight:600}
+/* ---- glove-first tipping controls ---- */
+.tip-choice{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.tip-choice .win-btn{flex:1;min-width:200px;min-height:64px;font-size:16.5px;font-weight:700;
+letter-spacing:.02em}
+.choice-clean{background:#2F6B4F!important;color:#EAF6EE!important;border-color:#2F6B4F!important}
+.choice-photo{background:var(--panel-dk)!important;color:var(--phosphor)!important}
+.cf-pct{display:flex;align-items:center;gap:8px}
+.cf-pct input{width:92px;text-align:center;font-size:20px;font-weight:600;font-family:'IBM Plex Mono'}
+.step-btn{width:56px;height:56px;flex:0 0 56px;font-size:26px;font-weight:600;line-height:1;
+border:1.5px solid var(--concrete-dk);border-radius:var(--r);background:var(--paper);color:var(--ink)}
+.step-btn:active{background:var(--concrete)}
+.tip-card.clean{border-left:4px solid #2F6B4F}
+.tip-toast{position:fixed;top:64px;left:50%;transform:translate(-50%,-8px);z-index:70;opacity:0;
+pointer-events:none;background:var(--panel-dk);color:var(--phosphor);font-family:'IBM Plex Mono';
+font-size:13.5px;font-weight:600;padding:13px 20px;border-radius:6px;box-shadow:0 6px 24px rgba(0,0,0,.35);
+transition:opacity .18s,transform .18s;max-width:90vw}
+.tip-toast.on{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){.tip-toast{transition:none}}
 /* ---- remittance OCR stage lines ---- */
 .ocr-line{font-family:'IBM Plex Mono';font-size:11.5px;padding:6px 0;border-bottom:1px dashed var(--concrete-dk);line-height:1.5}
 .ocr-line.warn{color:var(--oxblood);font-weight:600}
@@ -1069,7 +1087,15 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
   </div>
 
   <div class="card">
-    <div class="screen-label">Dumped and open &mdash; tap the load you are standing in front of</div>
+    <div class="screen-label">Dumped and open &mdash; scan the ticket, or tap the load you are standing in front of</div>
+    <div class="scan-row">
+      <span class="scan-ic" aria-hidden="true">&#9612;&#9615;&#9612;&#9613;&#9615;&#9612;</span>
+      <input id="tipScan" type="text" placeholder="Scan the receipt QR &mdash; opens that load's inspection"
+        autocomplete="off" autocapitalize="characters" aria-label="Scan or type a ticket to inspect">
+      <span class="scan-note">One scan of the printed ticket and the right load opens &mdash; no
+      picking the wrong card with gloves on. Works with any Bluetooth or USB hand scanner.</span>
+    </div>
+    <div id="tipScanMsg" class="of-note" style="display:none;text-align:left"></div>
     <div id="tipList"></div>
     <div class="of-note" style="text-align:left">Every report is stamped with who logged it, the
     time, and its own seal &mdash; kept separate from the weight seal, because a person made this call
@@ -2282,7 +2308,7 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
 </section>
 </div>
 
-<footer><span>Metropolitan Recycling · Dallas TX</span><span>DivertScan <span style="opacity:.55;font-size:.9em" title="Deployed build">· build v3.5 — Aug 17</span></span></footer>
+<footer><span>Metropolitan Recycling · Dallas TX</span><span>DivertScan <span style="opacity:.55;font-size:.9em" title="Deployed build">· build v3.6 — Aug 17</span></span></footer>
 </div>
 
 
@@ -2516,6 +2542,35 @@ $('restockBtn').addEventListener('click',()=>{
   CUSTODY=CUSTODY.concat(fresh);
   renderCustody(); renderSel(); updateRun();
 });
+/* ---- tipping-floor scan-to-inspect: the scan picks the load, not the glove ---- */
+function tipScanFlash(msg,bad){
+  const m=$('tipScanMsg'); if(!m) return;
+  m.style.display='block'; m.style.color=bad?'var(--oxblood)':'var(--ink)'; m.textContent=msg;
+  clearTimeout(window._tsT); window._tsT=setTimeout(()=>{m.style.display='none'},4200);
+}
+if($('tipScan')) $('tipScan').addEventListener('keydown',e=>{
+  if(e.key!=='Enter') return;
+  e.preventDefault();
+  const raw=$('tipScan').value.trim(); $('tipScan').value='';
+  if(!raw) return;
+  const hit=raw.toUpperCase().match(/WT-\d+/);
+  const id=hit?hit[0]:raw.toUpperCase();
+  const l=OPEN.find(x=>x.tk.toUpperCase()===id);
+  if(l){
+    if(l.contam){ tipScanFlash(id+' is already flagged \u2014 '+l.contam.type+
+      (l.contam.pct?' '+l.contam.pct.toFixed(1)+'%':'')+', sealed at '+l.contam.at+'.',true); }
+    else {
+      contamFor=l.tk; contamWhere='tip'; contamPhotos=0;
+      contamAI=null; contamDraft={pct:null,type:null};
+      renderOpen(); tipBuzz();
+      tipScanFlash(id+' open \u2014 '+l.veh+' \u00b7 '+refLabel(l.ref)+'. Clean, or photo?');
+    }
+  } else {
+    tipScanFlash('No open load '+id+' on the yard \u2014 already tared out, or not a receipt ticket.',true);
+  }
+  $('tipScan').focus();
+});
+
 /* ---- hand scanner: any keyboard-wedge (Bluetooth/USB) scanner types here and sends Enter ---- */
 function scanFlash(msg,bad){
   const m=$('scanMsg'); if(!m) return;
@@ -3722,6 +3777,26 @@ const CONTAM_TYPES=['Film plastic / bags','Wet \u2014 water damage','Foam / poly
  'Non-paper trash','Food residue','Wrong grade for the job','Mixed \u2014 see photos'];
 let contamFor=null, contamWhere='office', contamPhotos=0;
 let contamAI=null, contamDraft={pct:null,type:null};
+const AI_MODEL='demo-sim-1';   // stamped into every sealed record
+/* REAL-MODEL SEAM: production replaces the body of gradePhotos() with a call
+   to the vision endpoint (photos in, {type,pct,conf,mix,model} out). Everything
+   downstream — panel, prefill, sealing, override detection — stays untouched. */
+async function gradePhotos(n,l){ return {...aiGrade(n), model:AI_MODEL}; }
+/* demo per-generator baselines; production computes from that account's graded history */
+function genBase(l){
+  const m={'Trinity Foods Group':{n:5,avg:9.8},'Lone Star Beverage Co.':{n:7,avg:4.2},
+           'Panhandle Snack Brands':{n:4,avg:6.1}};
+  return m[refLabel(l.ref)]||{n:6,avg:7.5};
+}
+function tipBuzz(){ try{ if(navigator.vibrate) navigator.vibrate(35) }catch(e){} }
+function tipToast(msg){
+  tipBuzz(); try{beep()}catch(e){}
+  let t=$('tipToast');
+  if(!t){ t=document.createElement('div'); t.id='tipToast'; t.className='tip-toast';
+    t.setAttribute('role','status'); document.body.appendChild(t); }
+  t.textContent=msg; t.classList.add('on');
+  clearTimeout(window._ttT); window._ttT=setTimeout(()=>t.classList.remove('on'),2600);
+}
 /* Simulated vision grading for the demo. The accuracy DESIGN is the point:
    more photos tighten the confidence band, the AI proposes and the spotter
    confirms, BOTH numbers are sealed into the record, and every estimate is
@@ -3751,7 +3826,27 @@ function contamBlock(l,where){
       '<br><span style="color:var(--steel-lt);word-break:break-all">seal '+c.hash.slice(0,32)+
       '\u2026</span></div>';
   }
+  if(l.inspected && contamFor!==l.tk){
+    return '<div class="contam-note" style="color:#2F6B4F">\u2713 Inspected clean \u00b7 '+
+      l.inspected.at+' \u00b7 '+l.inspected.by.split(' \u00b7 ')[0]+
+      '<br><span style="color:var(--steel-lt);word-break:break-all">seal '+
+      l.inspected.hash.slice(0,32)+'\u2026</span></div>'+
+      '<button class="win-btn contam-btn" data-contam="'+l.tk+'" data-where="'+where+
+      '">Found something after all?</button>';
+  }
   if(contamFor===l.tk && contamWhere===where){
+    /* PHOTO-FIRST: until the first photo exists there is no form — just the
+       two decisions a gloved hand actually makes standing at the pile. */
+    if(contamPhotos===0){
+      return '<div class="contam-form"><div class="tip-choice">'+
+        '<button class="win-btn choice-clean" id="cClean">\u2713 CLEAN \u2014 nothing found</button>'+
+        '<button class="win-btn choice-photo" id="cPhoto">\ud83d\udcf7 PHOTO \u2014 AI grades it</button>'+
+        '</div>'+
+        '<div class="cf-row"><button class="win-btn" id="cCancel">Cancel</button></div>'+
+        '<div class="contam-note">Clean loads get a sealed record too \u2014 that is what beats the '+
+        '\u201cyou only inspect when it suits you\u201d argument. Finding something? The photo comes '+
+        'first: no photo, no deduction.</div></div>';
+    }
     const selType=contamDraft.type||(contamAI?contamAI.type:null);
     const pctVal=contamDraft.pct!==null?contamDraft.pct:(contamAI?contamAI.pct.toFixed(1):'');
     return '<div class="contam-form">'+
@@ -3761,17 +3856,26 @@ function contamBlock(l,where){
           contamAI.mix.map(m=>'<div class="ai-row"><span>'+m[0]+'</span><b>'+m[1].toFixed(1)+'%</b></div>').join('')+
           '<div class="ai-row" style="margin-top:6px;border-top:1px dashed var(--concrete-dk);padding-top:6px">'+
           '<span>Contamination \u00b7 \u00b1'+contamAI.conf.toFixed(1)+' pts</span><b>'+contamAI.pct.toFixed(1)+'%</b></div>'+
-          '<div style="font-size:11.5px;color:var(--steel-lt);margin-top:7px">More photos, tighter read. '+
-          'The AI proposes, the spotter confirms, and both numbers are sealed \u2014 then every estimate is '+
-          'reconciled against this account\u2019s actual sort-line weights, so the model\u2019s error is '+
-          'tracked per generator. That is what accuracy means here.</div></div>'
+          (function(){const b=genBase(l);
+            return '<div class="ai-row" style="margin-top:5px"><span>This source\u2019s last '+b.n+
+            ' graded loads</span><b>'+b.avg.toFixed(1)+'% avg</b></div>'+
+            '<div style="font-size:11.5px;color:var(--steel-lt);margin-top:7px">Today reads '+
+            (contamAI.pct>b.avg?'above':'below')+' this generator\u2019s baseline. More photos, '+
+            'tighter read \u2014 the AI proposes, the spotter confirms, both numbers are sealed, and '+
+            'every estimate is reconciled against this account\u2019s sort-line weights. '+
+            '<span class="mono" style="font-size:10px">model '+(contamAI.model||AI_MODEL)+'</span></div>'})()+
+          '</div>'
         : '')+
       '<div class="cf-row"><div class="cf-f"><label for="cType">What did you find?</label>'+
       '<select id="cType" aria-label="Contamination type">'+
       CONTAM_TYPES.map(t=>'<option'+(t===selType?' selected':'')+'>'+t+'</option>').join('')+'</select></div>'+
-      '<div class="cf-f" style="flex:0 0 92px"><label for="cPct">Est. %</label>'+
+      '<div class="cf-f" style="flex:0 0 auto"><label for="cPct">Est. %</label>'+
+      '<div class="cf-pct">'+
+      '<button class="step-btn" data-step="-0.5" aria-label="Decrease half a percent">\u2212</button>'+
       '<input id="cPct" type="text" inputmode="decimal" placeholder="2.5" autocomplete="off" '+
-      'value="'+pctVal+'" aria-label="Estimated contamination percent"></div></div>'+
+      'value="'+pctVal+'" aria-label="Estimated contamination percent">'+
+      '<button class="step-btn" data-step="0.5" aria-label="Increase half a percent">+</button>'+
+      '</div></div></div>'+
       '<div class="cf-row">'+
       '<button class="win-btn" id="cPhoto">\ud83d\udcf7 Add photo ('+contamPhotos+')</button>'+
       '<button class="win-btn" id="cSave" style="background:var(--panel-dk);color:var(--phosphor)">Log it</button>'+
@@ -3792,8 +3896,17 @@ function wireContam(){
     $('ofNote').textContent='Tipping floor is logging what came off that truck. '+
       'The weight is already sealed \u2014 this is a separate record, with its own author and time.';
   }));
-  const ph=$('cPhoto'), sv=$('cSave'), cn=$('cCancel');
-  if(ph) ph.addEventListener('click',()=>{ contamPhotos++; contamAI=aiGrade(contamPhotos); renderOpen(); });
+  const ph=$('cPhoto'), sv=$('cSave'), cn=$('cCancel'), cl=$('cClean');
+  if(ph) ph.addEventListener('click',async()=>{ contamPhotos++;
+    const l=OPEN.find(x=>x.tk===contamFor);
+    contamAI=await gradePhotos(contamPhotos,l); renderOpen(); });
+  if(cl) cl.addEventListener('click',saveClean);
+  document.querySelectorAll('.step-btn').forEach(b=>b.addEventListener('click',()=>{
+    const pi2=$('cPct'); if(!pi2) return;
+    const cur=parseFloat(pi2.value); const base=isFinite(cur)?cur:(contamAI?contamAI.pct:0);
+    const v=Math.max(0.5,Math.min(100,Math.round((base+parseFloat(b.dataset.step))*2)/2));
+    pi2.value=v.toFixed(1); contamDraft.pct=pi2.value;
+  }));
   if(cn) cn.addEventListener('click',()=>{ contamFor=null; contamPhotos=0;
     contamAI=null; contamDraft={pct:null,type:null}; renderOpen(); });
   if(sv) sv.addEventListener('click',saveContam);
@@ -3805,7 +3918,7 @@ function wireContam(){
 function renderTip(){
   const list=$('tipList'); if(!list) return;
   list.innerHTML = OPEN.length
-    ? OPEN.map(l=>'<div class="tip-card'+(l.contam?' flagged':'')+'">'+
+    ? OPEN.map(l=>'<div class="tip-card'+(l.contam?' flagged':(l.inspected?' clean':''))+'">'+
         '<div class="tip-top"><span class="tip-veh">'+l.veh+'</span>'+
         '<span class="tip-w">'+comma(l.gross)+' lb in \u00b7 '+l.inAt+'</span></div>'+
         '<div class="tip-job"><b>'+refLabel(l.ref)+'</b></div>'+
@@ -3825,15 +3938,30 @@ function renderTip(){
     (TIP_LOG.length
       ? TIP_LOG.map(r=>'<tr><td class="mono">'+r.tk+'</td><td class="mono">'+r.veh+'</td>'+
           '<td style="color:var(--steel)">'+r.ref+'</td>'+
-          '<td><span class="tag red">'+r.type+'</span>'+
+          '<td><span class="tag'+(r.clean?'':' red')+'">'+r.type+'</span>'+
           (r.ai?'<div style="font-size:11px;color:var(--steel-lt);margin-top:3px">AI '+
-            r.ai.pct.toFixed(1)+'% \u00b1'+r.ai.conf.toFixed(1)+' \u00b7 spotter confirmed</div>':'')+'</td>'+
+            r.ai.pct.toFixed(1)+'% \u00b1'+r.ai.conf.toFixed(1)+' \u00b7 spotter '+
+            (r.over?'<b style="color:var(--oxblood)">overrode</b>':'confirmed')+'</div>':'')+'</td>'+
           '<td class="mono r">'+(r.pct?r.pct.toFixed(1)+'%':'\u2014')+'</td>'+
           '<td class="mono r">'+r.photos+'</td>'+
           '<td class="mono r">'+r.at+'<div style="font-size:11px;color:var(--steel-lt)">'+
           r.by.split(' \u00b7 ')[0]+'</div></td></tr>').join('')
       : '<tr><td colspan="7" style="color:var(--steel-lt)">Nothing logged yet today. '+
         'Report one against a load above and it lands here.</td></tr>');
+}
+
+/* clean loads leave a sealed record too — inspection proof, not just absence of a flag */
+async function saveClean(){
+  const tk=contamFor, l=OPEN.find(x=>x.tk===tk);
+  if(!l){ contamFor=null; renderOpen(); return }
+  const at=new Date();
+  l.inspected={clean:true,by:TIPMAN,at:hm(at),
+               hash:await sha256(tk+'|clean|'+TIPMAN+'|'+at.toISOString())};
+  contamFor=null; contamPhotos=0; contamAI=null; contamDraft={pct:null,type:null};
+  TIP_LOG.unshift({tk:tk,veh:l.veh,ref:refLabel(l.ref),type:'Clean \u2014 inspected',pct:null,
+                   ai:null,photos:0,at:hm(at),by:TIPMAN,hash:l.inspected.hash,clean:true});
+  renderOpen();   /* one render, after the log entry, so every tip button re-wires */
+  tipToast('\u2713 '+tk+' inspected clean \u2014 sealed');
 }
 
 async function saveContam(){
@@ -3843,14 +3971,19 @@ async function saveContam(){
   const raw=$('cPct')?parseFloat($('cPct').value):NaN;
   const pct=(isFinite(raw)&&raw>0)?Math.min(raw,100):null;
   const at=new Date(), photos=contamPhotos;
-  const ai=contamAI?{pct:contamAI.pct,conf:contamAI.conf,n:contamAI.n}:null;
-  l.contam={type:type,pct:pct,photos:photos,by:TIPMAN,at:hm(at),ai:ai,
-            hash:await sha256(tk+'|'+type+'|'+pct+'|'+photos+'|'+(ai?ai.pct:'')+'|'+at.toISOString())};
+  const ai=contamAI?{pct:contamAI.pct,conf:contamAI.conf,n:contamAI.n,
+                     model:contamAI.model||AI_MODEL}:null;
+  /* outside the confidence band = an override, and the record says so plainly */
+  const over=!!(ai&&pct!==null&&Math.abs(pct-ai.pct)>ai.conf);
+  l.contam={type:type,pct:pct,photos:photos,by:TIPMAN,at:hm(at),ai:ai,over:over,
+            hash:await sha256(tk+'|'+type+'|'+pct+'|'+photos+'|'+(ai?ai.pct+'|'+ai.model:'')+
+                              '|'+at.toISOString())};
+  delete l.inspected;   /* found-after-clean supersedes the clean record on the card */
   contamFor=null; contamPhotos=0; contamAI=null; contamDraft={pct:null,type:null};
-  renderOpen();
-  TIP_LOG.unshift({tk:tk,veh:l.veh,ref:refLabel(l.ref),type:type,pct:pct,ai:ai,
+  TIP_LOG.unshift({tk:tk,veh:l.veh,ref:refLabel(l.ref),type:type,pct:pct,ai:ai,over:over,
                    photos:photos,at:hm(at),by:TIPMAN,hash:l.contam.hash});
-  renderTip();
+  renderOpen();   /* one render, after the log entry, so every tip button re-wires */
+  tipToast('\u25c6 '+tk+' \u00b7 '+type+(pct?' '+pct.toFixed(1)+'%':'')+' \u2014 sealed');
   $('ofNote').textContent='Logged against '+tk+'. When that trailer comes back for its tare the '+
     'deduction is already waiting, with '+TIPMAN+' and the time on it.';
 }
