@@ -364,6 +364,20 @@ pointer-events:none;background:var(--panel-dk);color:var(--phosphor);font-family
 font-size:13.5px;font-weight:600;padding:13px 20px;border-radius:6px;box-shadow:0 6px 24px rgba(0,0,0,.35);
 transition:opacity .18s,transform .18s;max-width:90vw}
 .tip-toast.on{opacity:1;transform:translate(-50%,0)}
+/* ---- production build plan ---- */
+.bp-list{margin:0 0 4px 18px;padding:0}
+.bp-list li{font-size:13.5px;color:var(--steel);line-height:1.6;margin-bottom:7px}
+.bp-list li b{color:var(--ink)}
+.bp-phase{border:1px solid var(--concrete-dk);border-radius:var(--r);background:var(--paper);
+margin-bottom:8px;overflow:hidden}
+.bp-phase summary{cursor:pointer;padding:12px 14px;font-family:'Archivo';font-weight:700;
+font-size:14px;letter-spacing:-.01em;list-style:none;display:flex;align-items:center;gap:9px;
+min-height:48px}
+.bp-phase summary::-webkit-details-marker{display:none}
+.bp-phase summary::after{content:'+';margin-left:auto;font-family:'IBM Plex Mono';font-size:16px;
+color:var(--steel-lt)}
+.bp-phase[open] summary::after{content:'\2212'}
+.bp-phase p{padding:0 14px 13px;font-size:13px;color:var(--steel);line-height:1.6;margin:0}
 @media (prefers-reduced-motion:reduce){.tip-toast{transition:none}}
 /* ---- remittance OCR stage lines ---- */
 .ocr-line{font-family:'IBM Plex Mono';font-size:11.5px;padding:6px 0;border-bottom:1px dashed var(--concrete-dk);line-height:1.5}
@@ -2296,6 +2310,84 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
     with the SMS module &mdash; and an expired COI blocks that hauler from the dispatch board.</div>
   </div>
 
+
+  <div class="card" id="buildPlanCard">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Production build plan &middot; v2
+      <span class="tag amber" style="margin-left:8px">This demo is the spec</span></div>
+      <div class="rpt-tools">
+        <button class="ghost-btn" id="bpCopy">Copy engineering prompt</button>
+        <button class="ghost-btn" id="bpDl">Download .md</button>
+      </div></div>
+    <p style="font-size:14px;color:var(--steel);line-height:1.6;margin-bottom:12px">Everything on
+    this site is the acceptance criterion; the single-file architecture underneath is what the
+    production build replaces. The full engineering prompt lives in this page &mdash; copy it, paste
+    it into the build session, run <b>one phase at a time</b>, and do not start a phase until the
+    previous one deploys and passes its tests.</p>
+
+    <div class="screen-label" style="margin-top:4px">Five non-negotiables</div>
+    <ol class="bp-list">
+      <li><b>Offline-first is the product.</b> Durable local queue on the scale laptop, client
+        ULIDs, idempotent store-and-forward sync, automatic replay on reconnect.</li>
+      <li><b>Append-only hash chain.</b> Every sealed event carries the previous event's hash;
+        Postgres refuses UPDATE and DELETE; the threat model is written down, including what the
+        chain cannot detect.</li>
+      <li><b>Public verification, no login.</b> Certificate QRs carry a URL and an ID only; the
+        server recomputes the chain and renders pass/fail for anyone holding the paper.</li>
+      <li><b>Multi-tenant from day one.</b> RLS on every table; office, spotter, admin and portal
+        roles; drivers authenticate by possession of a signed ticket token, never an account.</li>
+      <li><b>Testable without hardware.</b> Nothing counts as delivered unless it runs and passes
+        at a desk &mdash; which is why the simulator below is a required deliverable.</li>
+    </ol>
+
+    <div class="screen-label" style="margin-top:14px">Phases &mdash; one prompt each, in order</div>
+    <details class="bp-phase" open>
+      <summary><span class="tag">Run first</span> Phase 0 &mdash; Architecture doc + repo scaffold</summary>
+      <p>Monorepo layout (bridge / web / shared / migrations), pinned versions (Node 20 LTS,
+      Next.js 14, Supabase CLI), .env.example per app, CI test command, and one page of prose on
+      the data flow: indicator &rarr; bridge &rarr; local queue &rarr; sync &rarr; Postgres &rarr;
+      web and portal.</p>
+    </details>
+    <details class="bp-phase">
+      <summary><span class="tag">Run second</span> Phase 1 &mdash; Scale bridge + local capture + sync</summary>
+      <p>Profile-driven Avery Weigh-Tronix parser (frame regex, motion flag, center-of-zero,
+      gross/tare, unit flips &mdash; never hard-coded to one frame shape), weight-lock rules
+      (motion clear + 5 stable frames &plusmn;20 lb + debounce), raw frames persisted for audit,
+      2-second heartbeat with SCALE OFFLINE distinct from INTERNET OFFLINE, Windows service
+      install with watchdog &mdash; and the <b>serial simulator</b>: recorded settle ramps, motion
+      chatter, garbage bursts and cable pulls replayed at a desk, with tests asserting lock
+      behavior per scenario. Plus the scanner-input hook: scanner-speed keystroke discrimination,
+      prefix/suffix support, no accidental form submits.</p>
+    </details>
+    <details class="bp-phase">
+      <summary><span class="tag off">Held</span> Phase 2 &mdash; Core schema, RLS, custody, stale-load exceptions</summary>
+      <p>Tickets, loads, custody, tip reports (AI pct + human pct + model version + override flag),
+      exceptions with per-client thresholds, business-hours awareness and acknowledge/snooze &mdash;
+      designed against alarm fatigue, because an alert the office ignores is worse than none.</p>
+    </details>
+    <details class="bp-phase">
+      <summary><span class="tag off">Held</span> Phase 3 &mdash; Seals, certificates, public verification</summary>
+      <p>Canonical JSON before hashing (two serializers means two hashes), server-side PDF with the
+      hash printed and the QR pointing at verify.&lt;domain&gt;/c/&lt;id&gt;, chain recomputed on
+      every check.</p>
+    </details>
+    <details class="bp-phase">
+      <summary><span class="tag off">Held</span> Phase 4 &mdash; Compliance: CBP 7553, TTB, media, overrides</summary>
+      <p>Entry-number validation, 5-<i>working</i>-day notice check against a federal holiday
+      table, proof gallons as a generated column (volume &times; ABV &times; 2 &divide; 100),
+      photo evidence hashed byte-for-byte, and manual weight overrides as append-only supersession
+      events with reason codes &mdash; never edits.</p>
+    </details>
+    <details class="bp-phase">
+      <summary><span class="tag off">Held</span> Phase 5 &mdash; Driver + tipping mobile UI, EN/ES</summary>
+      <p>48px minimum targets, 64px on the tipping floor, sunlight contrast, and a typed EN/ES
+      dictionary with a CI check that fails the build on any string that bypasses it &mdash;
+      wired to the real APIs the earlier phases shipped.</p>
+    </details>
+    <div class="of-note" style="text-align:left" id="bpNote">The copy button puts the complete
+    prompt &mdash; system role, context, principles, phasing, requirements, output format &mdash;
+    on the clipboard, ready to paste.</div>
+  </div>
+
   <div class="card">
     <div class="screen-label">Your data, always</div>
     <p style="font-size:14.5px;color:var(--steel);margin-bottom:14px;max-width:56ch">Everything
@@ -2308,7 +2400,7 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
 </section>
 </div>
 
-<footer><span>Metropolitan Recycling · Dallas TX</span><span>DivertScan <span style="opacity:.55;font-size:.9em" title="Deployed build">· build v3.6 — Aug 17</span></span></footer>
+<footer><span>Metropolitan Recycling · Dallas TX</span><span>DivertScan <span style="opacity:.55;font-size:.9em" title="Deployed build">· build v3.7 — Aug 17</span></span></footer>
 </div>
 
 
@@ -2322,6 +2414,162 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
   </div>
   <button class="drv-exit" id="drvExit">View the full demo instead</button>
 </div>
+
+<script type="text/plain" id="bpPromptSrc">
+# DivertScan Production Build — Enhanced Engineering Prompt (v2)
+
+<system_role>
+You are a Principal Full-Stack Engineer, Embedded IoT Architect, and Industrial Operations
+Specialist. You specialize in build-out and refactoring for heavy industry, recycling operations,
+scrap/scale-house management systems, and high-compliance waste destruction platforms. You possess
+deep expertise in Node.js/TypeScript, React/Next.js, Tailwind CSS, Supabase/PostgreSQL (including
+Row-Level Security), Web Serial/WebSockets, and RS-232/Ethernet serial streaming for Avery
+Weigh-Tronix indicators.
+
+You write code for a SOLO developer-operator who runs a real recycling yard. Every deliverable must
+be independently deployable, testable without physical hardware, and small enough to understand in
+one sitting. You never deliver a monolith.
+</system_role>
+
+<context>
+An interactive single-file demo of "Metropolitan Recycling — Certified Destruction" (DivertScan)
+already exists and is the product spec: scale capture sealed before identification, driver QR
+self-check-in (EN/ES), tipping-floor photo-first contamination grading with AI-proposes /
+spotter-confirms, chain of custody, certified destruction with hand-scanner receipt selection,
+client portal with simulated ACH, settlement/rebate reconciliation with Wave CSV exports, and
+offline capture at the scale.
+
+This prompt governs the PRODUCTION rebuild. The demo's behavior is the acceptance criterion; the
+demo's architecture (one 537KB HTML file, in-memory state, simulated seals) is explicitly what we
+are replacing.
+
+Hardware reality: the scale office runs a Windows laptop next to the indicator. Confirm the exact
+indicator model and its configured output format before writing the parser — Avery Weigh-Tronix ZM
+series (ZM305/ZM510) output varies by configuration (SMA protocol, continuous custom stream, or
+demand mode). The parser must therefore be PROFILE-DRIVEN, not hard-coded to one frame shape.
+</context>
+
+<non_negotiable_architecture_principles>
+1. OFFLINE-FIRST IS THE PRODUCT. The scale bridge and capture UI run and store locally on the
+   scale-office laptop with zero internet. Every captured event gets a client-generated ULID and
+   enters a durable local queue (SQLite). Sync to Supabase is store-and-forward, idempotent on
+   ULID, resumable, and order-preserving per scale. Reconnection replays automatically. Conflicts
+   cannot occur by design (single writer per scale, append-only events); document why.
+2. APPEND-ONLY EVENT LEDGER WITH HASH CHAIN. Every sealed event (weight capture, assignment,
+   contamination report, clean inspection, destruction, certificate) stores
+   sha256(prev_hash || canonical_json(payload) || captured_at). Postgres enforces append-only via
+   REVOKE UPDATE/DELETE plus BEFORE UPDATE/DELETE triggers that RAISE EXCEPTION. State the explicit
+   threat model: what tampering does this detect, what does it not, and where the chain head is
+   published so the yard itself cannot silently regenerate history.
+3. PUBLIC VERIFICATION WITHOUT AUTH. Certificate QR codes contain a URL + certificate ID only —
+   never the payload. The verification endpoint recomputes the hash chain server-side and renders
+   pass/fail with the sealed facts. Anyone holding a certificate can verify without an account.
+4. MULTI-TENANT FROM DAY ONE. Supabase RLS on every table, keyed by org_id. Roles: office (full),
+   spotter (tipping-floor writes), admin (override with reason codes), client_portal (read own
+   org's certs/reports/requests), driver (no account — authenticated by possession of a signed
+   ticket token embedded in the QR, short-lived, scoped to one load).
+5. EVERY SECTION SHIPS WITH ITS TESTS AND A NO-HARDWARE TEST PATH. Code that cannot be exercised
+   at a desk does not count as delivered.
+</non_negotiable_architecture_principles>
+
+<phasing>
+Deliver in phases. DO NOT produce code for a later phase until asked. Each phase must be
+deployable and useful on its own.
+
+PHASE 0 — Architecture doc + repo scaffold: monorepo layout (apps/bridge, apps/web, packages/
+shared, supabase/migrations), pinned versions (Node 20 LTS, Next.js 14, Supabase CLI, pnpm),
+.env.example for every app, CI test command. One page of prose on data flow: indicator → bridge →
+local queue → sync → Postgres → web/portal.
+
+PHASE 1 — Scale bridge + local capture + sync (sections 1, 2, and the simulator below).
+PHASE 2 — Core schema + RLS + ticket/custody flows + stale-load exceptions (sections 4, 6a).
+PHASE 3 — Seals, certificates, public verification (section 5).
+PHASE 4 — Compliance layer: CBP 7553 / TTB fields, media evidence, override audit (section 6b/6c).
+PHASE 5 — Driver/tipping mobile UI + i18n (section 3), pointing at real APIs.
+
+This prompt requests PHASE 0 and PHASE 1 ONLY. Later phases will be requested one at a time.
+</phasing>
+
+<operational_requirements>
+
+1. AVERY WEIGH-TRONIX SERIAL PARSER, HEARTBEAT, AND SIMULATOR
+   - Profile-driven parser (TypeScript, runs under Node on the Windows laptop as a service via
+     node-windows or NSSM; document install, auto-start, watchdog restart, and log rotation).
+     Profiles are JSON: frame regex, field positions, motion flag token ('M'), center-of-zero
+     ('CZ'), gross/tare mode tokens ('G'/'T'), unit tokens (lb/kg), polarity handling, terminator.
+     Ship profiles for ZM305 SMA and ZM continuous-custom as examples.
+   - Robust framing: handle partial frames, interleaved garbage bytes, CRLF vs CR, and unit flips
+     mid-session. Never throw on bad input; count and log malformed frames.
+   - WEIGHT LOCK RULES (make constants configurable): motion flag clear AND N=5 consecutive frames
+     within ±20 lb tolerance AND above a minimum-net threshold AND a 750ms debounce since last
+     motion. Emit {weight, unit, isMotion, isCenterOfZero, mode, stable, lockedWeight?, raw} as
+     JSON over a local WebSocket. Persist the RAW frames for every locked weight (audit).
+   - Heartbeat: bridge → UI ping every 2s with monotonic sequence; UI shows SCALE OFFLINE within
+     5s of silence, distinct from INTERNET OFFLINE (two different failure banners — the demo
+     already distinguishes these; keep that behavior).
+   - SIMULATOR (required deliverable): a CLI that replays recorded or synthetic frame scripts —
+     truck-arrives ramp, motion chatter, settle, unit flip, garbage burst, cable pull — over a
+     pseudo-serial (socket) so the entire bridge + UI stack runs at a desk with no indicator.
+     Include five recorded scenario files and Vitest tests asserting lock behavior per scenario.
+
+2. BARCODE / QR SCANNER INPUT DISCIPLINE (React hook)
+   - useBarcodeScanner hook: discriminates scanner vs human typing by inter-key interval
+     (<35ms sustained), buffers until terminator, strips \r\n, e.preventDefault() on the
+     terminating Enter so no form submits, supports configurable prefix/suffix (many scanners are
+     configured to send one), extracts ticket patterns (WT-\d+, BOL-\d+) from full QR payloads,
+     and routes to a registered handler per screen (destruction run, tipping inspect, gate
+     check-in). Works when no input is focused (document-level capture with an allowlist of
+     screens). Include tests simulating both scanner-speed and human-speed input.
+
+3. DRIVER MOBILE UI & i18n (PHASE 5 — do not build yet; hold these constraints)
+   - 48px minimum touch targets; glove targets on tipping floor 64px. WCAG AAA contrast for
+     sunlight; no grey-on-grey. Single-column, thumb-reach layout.
+   - i18n: one typed dictionary (en/es) covering EVERY dynamic string — status prompts,
+     contamination types, material names, ticket summaries, release prompts, live-weight labels.
+     Language toggle re-renders in place without losing form state. Add a CI check that fails on
+     any user-visible string not routed through the dictionary.
+
+4. STALE-LOAD EXCEPTIONS (PHASE 2 — hold these constraints)
+   - Threshold configurable per client and per material (default 4h), computed in yard-local time
+     with business-hours awareness (a trailer parked at 5pm is not stale at 9pm; it is stale at
+     10am next day). Supabase scheduled function inserts exceptions; office UI supports
+     acknowledge and snooze-until with author + reason, both appended to the ledger. An alert the
+     office learns to ignore is worse than no alert — design against alarm fatigue.
+
+5. SEALS, CERTIFICATE HASHING, QR (PHASE 3 — hold these constraints)
+   - Canonical JSON serialization (sorted keys, fixed number formatting) before hashing —
+     document it, because two serializers = two hashes.
+   - QR payload: https://verify.{domain}/c/{cert_id} only. Server recomputes chain and shows
+     sealed facts + pass/fail. PDF embeds the same hash string visibly and the QR.
+   - PDF generation server-side; note where a future PAdES digital signature would slot in
+     without changing the data model.
+
+6. SCHEMA & COMPLIANCE (PHASES 2/4 — hold these constraints)
+   a. Core: orgs, users, roles, scales, tickets (gross/tare/net, source of tare, ULIDs), loads,
+      custody_receipts, destruction_runs, certificates, tip_reports (type, human_pct, ai_pct,
+      ai_conf, ai_model, override boolean, photo refs), exceptions. RLS policies inline in the
+      migrations, with comments stating who can do what and why.
+   b. Compliance: cbp_7553_items (entry_number with format validation, port_of_entry, notice_date
+      with a 5-WORKING-day validation against a US federal holiday table, inspector sign-off
+      timestamp + name), ttb_items (volume_gallons, abv, proof_gallons GENERATED ALWAYS AS
+      (volume_gallons * abv * 2 / 100) STORED, reason_not_salvageable), media_evidence (storage
+      path, sha256 of bytes, captured_by, captured_at, exif_stripped boolean, linked event ULID).
+   c. Manual weight overrides: append-only override_events table — original value, new value,
+      REASON CODE from a fixed enum (indicator_fault, retare, clerical, other+text), author from
+      auth.uid(), and the affected ticket's chain rehashed forward. No UPDATE on tickets; an
+      override is a new event that supersedes, never edits.
+</operational_requirements>
+
+<output_formatting>
+- Phase 0 first: architecture page + repo tree + migrations skeleton + .env.example files.
+- Then Phase 1 only: complete, runnable code — no placeholders, no TODOs.
+- Every code section ends with: (1) exact commands to run it, (2) how to test it WITHOUT hardware,
+  (3) the Vitest/pgTAP tests themselves.
+- TypeScript strict mode everywhere; Node 20 LTS; pinned dependency versions in package.json.
+- If any requirement is ambiguous, state the assumption you chose in one line and proceed — do not
+  ask questions mid-deliverable.
+</output_formatting>
+</script>
 
 <div class="welc" id="welc" role="dialog" aria-modal="true" aria-label="Welcome">
   <div class="welc-card">
@@ -2542,6 +2790,25 @@ $('restockBtn').addEventListener('click',()=>{
   CUSTODY=CUSTODY.concat(fresh);
   renderCustody(); renderSel(); updateRun();
 });
+/* ---- production build plan: carry the engineering prompt inside the demo ---- */
+function bpText(){ const el=$('bpPromptSrc'); return el?el.textContent.trim():''; }
+if($('bpCopy')) $('bpCopy').addEventListener('click',async()=>{
+  const t=bpText(); let ok=false;
+  try{ await navigator.clipboard.writeText(t); ok=true; }catch(e){
+    try{ const ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed';
+      ta.style.opacity='0'; document.body.appendChild(ta); ta.select();
+      ok=document.execCommand('copy'); ta.remove(); }catch(e2){}
+  }
+  $('bpNote').textContent = ok
+    ? 'Copied \u2014 '+t.length.toLocaleString()+' characters on the clipboard. Paste it into the '+
+      'build session and ask for Phase 0 only.'
+    : 'Clipboard blocked by the browser \u2014 use Download .md instead.';
+});
+if($('bpDl')) $('bpDl').addEventListener('click',()=>{
+  download('divertscan_production_build_prompt_v2.md',bpText());
+  $('bpNote').textContent='Saved \u2014 divertscan_production_build_prompt_v2.md';
+});
+
 /* ---- tipping-floor scan-to-inspect: the scan picks the load, not the glove ---- */
 function tipScanFlash(msg,bad){
   const m=$('tipScanMsg'); if(!m) return;
