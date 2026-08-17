@@ -336,6 +336,19 @@ color:var(--phosphor);text-shadow:0 0 12px rgba(107,232,150,.35);font-variant-nu
 .ph-live-u{font-family:'IBM Plex Mono';font-size:13px;color:var(--phosphor);opacity:.8}
 .ph-live-s{font-family:'IBM Plex Mono';font-size:10px;letter-spacing:.13em;text-transform:uppercase;
 color:#8D97A1;margin:9px 0 7px}
+/* ---- persistent driver LCD strip: same states, same number as the office readout ---- */
+.ph-lcd{display:flex;align-items:baseline;gap:8px;background:#0D1512;border:1px solid #000;
+border-radius:6px;padding:9px 12px;margin:8px 0 2px}
+.ph-lcd-s{font-family:'IBM Plex Mono';font-size:9px;font-weight:600;letter-spacing:.14em;
+color:#8D97A1;flex:0 0 auto}
+.ph-lcd-n{font-family:'IBM Plex Mono';font-weight:600;font-size:22px;letter-spacing:.02em;
+color:var(--phosphor);margin-left:auto;font-variant-numeric:tabular-nums}
+.ph-lcd-u{font-family:'IBM Plex Mono';font-size:11px;color:var(--phosphor);opacity:.75}
+.ph-lcd.locked{border-color:var(--phosphor)}
+.ph-lcd.locked .ph-lcd-s{color:var(--phosphor)}
+.ph-lcd.locked .ph-lcd-n{text-shadow:0 0 12px rgba(107,232,150,.45);animation:lcdlock .5s ease 1}
+@keyframes lcdlock{0%{opacity:.2}100%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.ph-lcd.locked .ph-lcd-n{animation:none}}
 .ph-in{width:100%;background:#0D1512;border:1.5px solid #3A434C;color:var(--phosphor);
 font-family:'IBM Plex Mono';font-size:15px;padding:12px 13px;border-radius:6px;margin:7px 0;
 text-transform:uppercase}
@@ -1034,6 +1047,10 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
             font-weight:600;letter-spacing:.1em;padding:5px 8px;border-radius:var(--r);cursor:pointer;
             border:1.5px solid #6E7A86;background:transparent;color:var(--on-dk)"
             aria-label="Cambiar idioma">ES</button>
+        </div>
+        <div class="ph-lcd" id="phLcd" style="display:none" aria-live="polite">
+          <span class="ph-lcd-s" id="phLcdS">IN MOTION</span>
+          <span class="ph-lcd-n" id="phLcdN">0</span><span class="ph-lcd-u">lb</span>
         </div>
         <div class="ph-body" id="phBody"><div class="ph-idle">Nothing<br>on the scale</div></div>
       </div></div>
@@ -2521,7 +2538,7 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
 </section>
 </div>
 
-<footer><span>Metropolitan Recycling · Dallas TX</span><span>DivertScan <span style="opacity:.55;font-size:.9em" title="Deployed build">· build v3.8 — Aug 17</span></span></footer>
+<footer><span>Metropolitan Recycling · Dallas TX</span><span>DivertScan <span style="opacity:.55;font-size:.9em" title="Deployed build">· build v3.9 — Aug 17</span></span></footer>
 </div>
 
 
@@ -3217,34 +3234,44 @@ let OPEN=[
 let pendingTare=null, plateIx=0;
 let direction='in', mill=null, bolId=null, release=null;
 
+/* ---- the driver's LCD strip: mirrors the office readout through EVERY phase,
+        and stays pinned through job pick, release, and the paper choice ---- */
+function phLcd(status,val,locked){
+  const w=$('phLcd'); if(!w) return;
+  w.style.display='flex';
+  w.classList.toggle('locked',!!locked);
+  $('phLcdS').textContent=status;
+  if(val!==null&&val!==undefined)
+    $('phLcdN').textContent=comma(Math.max(0,Math.round(val)));
+}
+function phLcdHide(){ const w=$('phLcd'); if(w){w.style.display='none';w.classList.remove('locked')} }
+
 function weigh(target,label,done){
   weighing=true; if($('dirBtn')) $('dirBtn').disabled=true;
   $('mainBtn').disabled=true;$('outBtn').disabled=true;
   $('modeTag').textContent=label;$('lockTag').textContent='';
-  /* the driver watches the SAME number climb on his own phone from the cab */
+  /* the driver watches the SAME number, the SAME states, the whole way */
   $('phVeh').textContent='Metropolitan Recycling \u00b7 Scale 01';
-  $('phBody').innerHTML='<div class="ph-live">'+
-    '<div class="ph-live-s">'+(label==='Inbound'?t('liveIn'):t('liveOut'))+'</div>'+
-    '<span class="ph-live-n" id="phLiveN">0</span><span class="ph-live-u"> lb</span>'+
-    '<div class="ph-live-s" id="phLiveS">'+t('liveSet')+'</div></div>';
+  $('phBody').innerHTML='<div class="ph-idle">'+
+    (label==='Inbound'?t('liveIn'):t('liveOut'))+'<br>'+t('liveSet')+'</div>';
+  phLcd(t('phMot'),0,false);
   let tk=0;setAnn(false,true,true);$('statusText').textContent='Truck on scale — in motion';
   const c=setInterval(()=>{tk++;const w=target*(1-Math.pow(1-tk/24,2.4));
     if(tk>=24){clearInterval(c);settle(target,done);return}
     const shown=Math.max(0,w+(Math.random()*900-450));
     $('readout').textContent=pad(shown);
-    const pn=$('phLiveN'); if(pn) pn.textContent=comma(Math.round(shown))},55);
+    phLcd(t('phMot'),shown,false)},55);
 }
 function settle(target,done){
   let k=0;$('statusText').textContent='Settling';
   const s=setInterval(()=>{k++;const j=Math.max(0,60-k*7);
     const shown=target+(Math.random()*j*2-j);
     $('readout').textContent=pad(shown);
-    const pn=$('phLiveN'); if(pn) pn.textContent=comma(Math.round(shown));
+    phLcd(t('phSet'),shown,false);
     if(k>8){clearInterval(s);setAnn(false,true,false);$('readout').textContent=pad(target);
       $('statusText').textContent='Stable — captured';$('lockTag').textContent='LOCKED';
-      const pn2=$('phLiveN'), ps=$('phLiveS');
-      if(pn2) pn2.textContent=comma(target);
-      if(ps) ps.textContent=t('liveLock');
+      /* the exact target the office sees, the moment it locks */
+      phLcd(t('phLock'),target,true);
       weighing=false; if($('dirBtn')) $('dirBtn').disabled=false;
       const sc=$('shCaptures'); if(sc) sc.textContent=(+sc.textContent||0)+1;
       done()}},110);
@@ -3298,6 +3325,11 @@ function renderOpen(){
 
 async function capIn(){
   inStamp=new Date();
+  /* a new inbound is a NEW transaction — clear job state that the outbound
+     receipt or a destruction run may have left behind, otherwise assign()
+     silently no-ops on its `if(job) return` guard (real bug: after any
+     tare-out, the next truck's job pick did nothing) */
+  job=null; identBy=null; inRelease=null;
   VEH=PLATES[plateIx++%PLATES.length];
   $('valIn').textContent=comma(GROSS)+' lb';
   $('hashIn').textContent=inStamp.toLocaleString()+' · '+
@@ -3431,8 +3463,15 @@ function afterAssign(by){
 
 function parkLoad(paper){
   const tkNo='WT-'+String(Math.floor(Math.random()*900)+9000);
+  const wasDriver=(identBy==='Driver scan');
   OPEN.unshift({tk:tkNo,veh:VEH,gross:GROSS,
     inAt:hm(inStamp),ref:job,by:identBy,paper:paper,rel:inRelease});
+  if(wasDriver){
+    /* the choice he just made, confirmed on his screen, with the locked gross still pinned above */
+    $('phBody').innerHTML='<div class="ph-done"><div class="tick">\u2713</div><b>'+t('onYard')+'</b>'+
+      '<span>'+tkNo+'<br>'+comma(GROSS)+' lb in \u00b7 '+t('phLock').toLowerCase()+'<br>'+
+      (paper?t('phPrint'):t('phSaved'))+'</span></div>';
+  }
   const wasOffline = (typeof NET!=='undefined' && !NET);
   if(wasOffline){ QUEUED++; paintNet(); }
   job=null;identBy=null;inRelease=null;
@@ -3524,9 +3563,10 @@ async function matchOut(ix,by){
   }else{
     const m=MATERIALS.find(x=>x.name===load.ref.material); if(m) m.ytd+=net;
   }
+  phLcd(t('phNet'),net,true);
   $('phBody').innerHTML='<div class="ph-done"><div class="tick">✓</div><b>You\u2019re clear</b><span>'+
-    load.tk+'<br>'+comma(net)+' lb<br>'+(load.paper?'Ticket printing at the window.':'Saved to your phone.')+
-    '</span></div>';
+    load.tk+'<br>'+comma(net)+' lb '+t('phNet').toLowerCase().replace(' \u00b7 ',' ')+'<br>'+
+    (load.paper?t('phPrint'):t('phSaved'))+'</span></div>';
   lastLoad.tkRec=TICKETS[0]; if(dest) lastLoad.cusRec=CUSTODY[0];
   renderQual(false);
   resetRec(); renderRec();
@@ -3709,6 +3749,7 @@ $('resetBtn').addEventListener('click',()=>{
   $('hashIn').textContent=$('hashOut').textContent=$('hashPhoto').textContent='Awaiting capture';
   $('hashNet').textContent='Sealed once the load closes';
   $('phVeh').textContent='Scan the sign at the scale';
+  phLcdHide();
   $('phBody').innerHTML='<div class="ph-idle">Nothing<br>on the scale</div>';
   $('receiptZone').classList.remove('show');$('receipt').innerHTML='';
   $('copyToggle').style.display='none';$('copyToggle').textContent='Show office copy';showingOffice=false;
@@ -5458,7 +5499,10 @@ const T={
      relSend:'SEND TO SCALE HOUSE', relSub:'The office sees it instantly',
      relNone:'I DON\u2019T HAVE ONE', relNoneSub:'You still get through \u2014 it gets flagged',
      liveIn:'Your truck on the scale', liveOut:'Empty on the scale',
-     liveSet:'Settling \u2014 watch it lock', liveLock:'Captured and sealed'},
+     liveSet:'Settling \u2014 watch it lock', liveLock:'Captured and sealed',
+     phMot:'IN MOTION', phSet:'SETTLING', phLock:'LOCKED', phNet:'NET \u00b7 LOCKED',
+     onYard:'On the yard', phPrint:'Ticket printing at the window',
+     phSaved:'Saved to your loadbook'},
  es:{scan:'Escanee el letrero en la b\u00e1scula', idle:'Nada<br>en la b\u00e1scula',
      wait:'Esperando a<br>la oficina', office:'La oficina lo hizo<br>\u2014<br>el chofer no us\u00f3<br>el tel\u00e9fono',
      what:'\u00bfQu\u00e9 est\u00e1 entregando?', plain:'O material sin trabajo',
@@ -5470,7 +5514,10 @@ const T={
      relSend:'ENVIAR A LA B\u00c1SCULA', relSub:'La oficina lo ve al instante',
      relNone:'NO TENGO UNO', relNoneSub:'Pasa igual \u2014 queda marcado',
      liveIn:'Su cami\u00f3n en la b\u00e1scula', liveOut:'Vac\u00edo en la b\u00e1scula',
-     liveSet:'Estabilizando \u2014 mire c\u00f3mo se fija', liveLock:'Capturado y sellado'}
+     liveSet:'Estabilizando \u2014 mire c\u00f3mo se fija', liveLock:'Capturado y sellado',
+     phMot:'EN MOVIMIENTO', phSet:'ESTABILIZANDO', phLock:'FIJADO', phNet:'NETO \u00b7 FIJADO',
+     onYard:'En el patio', phPrint:'Boleto imprimi\u00e9ndose en la ventanilla',
+     phSaved:'Guardado en su libreta'}
 };
 let LANG=(navigator.language||'en').toLowerCase().indexOf('es')===0?'es':'en';
 const t=k=>T[LANG][k];
