@@ -616,6 +616,33 @@ border-radius:var(--r);background:transparent;color:var(--steel);font-family:'Pu
 font-size:13.5px;cursor:pointer}
 .welc-go:focus-visible,.welc-skip:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 
+/* ---- contamination reported at the tipping floor ---- */
+.contam-btn{margin-top:9px}
+.contam-form{margin-top:10px;border-top:1px dashed var(--concrete-dk);padding-top:10px}
+.contam-form .cf-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.contam-form label{display:block;font-family:'IBM Plex Mono';font-size:9.5px;font-weight:600;
+letter-spacing:.12em;text-transform:uppercase;color:var(--steel);margin-bottom:4px}
+.contam-form select,.contam-form input{width:100%;font-family:'IBM Plex Mono';font-size:13.5px;
+padding:9px 10px;border:1.5px solid var(--concrete-dk);border-radius:var(--r);
+background:var(--paper);color:var(--ink)}
+.contam-form .cf-f{flex:1;min-width:104px}
+.contam-note{font-family:'IBM Plex Mono';font-size:11px;color:var(--steel-lt);
+line-height:1.65;margin-top:7px}
+
+/* ---- "try me" pulse -------------------------------------------------
+   Same green ripple as the client portal sign-in button, promoted to a
+   shared class so any live control can wear it. Deliberately self-limiting:
+   only the active tab pulses, each control stops for good once used, and the
+   whole thing goes quiet during the guided tour (which has its own focus
+   ring and does not need buttons competing with it). Delays are staggered
+   so they breathe out of sync -- a page throbbing in unison reads as broken,
+   not inviting. */
+.try{animation:signpulse 2s ease-out infinite}
+body.touring .try{animation:none}
+@media print{.try{animation:none}}
+@media (prefers-reduced-motion:reduce){
+ .try{animation:none;box-shadow:0 0 0 3px rgba(107,232,150,.5)}}
+
 /* ---- tactile press states (quick win) ---- */
 button:active,.opt:active,.pick:active,.drv-opt:active,.win-btn:active,.plan-pick:active{
 transform:scale(.97);transition:transform .06s}
@@ -1964,6 +1991,13 @@ let VEH='TX 4LK-9920';
 const CARRIER='Trinity Hauling LLC',CLERK='M. Alvarez',
  METHOD='Mechanical shredding, single-pass grinder',WITNESS='D. Okafor (client representative)',
  GROSS=62480,TARE=18940;
+/* Outbound mill run. These were referenced by capEmpty/capLoaded/printBOL but
+   never declared, so switching direction threw a ReferenceError -- which is why
+   the direction button was left unwired. Net here is 43,180 lb = 21.59 ST,
+   inside the 21-22 ST load window the rate card enforces. */
+const EMPTY_TRUCK=32140, LOADED=75320;
+const TIPMAN='J. Ruiz \u00b7 tipping floor';
+let weighing=false;
 
 /* receipts already in custody — this is what makes the two-event model visible */
 let CUSTODY=[
@@ -2266,6 +2300,7 @@ let pendingTare=null, plateIx=0;
 let direction='in', mill=null, bolId=null, release=null;
 
 function weigh(target,label,done){
+  weighing=true; if($('dirBtn')) $('dirBtn').disabled=true;
   $('mainBtn').disabled=true;$('outBtn').disabled=true;
   $('modeTag').textContent=label;$('lockTag').textContent='';
   let t=0;setAnn(false,true,true);$('statusText').textContent='Truck on scale — in motion';
@@ -2278,7 +2313,8 @@ function settle(target,done){
   const s=setInterval(()=>{k++;const j=Math.max(0,60-k*7);
     $('readout').textContent=pad(target+(Math.random()*j*2-j));
     if(k>8){clearInterval(s);setAnn(false,true,false);$('readout').textContent=pad(target);
-      $('statusText').textContent='Stable — captured';$('lockTag').textContent='LOCKED';done()}},110);
+      $('statusText').textContent='Stable — captured';$('lockTag').textContent='LOCKED';
+      weighing=false; if($('dirBtn')) $('dirBtn').disabled=false; done()}},110);
 }
 
 function refLabel(r){return r.wo? r.wo+' · '+r.client : r.material}
@@ -2316,10 +2352,12 @@ function renderOpen(){
       : '')+
      '<span class="tag">In '+l.inAt+'</span>'+
      '<span class="tag '+(isDest(l.ref)?'amber':'')+'">'+
-     (isDest(l.ref)?'Destruction · cert due':'Recycling')+'</span></div>').join('');
+     (isDest(l.ref)?'Destruction · cert due':'Recycling')+'</span>'+
+     contamBlock(l)+'</div>').join('');
   $('loadList').innerHTML=h;
   document.querySelectorAll('[data-match]').forEach(b=>
     b.addEventListener('click',()=>matchOut(+b.dataset.match,'Office · '+CLERK)));
+  wireContam();
 }
 
 async function capIn(){
@@ -2494,6 +2532,14 @@ async function matchOut(ix,by){
   job=load.ref;
   lastLoad={load:load,tare:tare,net:net,dest:dest,tkRec:null,cusRec:null};
   resetQual();
+  /* Contamination is found at the tip, not at the scale. If the yard already
+     logged it, the office does not retype it -- it arrives pre-filled with the
+     reporter and the time attached. */
+  if(load.contam && load.contam.pct){
+    const ce=$('qContam'), ue=$('qUnit');
+    if(ce) ce.value=String(load.contam.pct);
+    if(ue) ue.value='pct';
+  }
   printTicket(net,dest,load,tare);
   $('ticketWho').textContent=load.paper?'· driver asked for paper':'· driver took it on his phone';
   TICKETS.unshift({id:load.tk,date:md(outStamp),time:hm(outStamp),veh:load.veh,
@@ -2661,6 +2707,17 @@ $('outBtn').addEventListener('click',()=>{
   if(direction==='out'||state!=='idle'||!OPEN.length) return;
   weigh(TARE,'Outbound',capTare);
 });
+/* Inbound receipt <-> outbound mill shipment. Blocked mid-weigh: you cannot
+   change what a truck is doing while it is sitting on the deck. */
+$('dirBtn').addEventListener('click',()=>{
+  if(weighing) return;
+  direction = direction==='in' ? 'out' : 'in';
+  $('resetBtn').click();
+  $('hintText').textContent = direction==='out'
+    ? 'Outbound: the empty trailer weighs first, then the loaded one. Same scale, same seal, and the mill gets a release number.'
+    : 'Two trucks are already on the yard \u2014 watch how the return is matched';
+});
+
 $('resetBtn').addEventListener('click',()=>{
   state='idle';job=identBy=ticketId=mill=bolId=release=null;wantsPaper=null;
   pendingTare=null;plateIx=0;
@@ -3131,6 +3188,73 @@ $('netBtn').addEventListener('click',()=>{
   }
 });
 
+/* ================= CONTAMINATION FOUND AT THE TIP =================
+   The scale cannot see contamination. Nobody knows a load is full of film
+   plastic until it hits the floor, which is after the gross weight is sealed
+   and before the empty comes back for its tare.
+
+   So the report is a separate event with its own author and its own clock: the
+   tipping floor logs what they found, with photos, against the load that is
+   still open on the yard. When that truck returns to the scale the deduction is
+   already there and already attributed -- the office never retypes it, and the
+   mill or the client gets a report with a name and a time on it rather than an
+   assertion.                                                                */
+const CONTAM_TYPES=['Film plastic / bags','Wet \u2014 water damage','Foam / polystyrene',
+ 'Non-paper trash','Food residue','Wrong grade for the job','Mixed \u2014 see photos'];
+let contamFor=null, contamPhotos=0;
+
+function contamBlock(l){
+  if(l.contam){
+    const c=l.contam;
+    return '<div class="contam-note" style="color:var(--oxblood)">\u25c6 '+c.type+
+      (c.pct?' \u00b7 '+c.pct.toFixed(1)+'%':'')+' \u00b7 '+c.photos+' photo'+
+      (c.photos===1?'':'s')+'<br>Logged by '+c.by+' at '+c.at+
+      '<br><span style="color:var(--steel-lt);word-break:break-all">seal '+c.hash.slice(0,32)+
+      '\u2026</span></div>';
+  }
+  if(contamFor===l.tk){
+    return '<div class="contam-form">'+
+      '<div class="cf-row"><div class="cf-f"><label for="cType">What did you find?</label>'+
+      '<select id="cType" aria-label="Contamination type">'+
+      CONTAM_TYPES.map(t=>'<option>'+t+'</option>').join('')+'</select></div>'+
+      '<div class="cf-f" style="flex:0 0 92px"><label for="cPct">Est. %</label>'+
+      '<input id="cPct" type="text" inputmode="decimal" placeholder="2.5" autocomplete="off" '+
+      'aria-label="Estimated contamination percent"></div></div>'+
+      '<div class="cf-row">'+
+      '<button class="win-btn" id="cPhoto">\ud83d\udcf7 Add photo ('+contamPhotos+')</button>'+
+      '<button class="win-btn" id="cSave" style="background:var(--panel-dk);color:var(--phosphor)">Log it</button>'+
+      '<button class="win-btn" id="cCancel">Cancel</button></div>'+
+      '<div class="contam-note">Photographed and sealed at the tip. This is what makes a '+
+      'deduction defensible instead of an argument three weeks later.</div></div>';
+  }
+  return '<button class="win-btn contam-btn" data-contam="'+l.tk+'">Report contamination</button>';
+}
+function wireContam(){
+  document.querySelectorAll('[data-contam]').forEach(b=>b.addEventListener('click',()=>{
+    contamFor=b.dataset.contam; contamPhotos=0; renderOpen();
+    $('ofNote').textContent='Tipping floor is logging what came off that truck. '+
+      'The weight is already sealed \u2014 this is a separate record, with its own author and time.';
+  }));
+  const ph=$('cPhoto'), sv=$('cSave'), cn=$('cCancel');
+  if(ph) ph.addEventListener('click',()=>{ contamPhotos++; renderOpen(); });
+  if(cn) cn.addEventListener('click',()=>{ contamFor=null; contamPhotos=0; renderOpen(); });
+  if(sv) sv.addEventListener('click',saveContam);
+}
+async function saveContam(){
+  const tk=contamFor, l=OPEN.find(x=>x.tk===tk);
+  if(!l){ contamFor=null; renderOpen(); return }
+  const type=$('cType')?$('cType').value:CONTAM_TYPES[0];
+  const raw=$('cPct')?parseFloat($('cPct').value):NaN;
+  const pct=(isFinite(raw)&&raw>0)?Math.min(raw,100):null;
+  const at=new Date(), photos=contamPhotos;
+  l.contam={type:type,pct:pct,photos:photos,by:TIPMAN,at:hm(at),
+            hash:await sha256(tk+'|'+type+'|'+pct+'|'+photos+'|'+at.toISOString())};
+  contamFor=null; contamPhotos=0;
+  renderOpen();
+  $('ofNote').textContent='Logged against '+tk+'. When that trailer comes back for its tare the '+
+    'deduction is already waiting, with '+TIPMAN+' and the time on it.';
+}
+
 /* ================= RECOVERY EVIDENCE =================
    A destroyed load can still be worth money to the client, but only if the
    paperwork was right BEFORE it was destroyed:
@@ -3312,6 +3436,9 @@ function dedTicketLines(net){
   if(d.contamDed) h+='<div class="rw"><span>Contamination '+
     (d.unit==='lb'?comma(d.c)+' lb':d.c.toFixed(1)+'%')+'</span><b>\u2212'+
     comma(d.contamDed)+' lb</b></div>';
+  const cr=lastLoad&&lastLoad.load?lastLoad.load.contam:null;
+  if(d.contamDed&&cr) h+='<div class="ctr tiny">'+cr.type+'<br>Reported at the tipping floor by '+
+    cr.by+' at '+cr.at+'<br>'+cr.photos+' photo'+(cr.photos===1?'':'s')+' sealed</div>';
   h+='<div class="rw big"><span>NET PAID</span><b>'+comma(d.paid)+' lb</b></div>'+
      '<div class="ctr tiny">Assessed by '+CLERK+' after capture.<br>'+
      'Scale weight '+comma(net)+' lb is unchanged<br>and is the weight certified.</div>';
@@ -3335,9 +3462,14 @@ function renderQual(reprint){
     '<div class="qrow"><span>Contamination deduction</span><b>'+(d.contamDed?'\u2212'+comma(d.contamDed)+' lb':'\u2014')+'</b></div>'+
     '<div class="qrow qbig"><span>Net paid</span><b>'+comma(d.paid)+' lb</b></div>'+
     '<div class="qrow qcert"><span>Certified / destroyed weight</span><b>'+comma(d.net)+' lb</b></div>';
-  $('qualNote').textContent = d.total
+  const rep0=lastLoad&&lastLoad.load?lastLoad.load.contam:null;
+  $('qualNote').innerHTML = (rep0
+    ? '<span style="color:var(--oxblood);font-weight:600">' + rep0.type + '</span> reported at the '+
+      'tipping floor by ' + rep0.by + ' at ' + rep0.at + ' \u00b7 ' + rep0.photos + ' photo' +
+      (rep0.photos===1?'':'s') + ' sealed at capture. The percentage is already in the field.<br>'
+    : '') + (d.total
     ? 'Deductions change what you pay, not what you certify. The certificate, the custody record and the LEED tonnage all still read '+comma(d.net)+' lb, because that is what crossed the scale and that is what gets destroyed.'
-    : 'Type an assessment and watch it price the load. Moisture over the '+MOIST_BASIS+'% basis comes off on the ratio the mills settle on, not a flat subtraction.';
+    : 'Type an assessment and watch it price the load. Moisture over the '+MOIST_BASIS+'% basis comes off on the ratio the mills settle on, not a flat subtraction.');
   /* audit integrity: raw and adjusted are stored side by side, never merged */
   if(lastLoad.tkRec){ lastLoad.tkRec.netScale=d.net; lastLoad.tkRec.netPaid=d.paid;
     lastLoad.tkRec.moisture=d.m; lastLoad.tkRec.moistDed=d.moistDed;
@@ -4258,6 +4390,103 @@ $('subBtn').addEventListener('click',()=>{
 });
 
 updatePlan();
+
+
+/* ================= "TRY ME" PULSE =================
+   Anything on screen a viewer can actually press gets the green ripple until
+   they press it. dirBtn is excluded on purpose: it has no click handler, and
+   inviting someone to press a dead control is worse than leaving it plain. */
+const TRY_SPEC=[
+ /* Ordered by priority, because the cap below only lights the top few.
+    Whatever the moment is actually asking for comes first; the standing
+    controls next; downloads last, because they are nice, not the point. */
+ ['#loadList .pick','pick'],['#phBody .opt','opt'],
+ ['#qMoist','moisture'],['#r7553','notice'],
+ ['#selList .sel','selrow'],['#runBtn','run'],['#photoBtn','photo'],['#certBtn','issue'],
+ ['#dispTable .win-btn','window'],['#pReq','request'],
+ /* standing controls */
+ ['#tourStart','tour'],
+ ['#mainBtn','main'],['#outBtn','out'],['#dirBtn','direction'],['#netBtn','net'],
+ ['#loadList .contam-btn','contam'],['#tryDrv','driver'],
+ ['#vBtn','verify'],['#voidBtn','void'],['#ppiBtn','index'],
+ ['#planGrid .plan-pick','plan'],['#subBtn','subscribe'],
+ ['#addMat','addmat'],['#fullX','export'],['[data-x]','xfile'],
+ /* downloads */
+ ['#pdfBtn','onepager'],['#signBtn','sign'],['#xlsBtn','xls'],
+ ['#printAll','printall'],['#pdfBtn2','planspdf']
+];
+const TRY_USED=new Set();
+const TRY_MAX=6;
+
+/* An element counts as reachable if it is outside every tab (the masthead) or
+   inside the one currently showing. */
+function tryVisible(el){
+  let n=el;
+  while(n && n!==document.body){
+    if(n.style && n.style.display==='none') return false;
+    if(n.classList){
+      if(n.classList.contains('tab') && !n.classList.contains('on')) return false;
+      /* panels that use the .on convention: quality, recovery, receipt, overlays */
+      if((n.classList.contains('qual')||n.classList.contains('rec')||
+          n.classList.contains('receipt-zone')||n.classList.contains('drv')||
+          n.classList.contains('welc')) && !n.classList.contains('on')) return false;
+    }
+    n=n.parentElement;
+  }
+  return true;
+}
+function markTry(){
+  document.querySelectorAll('.try').forEach(e=>{
+    e.classList.remove('try'); e.style.animationDelay='';
+  });
+  if(document.body.classList.contains('touring')) return;
+  if($('drv') && $('drv').classList.contains('on')) return;
+  if($('welc') && $('welc').classList.contains('on')) return;
+  /* Cap it. A dozen things throbbing at once is noise, not an invitation --
+     so take them in TRY_SPEC order, which is priority order, and let the next
+     one light up only as earlier ones get used. The demo leads rather than
+     shouts. */
+  const queue=[];
+  TRY_SPEC.forEach(spec=>{
+    if(TRY_USED.has(spec[1])) return;
+    document.querySelectorAll(spec[0]).forEach(el=>{
+      if(el.disabled) return;
+      if(!tryVisible(el)) return;
+      queue.push(el);
+    });
+  });
+  queue.slice(0,TRY_MAX).forEach((el,i)=>{
+    el.classList.add('try');
+    el.style.animationDelay=((i % 5) * 0.45).toFixed(2)+'s';
+  });
+}
+/* Capture phase: record the press before a handler re-renders the element away. */
+document.addEventListener('click',e=>{
+  if(!e.target || !e.target.closest) return;
+  TRY_SPEC.forEach(spec=>{
+    if(TRY_USED.has(spec[1])) return;
+    try{ if(e.target.closest(spec[0])) TRY_USED.add(spec[1]) }catch(err){}
+  });
+  setTimeout(markTry,90);
+},true);
+['input','change'].forEach(ev=>document.addEventListener(ev,e=>{
+  if(e.target && (e.target.id==='qMoist'||e.target.id==='r7553')){
+    TRY_USED.add(e.target.id==='qMoist'?'moisture':'notice');
+    setTimeout(markTry,90);
+  }
+},true));
+/* Pickers, match lists and dispatch windows are rendered seconds after the
+   click that caused them, so a one-shot re-check misses them. Watch for nodes
+   arriving instead of hooking every render function. markTry only touches
+   classes and inline styles -- attribute changes, which childList does not
+   observe -- so it cannot retrigger itself. */
+let tryTimer=null;
+try{
+  new MutationObserver(()=>{
+    clearTimeout(tryTimer); tryTimer=setTimeout(markTry,120);
+  }).observe(document.body,{childList:true,subtree:true});
+}catch(e){}
+setTimeout(markTry,600);
 
 </script>
 
