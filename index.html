@@ -673,6 +673,42 @@ img,svg,video{max-width:100%}
 font-family:'IBM Plex Mono',monospace;font-size:10px;line-height:1.5;padding:8px 10px;
 border-radius:4px;max-width:88vw;word-break:break-all;opacity:.95}
 
+/* ---- quality assessment: moisture + contamination ---- */
+.qual{display:none;margin-top:15px;background:var(--paper);border:1px solid var(--concrete-dk);
+border-left:3px solid var(--amber);border-radius:var(--r);padding:14px 15px}
+.qual.on{display:block}
+.qual-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
+.qual-f{flex:1;min-width:110px}
+.qual-f label{display:block;font-family:'IBM Plex Mono';font-size:10px;font-weight:600;
+letter-spacing:.12em;text-transform:uppercase;color:var(--steel);margin-bottom:5px}
+.qual-f input,.qual-f select{width:100%;font-family:'IBM Plex Mono';font-size:15px;padding:11px 10px;
+border:1.5px solid var(--concrete-dk);border-radius:var(--r);background:var(--paper);color:var(--ink)}
+.qual-f input:focus,.qual-f select:focus{outline:2px solid var(--ink);outline-offset:1px}
+.qual-out{border-top:1px solid var(--concrete-dk);padding-top:11px;font-family:'IBM Plex Mono';
+font-size:12px;line-height:1.95;color:var(--steel)}
+.qual-out .qrow{display:flex;justify-content:space-between;gap:12px}
+.qual-out .qrow b{color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.qual-out .qbig{font-size:14.5px;padding-top:6px;margin-top:6px;border-top:1px dashed var(--concrete-dk)}
+.qual-out .qcert b{color:var(--oxblood)}
+.qual-note{font-size:12.5px;color:var(--steel-lt);line-height:1.65;margin-top:10px}
+@media (max-width:760px){.qual-f{min-width:100%}.qual-f:last-child{min-width:100%}}
+/* ---- recovery evidence ---- */
+.rec{display:none;margin-top:15px;background:var(--paper);border:1px solid var(--concrete-dk);
+border-left:3px solid var(--oxblood);border-radius:var(--r);padding:14px 15px}
+.rec.on{display:block}
+.rec .qual-f label{color:var(--steel)}
+.rec-grid{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
+.rec-hold{border-radius:var(--r);padding:11px 13px;margin-top:11px;font-family:'IBM Plex Mono';
+font-size:12px;line-height:1.75}
+.rec-hold.wait{background:#FBF2E0;border:1.5px solid var(--amber);color:#7A5310}
+.rec-hold.clear{background:var(--paper);border:1.5px solid var(--concrete-dk);color:var(--steel)}
+.rec-hold b{display:block;font-size:13px;letter-spacing:.04em;margin-bottom:3px}
+body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
+.cert-rec{border:1px solid var(--concrete-dk);border-radius:var(--r);padding:15px 17px;margin-bottom:19px}
+.cert-rec .fld-label{margin-bottom:7px}
+.tag.hold{border-color:var(--amber);color:#8A5D14}
+@media (max-width:760px){.rec-grid .qual-f{min-width:100%}}
+
 /* ---- office pane flash when the driver hands off ---- */
 @keyframes ofland{0%,60%{box-shadow:0 0 0 4px var(--phosphor)}100%{box-shadow:0 0 0 0 rgba(107,232,150,0)}}
 .of-land{animation:ofland 1.8s ease-out 1;border-radius:var(--r)}
@@ -768,6 +804,56 @@ border-radius:4px;max-width:88vw;word-break:break-all;opacity:.95}
       <div class="role-cap"><b>Sees everything.</b> Every open load on the yard, every weight the
       moment it settles, and the alert when a truck lands. Assigns jobs, confirms tickets, runs
       destructions, issues certificates, reprints anything.</div>
+      <div class="qual" id="qualZone">
+        <div class="screen-label" style="margin:0 0 11px">Quality assessment
+          <span id="qualBadge"></span></div>
+        <div class="qual-row">
+          <div class="qual-f"><label for="qMoist">Moisture %</label>
+            <input id="qMoist" type="text" inputmode="decimal" placeholder="e.g. 16.4"
+              autocomplete="off" aria-label="Moisture percent"></div>
+          <div class="qual-f"><label for="qContam">Contamination</label>
+            <input id="qContam" type="text" inputmode="decimal" placeholder="e.g. 2.5"
+              autocomplete="off" aria-label="Contamination amount"></div>
+          <div class="qual-f" style="flex:0 0 92px"><label for="qUnit">Unit</label>
+            <select id="qUnit" aria-label="Contamination unit">
+              <option value="pct">%</option><option value="lb">lb</option></select></div>
+        </div>
+        <div class="qual-out" id="qualOut"></div>
+        <div class="qual-note" id="qualNote"></div>
+      </div>
+      <div class="rec" id="recZone">
+        <div class="screen-label" style="margin:0 0 4px">Recovery evidence
+          <span id="recBadge"></span></div>
+        <div class="qual-note" style="margin:0 0 12px">What this load needs before it is destroyed, so the
+          client can still claim what it is worth. Captured here, carried onto the certificate.</div>
+        <div class="rec-grid">
+          <div class="qual-f"><label for="rSku">SKU / part no.</label>
+            <input id="rSku" type="text" placeholder="PSB-0885-R3" autocomplete="off"
+              aria-label="SKU or part number"></div>
+          <div class="qual-f"><label for="rLot">Lot / batch</label>
+            <input id="rLot" type="text" placeholder="L4471-A" autocomplete="off"
+              aria-label="Lot or batch code"></div>
+        </div>
+        <div class="rec-grid">
+          <div class="qual-f"><label for="rEntry">Import entry no.</label>
+            <input id="rEntry" type="text" placeholder="if imported" autocomplete="off"
+              aria-label="Customs import entry number"></div>
+          <div class="qual-f"><label for="r7553">CBP 7553 filed</label>
+            <input id="r7553" type="date" aria-label="Date CBP form 7553 was filed"></div>
+        </div>
+        <div class="rec-grid">
+          <div class="qual-f"><label for="rGal">Volume (gal)</label>
+            <input id="rGal" type="text" inputmode="decimal" placeholder="taxpaid alcohol only"
+              autocomplete="off" aria-label="Volume in gallons"></div>
+          <div class="qual-f" style="flex:0 0 96px"><label for="rAbv">ABV %</label>
+            <input id="rAbv" type="text" inputmode="decimal" placeholder="5.0" autocomplete="off"
+              aria-label="Alcohol by volume percent"></div>
+          <div class="qual-f"><label for="rWit">Witness</label>
+            <input id="rWit" type="text" placeholder="name · role" autocomplete="off"
+              aria-label="Witness name and role"></div>
+        </div>
+        <div id="recHold"></div>
+      </div>
       <div class="receipt-zone" id="receiptZone">
         <div class="screen-label" style="margin-top:15px">Ticket <span id="ticketWho"></span></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:11px">
@@ -943,6 +1029,14 @@ border-radius:4px;max-width:88vw;word-break:break-all;opacity:.95}
       <div><div class="fld-label">Days in custody</div><div class="fld-val mono" id="fDays">—</div></div>
       <div><div class="fld-label">Work order coverage</div><div class="fld-val" id="fCover">—</div></div>
       <div><div class="fld-label">Authorised by</div><div class="fld-val" id="fWeigher">—</div></div>
+    </div>
+
+    <div class="cert-rec" id="certRec" style="display:none">
+      <div class="fld-label">Recovery evidence attached to this run</div>
+      <div id="certRecBody"></div>
+      <div style="font-size:12.5px;color:var(--steel-lt);margin-top:9px;line-height:1.6">
+        Recorded by Metropolitan at the point of work. Metropolitan does not file customs or tax
+        claims and does not advise on eligibility; hand this to your broker or your accountant.</div>
     </div>
 
     <div id="voidBanner" style="display:none;background:var(--oxblood);color:#fff;padding:13px 16px;
@@ -1958,7 +2052,9 @@ function renderCustody(){
   $('kOldest').textContent=CUSTODY.length?Math.max(...CUSTODY.map(r=>r.days)):0;
   $('kClients').textContent=clients.size;
   const rows=[...CUSTODY].sort((a,b)=>b.days-a.days).map(r=>
-    '<tr><td class="mono">'+r.id+'</td><td class="mono">'+r.date+'</td><td>'+r.client+
+    '<tr><td class="mono">'+r.id+
+    (recHeld(r)?'<div style="font-size:11px;color:#8A5D14;margin-top:3px">notice period</div>':'')+
+    '</td><td class="mono">'+r.date+'</td><td>'+r.client+
     '</td><td class="mono">'+r.wo+'</td>'+
     '<td class="mono">'+(r.rel?r.rel:'<span style="color:var(--oxblood);font-weight:600">missing</span>')+'</td>'+
     '<td class="mono r">'+comma(r.net)+'</td>'+
@@ -1976,6 +2072,7 @@ function renderSel(){
     '<div class="sel'+(picked.has(r.id)?' picked':'')+'" data-id="'+r.id+'" tabindex="0" role="checkbox" '+
     'aria-checked="'+picked.has(r.id)+'"><div class="box">'+(picked.has(r.id)?'✓':'')+'</div>'+
     '<div class="meta"><b>'+r.id+'</b> · '+comma(r.net)+' lb'+
+    (recHeld(r)?' <span class="tag hold">on notice hold</span>':'')+
     '<div>Received '+r.date+' · '+r.days+' days in custody · '+r.veh+'</div></div></div>').join('');
   document.querySelectorAll('.sel').forEach(el=>{
     const t=()=>{const id=el.dataset.id;picked.has(id)?picked.delete(id):picked.add(id);renderSel();updateRun()};
@@ -1985,6 +2082,16 @@ function renderSel(){
 }
 function updateRun(){
   const sel=CUSTODY.filter(r=>picked.has(r.id));
+  const held=sel.filter(recHeld);
+  if(held.length){
+    const worst=held.map(r=>noticeState(r.rec)).sort((a,b)=>b.holdUntil-a.holdUntil)[0];
+    $('runBtn').disabled=true;
+    $('selHint').innerHTML='<span style="color:var(--oxblood);font-weight:600">'+
+      held.length+' receipt'+(held.length>1?'s are':' is')+' inside the CBP notice period.</span> '+
+      'Earliest lawful destruction '+dayLabel(worst.holdUntil)+
+      ' \u2014 destroying sooner forfeits the drawback claim.';
+    return;
+  }
   const lb=sel.reduce((s,r)=>s+r.net,0);
   $('runBtn').disabled=!sel.length;
   $('selHint').textContent=sel.length?sel.length+' receipts · '+comma(lb)+' lb selected':'Select at least one receipt';
@@ -1992,6 +2099,7 @@ function updateRun(){
 
 $('runBtn').addEventListener('click',()=>{
   const sel=CUSTODY.filter(r=>picked.has(r.id));
+  if(sel.some(recHeld)){ updateRun(); return }
   runData={sel,lb:sel.reduce((s,r)=>s+r.net,0)};
   $('runCard').style.display='block';
   $('rWeight').textContent=comma(runData.lb);
@@ -2025,6 +2133,7 @@ async function issueCert(){
   const coverage=left?sel.length+' loads · '+left+' still on hand for this work order'
                      :sel.length+' loads · work order complete';
   $('fCover').textContent=coverage;
+  renderCertRecovery(sel);
   $('voidBanner').style.display='none';
   $('certStamp').innerHTML='<b>DESTROYED</b><span id="stampDate">'+
     now.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})+'</span>';
@@ -2383,6 +2492,8 @@ async function matchOut(ix,by){
     ? 'Weight ticket issued. Certificate comes later, when it is destroyed.'
     : 'Weight ticket issued. Ordinary recycling receipt — no certificate needed.';
   job=load.ref;
+  lastLoad={load:load,tare:tare,net:net,dest:dest,tkRec:null,cusRec:null};
+  resetQual();
   printTicket(net,dest,load,tare);
   $('ticketWho').textContent=load.paper?'· driver asked for paper':'· driver took it on his phone';
   TICKETS.unshift({id:load.tk,date:md(outStamp),time:hm(outStamp),veh:load.veh,
@@ -2397,6 +2508,9 @@ async function matchOut(ix,by){
   $('phBody').innerHTML='<div class="ph-done"><div class="tick">✓</div><b>You\u2019re clear</b><span>'+
     load.tk+'<br>'+comma(net)+' lb<br>'+(load.paper?'Ticket printing at the window.':'Saved to your phone.')+
     '</span></div>';
+  lastLoad.tkRec=TICKETS[0]; if(dest) lastLoad.cusRec=CUSTODY[0];
+  renderQual(false);
+  resetRec(); renderRec();
   renderCustody();renderSel();updateRun();renderReports();renderSetup();
   state='idle';$('mainBtn').disabled=false;$('mainBtn').textContent='Another truck arrives';
   $('outBtn').disabled=!OPEN.length;$('outBtn').textContent='An empty truck returns';
@@ -2415,7 +2529,7 @@ function printTicket(net,dest,load,tare){
         :'<div class="rw"><span>Material</span><b>'+load.ref.material.split(' — ')[0]+'</b></div>')+'<hr>'+
    '<div class="rw"><span>Gross</span><b>'+comma(load.gross)+' lb</b></div>'+
    '<div class="rw"><span>Tare</span><b>'+comma(tare)+' lb</b></div>'+
-   '<div class="rw big"><span>NET</span><b>'+comma(net)+' lb</b></div><hr>'+
+   '<div class="rw big"><span>NET</span><b>'+comma(net)+' lb</b></div>'+dedTicketLines(net)+'<hr>'+
    '<div class="rw"><span>In</span><b>'+load.inAt+'</b></div>'+
    '<div class="rw"><span>Out</span><b>'+hm(outStamp)+'</b></div>'+
    '<div class="rw"><span>Confirmed</span><b>'+CLERK+'</b></div>'+
@@ -3017,15 +3131,235 @@ $('netBtn').addEventListener('click',()=>{
   }
 });
 
+/* ================= RECOVERY EVIDENCE =================
+   A destroyed load can still be worth money to the client, but only if the
+   paperwork was right BEFORE it was destroyed:
+
+     imported goods   CBP Form 7553 filed at the port at least 5 working days
+                      ahead, destroyed under CBP supervision -> up to 99% of
+                      duties, taxes and fees back. Destroy it quietly and the
+                      refund is gone.
+     taxpaid alcohol  TTB wants volume, type and ABV and a reason it cannot be
+                      salvaged, to refund the federal excise tax.
+     written-off      the burden of proof sits on the taxpayer: date, method,
+       inventory      items, and ideally a third-party destruction certificate.
+     recalled goods   disposition records by lot, so the recall reconciles.
+
+   So the scale house captures SKU, lot, entry number, notice date, volume/ABV
+   and witness at the point of work, and the certificate carries them.
+
+   Metropolitan records. It does not file and it does not advise -- that line is
+   deliberate, and it is in the note under the certificate block.            */
+const NOTICE_WORKING_DAYS=5;
+
+function parseDay(v){
+  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v||'').trim());
+  if(!m) return null;
+  const d=new Date(+m[1],+m[2]-1,+m[3]);
+  return isNaN(d.getTime())?null:d;
+}
+function startOfDay(d){ return new Date(d.getFullYear(),d.getMonth(),d.getDate()) }
+/* Weekends only. Federal holidays are NOT modelled -- the panel says so, because
+   quietly being a day out on a customs notice is worse than not guessing.    */
+function addWorkingDays(from,n){
+  const o=new Date(from.getTime()); let added=0;
+  while(added<n){ o.setDate(o.getDate()+1);
+    const w=o.getDay(); if(w!==0&&w!==6) added++; }
+  return o;
+}
+function workingDaysBetween(a,b){
+  if(b<=a) return 0;
+  const o=new Date(a.getTime()); let n=0;
+  while(o<b){ o.setDate(o.getDate()+1);
+    const w=o.getDay(); if(w!==0&&w!==6) n++; }
+  return n;
+}
+const dayLabel=d=>d.toLocaleDateString('en-US',
+  {weekday:'short',day:'numeric',month:'short',year:'numeric'});
+
+/* holdUntil is the earliest lawful destruction date, or null if no notice filed */
+function noticeState(rec){
+  if(!rec||!rec.f7553) return {filed:false,held:false,holdUntil:null,left:0};
+  const filed=parseDay(rec.f7553);
+  if(!filed) return {filed:false,held:false,holdUntil:null,left:0};
+  const holdUntil=addWorkingDays(filed,NOTICE_WORKING_DAYS);
+  const today=startOfDay(new Date());
+  return {filed:true,held:today<holdUntil,holdUntil:holdUntil,
+          left:workingDaysBetween(today,holdUntil)};
+}
+function recHeld(r){ return noticeState(r&&r.rec).held }
+
+const REC_IDS=['rSku','rLot','rEntry','r7553','rGal','rAbv','rWit'];
+function resetRec(){ REC_IDS.forEach(id=>{const e=$(id); if(e) e.value=''}) }
+function recRead(){
+  const g=id=>{const e=$(id); return e?e.value.trim():''};
+  const num=id=>{const v=parseFloat(g(id)); return isFinite(v)&&v>0?v:null};
+  return {sku:g('rSku'),lot:g('rLot'),entry:g('rEntry'),f7553:g('r7553'),
+          gal:num('rGal'),abv:num('rAbv'),witness:g('rWit')};
+}
+function renderRec(){
+  const z=$('recZone'); if(!z) return;
+  /* only destruction loads carry recovery evidence -- a plain OCC recycling
+     receipt has no customs or excise story and should not pretend to.       */
+  if(!lastLoad || !lastLoad.dest){ z.classList.remove('on'); return }
+  z.classList.add('on');
+  const rec=recRead(), st=noticeState(rec);
+  const bits=[];
+  if(rec.sku||rec.lot) bits.push('identified');
+  if(rec.entry) bits.push('imported');
+  if(rec.gal) bits.push('taxpaid alcohol');
+  if(rec.witness) bits.push('witnessed');
+  $('recBadge').innerHTML = st.held
+    ? '<span class="tag hold">Hold \u00b7 notice period running</span>'
+    : (bits.length?'<span class="tag green">'+bits.join(' \u00b7 ')+'</span>':'');
+  let h='';
+  if(st.held){
+    h='<div class="rec-hold wait"><b>Do not destroy yet</b>'+
+      'CBP notice filed. Earliest lawful destruction '+dayLabel(st.holdUntil)+
+      ' \u2014 '+st.left+' working day'+(st.left===1?'':'s')+' to go.<br>'+
+      'Destroying inside the notice period forfeits the client\u2019s drawback claim. '+
+      'This receipt is blocked on the Destruction tab until then.<br>'+
+      '<span style="color:var(--steel-lt)">Weekends excluded; federal holidays are not \u2014 confirm the date with the broker.</span></div>';
+  }else if(st.filed){
+    h='<div class="rec-hold clear"><b>Clear to destroy</b>'+
+      'Notice period closed '+dayLabel(st.holdUntil)+'. Destruction from here is under notice.</div>';
+  }else if(rec.entry){
+    h='<div class="rec-hold wait"><b>Imported, no notice recorded</b>'+
+      'An entry number is present but no CBP 7553 date. If this is destroyed without notice the '+
+      'client cannot claim drawback on it. Check before the run.</div>';
+  }
+  $('recHold').innerHTML=h;
+  if(lastLoad.tkRec) lastLoad.tkRec.rec=rec;
+  if(lastLoad.cusRec) lastLoad.cusRec.rec=rec;
+}
+REC_IDS.forEach(id=>{
+  const e=$(id); if(!e) return;
+  e.addEventListener('input',renderRec);
+  e.addEventListener('change',()=>{renderRec();renderCustody();renderSel();updateRun()});
+});
+
+function renderCertRecovery(sel){
+  const box=$('certRec'); if(!box) return;
+  const withRec=sel.filter(r=>r.rec&&(r.rec.sku||r.rec.lot||r.rec.entry||r.rec.gal||r.rec.witness));
+  if(!withRec.length){ box.style.display='none'; return }
+  box.style.display='block';
+  $('certRecBody').innerHTML='<div class="scroll"><table>'+
+    '<tr><th>Receipt</th><th>SKU</th><th>Lot / batch</th><th>Entry</th>'+
+    '<th class="mono">7553 filed</th><th>Witness</th></tr>'+
+    withRec.map(r=>{const c=r.rec;
+      return '<tr><td class="mono">'+r.id+'</td>'+
+      '<td class="mono">'+(c.sku||'\u2014')+'</td>'+
+      '<td class="mono">'+(c.lot||'\u2014')+'</td>'+
+      '<td class="mono">'+(c.entry||'\u2014')+'</td>'+
+      '<td class="mono">'+(c.f7553?dayLabel(parseDay(c.f7553)):'\u2014')+'</td>'+
+      '<td>'+(c.witness||'\u2014')+'</td></tr>'}).join('')+'</table></div>'+
+    (withRec.some(r=>r.rec.gal)
+      ? '<div style="font-family:\'IBM Plex Mono\';font-size:11.5px;color:var(--steel);margin-top:9px">'+
+        'Taxpaid alcohol on this run: '+withRec.filter(r=>r.rec.gal)
+          .map(r=>r.rec.gal.toFixed(1)+' gal at '+(r.rec.abv?r.rec.abv.toFixed(1)+'% ABV':'ABV not recorded'))
+          .join(' \u00b7 ')+'</div>'
+      : '');
+}
+
+/* ================= QUALITY: MOISTURE + CONTAMINATION =================
+   Two weights, deliberately kept apart.
+
+   SCALE WEIGHT is what the indicator captured and sealed. It never moves, it is
+   what the hash covers, it is what was received and destroyed, and it is what
+   the certificate and the LEED tonnage report.
+
+   NET PAID is a commercial figure: scale weight less an assessor's judgement
+   about moisture and contamination. A person types it after the fact, so it
+   carries their name and the time, and it lives in its own field.
+
+   Deducting moisture from a certificate of destruction would understate how
+   much material was actually destroyed, so it is never applied there. Same for
+   LEED: a reviewer wants tonnage that crossed a certified scale, not tonnage
+   net of a commercial argument about how wet it was.                        */
+const MOIST_BASIS=12;                 /* contract basis; excess is deductible */
+const MOIST_WARN=12, MOIST_ALERT=18;
+let lastLoad=null;
+
+function resetQual(){
+  const m=$('qMoist'), c=$('qContam'), u=$('qUnit');
+  if(m) m.value=''; if(c) c.value=''; if(u) u.value='pct';
+}
+function dedCalc(){
+  const net = lastLoad?lastLoad.net:0;
+  const mEl=$('qMoist'), cEl=$('qContam'), uEl=$('qUnit');
+  const m = mEl?parseFloat(mEl.value):NaN;
+  const c = cEl?parseFloat(cEl.value):NaN;
+  const unit = uEl?uEl.value:'pct';
+  const hasM = isFinite(m) && m>=0 && m<100;
+  /* Ratio method, the one the mills actually settle on:
+       adjusted = net x (100 - actual) / (100 - basis)
+     A flat "deduct the extra 4%" understates the deduction every time.     */
+  const moistDed = (hasM && m>MOIST_BASIS)
+    ? Math.round(net - net*(100-m)/(100-MOIST_BASIS)) : 0;
+  const hasC = isFinite(c) && c>0;
+  const contamDed = hasC ? Math.round(unit==='lb' ? Math.min(c,net) : net*Math.min(c,100)/100) : 0;
+  const paid = Math.max(0, net - moistDed - contamDed);
+  return {net:net, m:hasM?m:null, moistDed:moistDed, c:hasC?c:null, unit:unit,
+          contamDed:contamDed, paid:paid, total:moistDed+contamDed};
+}
+function dedTicketLines(net){
+  if(!lastLoad || lastLoad.net!==net) return '';
+  const d=dedCalc();
+  if(!d.total) return '';
+  let h='<hr><div class="ctr" style="letter-spacing:.14em;font-size:9.5px">QUALITY DEDUCTIONS</div>';
+  if(d.moistDed) h+='<div class="rw"><span>Moisture '+d.m.toFixed(1)+'% / basis '+MOIST_BASIS+
+    '%</span><b>\u2212'+comma(d.moistDed)+' lb</b></div>';
+  if(d.contamDed) h+='<div class="rw"><span>Contamination '+
+    (d.unit==='lb'?comma(d.c)+' lb':d.c.toFixed(1)+'%')+'</span><b>\u2212'+
+    comma(d.contamDed)+' lb</b></div>';
+  h+='<div class="rw big"><span>NET PAID</span><b>'+comma(d.paid)+' lb</b></div>'+
+     '<div class="ctr tiny">Assessed by '+CLERK+' after capture.<br>'+
+     'Scale weight '+comma(net)+' lb is unchanged<br>and is the weight certified.</div>';
+  return h;
+}
+function renderQual(reprint){
+  const z=$('qualZone'); if(!z) return;
+  if(!lastLoad){ z.classList.remove('on'); return }
+  z.classList.add('on');
+  const d=dedCalc();
+  let badge='';
+  if(d.m!==null){
+    if(d.m>MOIST_ALERT)      badge='<span class="tag red">Moisture '+d.m.toFixed(1)+'% \u00b7 over reject threshold</span>';
+    else if(d.m>MOIST_WARN)  badge='<span class="tag amber">Moisture '+d.m.toFixed(1)+'% \u00b7 over basis</span>';
+    else                     badge='<span class="tag green">Moisture '+d.m.toFixed(1)+'% \u00b7 within basis</span>';
+  }
+  $('qualBadge').innerHTML=badge;
+  $('qualOut').innerHTML=
+    '<div class="qrow"><span>Scale weight \u00b7 sealed at capture</span><b>'+comma(d.net)+' lb</b></div>'+
+    '<div class="qrow"><span>Moisture deduction</span><b>'+(d.moistDed?'\u2212'+comma(d.moistDed)+' lb':'\u2014')+'</b></div>'+
+    '<div class="qrow"><span>Contamination deduction</span><b>'+(d.contamDed?'\u2212'+comma(d.contamDed)+' lb':'\u2014')+'</b></div>'+
+    '<div class="qrow qbig"><span>Net paid</span><b>'+comma(d.paid)+' lb</b></div>'+
+    '<div class="qrow qcert"><span>Certified / destroyed weight</span><b>'+comma(d.net)+' lb</b></div>';
+  $('qualNote').textContent = d.total
+    ? 'Deductions change what you pay, not what you certify. The certificate, the custody record and the LEED tonnage all still read '+comma(d.net)+' lb, because that is what crossed the scale and that is what gets destroyed.'
+    : 'Type an assessment and watch it price the load. Moisture over the '+MOIST_BASIS+'% basis comes off on the ratio the mills settle on, not a flat subtraction.';
+  /* audit integrity: raw and adjusted are stored side by side, never merged */
+  if(lastLoad.tkRec){ lastLoad.tkRec.netScale=d.net; lastLoad.tkRec.netPaid=d.paid;
+    lastLoad.tkRec.moisture=d.m; lastLoad.tkRec.moistDed=d.moistDed;
+    lastLoad.tkRec.contamDed=d.contamDed; lastLoad.tkRec.assessedBy=d.total?CLERK:null; }
+  if(lastLoad.cusRec){ lastLoad.cusRec.netScale=d.net; lastLoad.cusRec.netPaid=d.paid; }
+  if(reprint!==false) printTicket(d.net,lastLoad.dest,lastLoad.load,lastLoad.tare);
+}
+['qMoist','qContam','qUnit'].forEach(id=>{
+  const e=$(id); if(!e) return;
+  e.addEventListener('input',()=>renderQual());
+  e.addEventListener('change',()=>renderQual());
+});
+
 /* ================= GUIDED TOUR ================= */
-/* Several steps act on UI that only exists a beat later - the scale animation
+/* Several steps act on UI that only exists a beat later — the scale animation
    runs about 2.3 seconds, and the office pickers do not exist until it lands.
-   Polling instead of firing once is the whole fix: the old version clicked
+   Polling instead of firing once is the whole fix: the previous version clicked
    into thin air and the step silently did nothing.
    Keep trying while the tour is open and the person has not gone BACK past this
-   step. Racing forward is fine - actions still complete in order, because each
-   target only appears once the previous one has finished. Give up after ~12s;
-   if a giveUp element is supplied, fire that so nothing is left stranded. */
+   step. Racing forward is safe — each target only appears once the previous
+   action has finished, so the order enforces itself. Give up after ~12s, and if
+   a giveUp element is supplied fire that instead so the demo is never stranded. */
 function tourDo(getEl,then,giveUp){
   const at=tIdx; let n=0;
   (function go(){
@@ -3040,28 +3374,13 @@ function tourDo(getEl,then,giveUp){
 }
 const TOUR=[
  {t:'scale',sel:'.sign',scrollSel:'.sign-qr',say:'It starts here \u2014 a sign posted at the scale. The driver scans it with his own phone while he sits on the deck. That code is real: point your phone at it. No app, no clipboard, no walking outside.'},
- {t:'scale',sel:'.controls',say:'And watch \u2014 a truck is landing on the scale right now. Nobody walks out to it, and the weight is captured and sealed before anyone knows whose load it is.',
-  act:()=>{tourDo(()=>{const b=$('mainBtn');
-    return (state==='idle'&&b&&/arrives/i.test(b.textContent))?b:null})}},
- {t:'scale',sel:'.screens',say:'The office is alerted the moment it settles \u2014 and the driver is picking his own job on his own phone, from the cab. Watch the office screen update before he has his window down.',
-  act:()=>{tourDo(()=>document.querySelector('#phBody .opt[data-m]'))}},
- {t:'scale',sel:'.screens',say:'One question, in his language: does he want paper? He says yes, the ticket goes to the printer at your office window, and the load is on the yard. Nobody walked outside and nobody typed a number.',
-  act:()=>{tourDo(()=>$('yesP'))}},
- {t:'scale',sel:'#netPill',say:'Now the internet gets cut \u2014 by this tour. The capture laptop in your scale office does not care. Weigh a truck anyway: capture is local, so nothing stops.',
-  act:()=>{tourDo(()=>{const n=$('netTxt');
-    return (n&&/online/i.test(n.textContent))?$('netBtn'):null})}},
- {t:'scale',sel:'.screens',say:'And there it is \u2014 landed, assigned from the office chair this time, held on the laptop. The pill says one ticket waiting. The yard never paused, and nobody had to be told the line was down.',
-  act:()=>{tourDo(()=>{const b=$('mainBtn');
-      return (state==='idle'&&b&&/arrives/i.test(b.textContent))?b:null},
-    ()=>tourDo(()=>document.querySelector('#loadList .pick[data-m]')))}},
- {t:'scale',sel:'#netPill',say:'Line is back. Watch the pill \u2014 what the laptop was holding syncs itself and clears. Nobody rekeys a ticket. Nobody even has to remember it happened.',
-  act:()=>{tourDo(()=>{const n=$('netTxt');
-      return (QUEUED>0&&n&&/offline/i.test(n.textContent))?$('netBtn'):null},null,
-    ()=>{const n=$('netTxt');return (n&&/offline/i.test(n.textContent))?$('netBtn'):null})}},
- {t:'scale',sel:'.screens',say:'Now the empty comes back to the scale. The tare is captured and sealed first \u2014 then a person says which load it belongs to. Never matched on weight, never on timing. That is the whole custody argument, in one tap.',
-  act:()=>{tourDo(()=>{const b=$('outBtn');
-      return (state==='idle'&&OPEN.length&&b&&/returns/i.test(b.textContent))?b:null},
-    ()=>tourDo(()=>document.querySelector('#loadList .pick[data-match]')))}},
+ {t:'scale',sel:'.controls',say:'And watch \u2014 a truck is landing on the scale right now. Nobody walks out to it, and the weight is captured and sealed before anyone knows whose load it is.',act:()=>{tourDo(()=>{const b=$('mainBtn');return (state==='idle'&&b&&/arrives/i.test(b.textContent))?b:null})}},
+ {t:'scale',sel:'.screens',say:'The office is alerted the moment it settles \u2014 and the driver is picking his own job on his own phone, from the cab. Watch the office screen update before he has his window down.',act:()=>{tourDo(()=>document.querySelector('#phBody .opt[data-m]'))}},
+ {t:'scale',sel:'.screens',say:'One question, in his language: does he want paper? He says yes, the ticket goes to the printer at your office window, and the load is on the yard. Nobody walked outside and nobody typed a number.',act:()=>{tourDo(()=>$('yesP'))}},
+ {t:'scale',sel:'#netPill',say:'Now the internet gets cut \u2014 by this tour. The capture laptop in your scale office does not care. Weigh a truck anyway: capture is local, so nothing stops.',act:()=>{tourDo(()=>{const n=$('netTxt');return (n&&/online/i.test(n.textContent))?$('netBtn'):null})}},
+ {t:'scale',sel:'.screens',say:'And there it is \u2014 landed, assigned from the office chair this time, held on the laptop. The pill says one ticket waiting. The yard never paused, and nobody had to be told the line was down.',act:()=>{tourDo(()=>{const b=$('mainBtn');return (state==='idle'&&b&&/arrives/i.test(b.textContent))?b:null},()=>tourDo(()=>document.querySelector('#loadList .pick[data-m]')))}},
+ {t:'scale',sel:'#netPill',say:'Line is back. Watch the pill \u2014 what the laptop was holding syncs itself and clears. Nobody rekeys a ticket. Nobody even has to remember it happened.',act:()=>{tourDo(()=>{const n=$('netTxt');return (QUEUED>0&&n&&/offline/i.test(n.textContent))?$('netBtn'):null},null,()=>{const n=$('netTxt');return (n&&/offline/i.test(n.textContent))?$('netBtn'):null})}},
+ {t:'scale',sel:'.screens',say:'Now the empty comes back to the scale. The tare is captured and sealed first \u2014 then a person says which load it belongs to. Never matched on weight, never on timing. That is the whole custody argument, in one tap.',act:()=>{tourDo(()=>{const b=$('outBtn');return (state==='idle'&&OPEN.length&&b&&/returns/i.test(b.textContent))?b:null},()=>tourDo(()=>document.querySelector('#loadList .pick[data-match]')))}},
  {t:'scale',sel:'#receiptZone',say:'And the ticket writes itself \u2014 gross, tare, net, tare source, who confirmed it. These same sealed weights follow the load all the way to the certificate, and nothing about them can be retyped.'},
  {t:'custody',sel:'#custodyTable',say:'The receipt lands on the yard and the clock starts. This is the client\u2019s product sitting on your ground, and the ageing column is what they will ask about.'},
  {t:'destroy',sel:'#tab-destroy .card',say:'Several receipts get destroyed together as one run. Photographs are taken and sealed at the moment of capture.'},
