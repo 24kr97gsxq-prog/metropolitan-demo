@@ -616,6 +616,23 @@ border-radius:var(--r);background:transparent;color:var(--steel);font-family:'Pu
 font-size:13.5px;cursor:pointer}
 .welc-go:focus-visible,.welc-skip:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 
+/* ---- tipping floor: built for a tablet, in gloves, in daylight ---- */
+.tip-card{border:1.5px solid var(--concrete-dk);border-radius:var(--r);
+padding:16px 17px;margin-bottom:12px;background:var(--paper)}
+.tip-card.flagged{border-color:var(--oxblood);border-left-width:4px;background:#FCF8F8}
+body.night .tip-card.flagged{background:#241C1C}
+.tip-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.tip-veh{font-family:'IBM Plex Mono';font-size:16px;font-weight:600;letter-spacing:.05em}
+.tip-w{font-family:'IBM Plex Mono';font-size:13px;color:var(--steel);
+font-variant-numeric:tabular-nums;white-space:nowrap}
+.tip-job{font-size:15px;color:var(--steel);margin-top:6px}
+.tip-job b{color:var(--ink);font-weight:600}
+#tipList .contam-btn{font-size:14px;padding:13px 18px;margin-top:12px}
+/* 16px inputs stop iOS zooming the page when a gloved thumb lands on a field */
+#tipList .contam-form select,#tipList .contam-form input{font-size:16px;padding:13px 12px}
+#tipList .contam-form .win-btn{font-size:14px;padding:13px 16px}
+#tipList .contam-note{font-size:12px}
+
 /* ---- contamination reported at the tipping floor ---- */
 .contam-btn{margin-top:9px}
 .contam-form{margin-top:10px;border-top:1px dashed var(--concrete-dk);padding-top:10px}
@@ -762,6 +779,7 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
   </div>
   <nav>
     <button class="on" data-t="scale">Scale house</button>
+    <button data-t="tip">Tipping floor</button>
     <button data-t="custody">In custody</button>
     <button data-t="destroy">Destruction</button>
     <button data-t="cert">Certificates</button>
@@ -958,6 +976,43 @@ body.night .rec-hold.wait{background:#4A3410;color:#F0C97A}
     <button id="tryDrv" style="background:none;border:none;padding:0;cursor:pointer;color:var(--oxblood);font-weight:600;font-size:inherit;font-family:inherit;text-decoration:underline;text-underline-offset:2px">try the driver view here</button>.
     A shared sign identifies the scale, not the person — the driver picks his job, and in
     production his phone remembers him after the first visit.</div>
+  </div>
+</section>
+</div>
+
+<!-- ============ TIPPING FLOOR ============ -->
+<div class="tab" id="tab-tip">
+<section>
+  <div class="eyebrow">Between the scale and the pile<span class="tier core">Every tier</span></div>
+  <h1>Contamination gets found here, not at the scale.</h1>
+  <p class="lede">An indicator cannot see film plastic. Nobody knows what is really in a load until
+  it hits the floor &mdash; which is after the weight is sealed and before the empty goes back on the
+  deck. This screen is for the person standing there, on a tablet, in gloves.</p>
+
+  <div class="kpis">
+    <div class="kpi"><div class="n" id="kTipOpen">0</div><div class="l">loads on the yard</div></div>
+    <div class="kpi"><div class="n" id="kTipLogged">0</div><div class="l">reports logged today</div></div>
+    <div class="kpi warn"><div class="n" id="kTipShare">0%</div><div class="l">of loads flagged</div></div>
+    <div class="kpi"><div class="n" id="kTipPhotos">0</div><div class="l">photos sealed</div></div>
+  </div>
+
+  <div class="card">
+    <div class="screen-label">Dumped and open &mdash; tap the load you are standing in front of</div>
+    <div id="tipList"></div>
+    <div class="of-note" style="text-align:left">Every report is stamped with who logged it, the
+    time, and its own seal &mdash; kept separate from the weight seal, because a person made this call
+    and a certified scale made the other one. The office never retypes it: when that trailer comes
+    back for its tare the deduction is already sitting in the ticket.</div>
+  </div>
+
+  <div class="card">
+    <div class="rpt-head"><div class="screen-label" style="margin:0">Logged today</div>
+      <div class="rpt-tools"><button data-print="tipLogTable">Print</button>
+      <button data-csv="tipLogTable" data-name="contamination_reports">CSV</button></div></div>
+    <div class="scroll"><table id="tipLogTable"></table></div>
+    <div class="of-note" style="text-align:left">Tracked by account over time, this is the
+    conversation you have with a generator whose material keeps arriving wet &mdash; evidence with a
+    name and a clock on it, instead of an assertion three weeks later.</div>
   </div>
 </section>
 </div>
@@ -2353,10 +2408,11 @@ function renderOpen(){
      '<span class="tag">In '+l.inAt+'</span>'+
      '<span class="tag '+(isDest(l.ref)?'amber':'')+'">'+
      (isDest(l.ref)?'Destruction · cert due':'Recycling')+'</span>'+
-     contamBlock(l)+'</div>').join('');
+     contamBlock(l,'office')+'</div>').join('');
   $('loadList').innerHTML=h;
   document.querySelectorAll('[data-match]').forEach(b=>
     b.addEventListener('click',()=>matchOut(+b.dataset.match,'Office · '+CLERK)));
+  renderTip();
   wireContam();
 }
 
@@ -3201,9 +3257,14 @@ $('netBtn').addEventListener('click',()=>{
    assertion.                                                                */
 const CONTAM_TYPES=['Film plastic / bags','Wet \u2014 water damage','Foam / polystyrene',
  'Non-paper trash','Food residue','Wrong grade for the job','Mixed \u2014 see photos'];
-let contamFor=null, contamPhotos=0;
+let contamFor=null, contamWhere='office', contamPhotos=0;
+let TIP_LOG=[];
 
-function contamBlock(l){
+/* Two surfaces can show the same load: the office pane and the tipping floor
+   tab. Only the one that opened the form renders it, so the form's element ids
+   stay unique and getElementById cannot pick the wrong pane. */
+function contamBlock(l,where){
+  where=where||'office';
   if(l.contam){
     const c=l.contam;
     return '<div class="contam-note" style="color:var(--oxblood)">\u25c6 '+c.type+
@@ -3212,7 +3273,7 @@ function contamBlock(l){
       '<br><span style="color:var(--steel-lt);word-break:break-all">seal '+c.hash.slice(0,32)+
       '\u2026</span></div>';
   }
-  if(contamFor===l.tk){
+  if(contamFor===l.tk && contamWhere===where){
     return '<div class="contam-form">'+
       '<div class="cf-row"><div class="cf-f"><label for="cType">What did you find?</label>'+
       '<select id="cType" aria-label="Contamination type">'+
@@ -3227,11 +3288,12 @@ function contamBlock(l){
       '<div class="contam-note">Photographed and sealed at the tip. This is what makes a '+
       'deduction defensible instead of an argument three weeks later.</div></div>';
   }
-  return '<button class="win-btn contam-btn" data-contam="'+l.tk+'">Report contamination</button>';
+  return '<button class="win-btn contam-btn" data-contam="'+l.tk+'" data-where="'+where+
+    '">Report contamination</button>';
 }
 function wireContam(){
   document.querySelectorAll('[data-contam]').forEach(b=>b.addEventListener('click',()=>{
-    contamFor=b.dataset.contam; contamPhotos=0; renderOpen();
+    contamFor=b.dataset.contam; contamWhere=b.dataset.where||'office'; contamPhotos=0; renderOpen();
     $('ofNote').textContent='Tipping floor is logging what came off that truck. '+
       'The weight is already sealed \u2014 this is a separate record, with its own author and time.';
   }));
@@ -3240,6 +3302,38 @@ function wireContam(){
   if(cn) cn.addEventListener('click',()=>{ contamFor=null; contamPhotos=0; renderOpen(); });
   if(sv) sv.addEventListener('click',saveContam);
 }
+function renderTip(){
+  const list=$('tipList'); if(!list) return;
+  list.innerHTML = OPEN.length
+    ? OPEN.map(l=>'<div class="tip-card'+(l.contam?' flagged':'')+'">'+
+        '<div class="tip-top"><span class="tip-veh">'+l.veh+'</span>'+
+        '<span class="tip-w">'+comma(l.gross)+' lb in \u00b7 '+l.inAt+'</span></div>'+
+        '<div class="tip-job"><b>'+refLabel(l.ref)+'</b></div>'+
+        contamBlock(l,'tip')+'</div>').join('')
+    : '<div class="empty">Nothing on the yard right now.<br>'+
+      'Loads appear here the moment they leave the scale.</div>';
+
+  const flagged=OPEN.filter(l=>l.contam).length;
+  $('kTipOpen').textContent=OPEN.length;
+  $('kTipLogged').textContent=TIP_LOG.length;
+  $('kTipShare').textContent=(OPEN.length?Math.round(flagged/OPEN.length*100):0)+'%';
+  $('kTipPhotos').textContent=TIP_LOG.reduce((a,r)=>a+r.photos,0);
+
+  $('tipLogTable').innerHTML='<tr><th>Ticket</th><th>Vehicle</th><th>Account / material</th>'+
+    '<th>What was found</th><th class="r">Est.</th><th class="r">Photos</th>'+
+    '<th class="r">Logged</th></tr>'+
+    (TIP_LOG.length
+      ? TIP_LOG.map(r=>'<tr><td class="mono">'+r.tk+'</td><td class="mono">'+r.veh+'</td>'+
+          '<td style="color:var(--steel)">'+r.ref+'</td>'+
+          '<td><span class="tag red">'+r.type+'</span></td>'+
+          '<td class="mono r">'+(r.pct?r.pct.toFixed(1)+'%':'\u2014')+'</td>'+
+          '<td class="mono r">'+r.photos+'</td>'+
+          '<td class="mono r">'+r.at+'<div style="font-size:11px;color:var(--steel-lt)">'+
+          r.by.split(' \u00b7 ')[0]+'</div></td></tr>').join('')
+      : '<tr><td colspan="7" style="color:var(--steel-lt)">Nothing logged yet today. '+
+        'Report one against a load above and it lands here.</td></tr>');
+}
+
 async function saveContam(){
   const tk=contamFor, l=OPEN.find(x=>x.tk===tk);
   if(!l){ contamFor=null; renderOpen(); return }
@@ -3251,6 +3345,9 @@ async function saveContam(){
             hash:await sha256(tk+'|'+type+'|'+pct+'|'+photos+'|'+at.toISOString())};
   contamFor=null; contamPhotos=0;
   renderOpen();
+  TIP_LOG.unshift({tk:tk,veh:l.veh,ref:refLabel(l.ref),type:type,pct:pct,
+                   photos:photos,at:hm(at),by:TIPMAN,hash:l.contam.hash});
+  renderTip();
   $('ofNote').textContent='Logged against '+tk+'. When that trailer comes back for its tare the '+
     'deduction is already waiting, with '+TIPMAN+' and the time on it.';
 }
@@ -4407,10 +4504,10 @@ const TRY_SPEC=[
  /* standing controls */
  ['#tourStart','tour'],
  ['#mainBtn','main'],['#outBtn','out'],['#dirBtn','direction'],['#netBtn','net'],
- ['#loadList .contam-btn','contam'],['#tryDrv','driver'],
+ ['#loadList .contam-btn','contam'],['#tipList .contam-btn','contamTip'],['#tryDrv','driver'],
  ['#vBtn','verify'],['#voidBtn','void'],['#ppiBtn','index'],
  ['#planGrid .plan-pick','plan'],['#subBtn','subscribe'],
- ['#addMat','addmat'],['#fullX','export'],['[data-x]','xfile'],
+ ['#addMat','addmat'],['#fullX','export'],['#tab-setup [data-x]','xfile'],
  /* downloads */
  ['#pdfBtn','onepager'],['#signBtn','sign'],['#xlsBtn','xls'],
  ['#printAll','printall'],['#pdfBtn2','planspdf']
@@ -4421,6 +4518,7 @@ const TRY_MAX_GROUPS=5;
    actually waiting on a person. A six-option list is one decision, so it lights
    as one -- capping by element would light half a list and look like a fault. */
 const TRY_INTOUR=new Set(['pick','opt']);
+let TRY_ON=[];
 
 /* An element counts as reachable if it is outside every tab (the masthead) or
    inside the one currently showing. */
@@ -4439,10 +4537,31 @@ function tryVisible(el){
   }
   return true;
 }
+/* Plain-id specs resolve through getElementById, which is a hash lookup.
+   Only the handful of list selectors need a real sweep -- doing all thirty as
+   querySelectorAll cost ~119ms a call, which is a visible stutter on a tablet. */
+const TRY_ID=/^#[A-Za-z][\w-]*$/;
+const TRY_SCOPED=/^#([A-Za-z][\w-]*)\s+(.+)$/;
+function tryFind(sel){
+  if(TRY_ID.test(sel)){ const e=document.getElementById(sel.slice(1)); return e?[e]:[] }
+  const out=[];
+  const m=TRY_SCOPED.exec(sel);
+  /* "#loadList .pick" becomes a hash lookup plus a query over one small
+     subtree, instead of a sweep of the whole 488KB document. */
+  if(m){ const root=document.getElementById(m[1]);
+    if(root) root.querySelectorAll(m[2]).forEach(e=>out.push(e));
+    return out; }
+  document.querySelectorAll(sel).forEach(e=>out.push(e));
+  return out;
+}
 function markTry(){
-  document.querySelectorAll('.try').forEach(e=>{
+  /* nothing to invite while a truck is mid-weigh: the controls are disabled and
+     the readout is mutating every 55ms */
+  if(typeof weighing!=='undefined' && weighing) return;
+  TRY_ON.forEach(e=>{
     e.classList.remove('try'); e.classList.remove('try-live'); e.style.animationDelay='';
   });
+  TRY_ON=[];
   if($('drv') && $('drv').classList.contains('on')) return;
   if($('welc') && $('welc').classList.contains('on')) return;
   const touring=document.body.classList.contains('touring');
@@ -4455,21 +4574,16 @@ function markTry(){
     const spec=TRY_SPEC[k];
     if(TRY_USED.has(spec[1])) continue;
     if(touring && !TRY_INTOUR.has(spec[1])) continue;
-    const els=[];
-    document.querySelectorAll(spec[0]).forEach(el=>{
-      if(!el.disabled && tryVisible(el)) els.push(el);
-    });
+    const els=tryFind(spec[0]).filter(el=>!el.disabled && tryVisible(el));
     if(!els.length) continue;
     groups.push(spec[1]); n++;
     els.forEach(el=>{
       el.classList.add('try');
       if(TRY_INTOUR.has(spec[1])) el.classList.add('try-live');
+      TRY_ON.push(el);
     });
   }
-  let i=0;
-  document.querySelectorAll('.try').forEach(el=>{
-    el.style.animationDelay=((i++ % 5) * 0.45).toFixed(2)+'s';
-  });
+  TRY_ON.forEach((el,i)=>{ el.style.animationDelay=((i % 5) * 0.45).toFixed(2)+'s' });
 }
 /* Capture phase: record the press before a handler re-renders the element away. */
 document.addEventListener('click',e=>{
@@ -4494,7 +4608,8 @@ document.addEventListener('click',e=>{
 let tryTimer=null;
 try{
   new MutationObserver(()=>{
-    clearTimeout(tryTimer); tryTimer=setTimeout(markTry,120);
+    if(typeof weighing!=='undefined' && weighing) return;
+    clearTimeout(tryTimer); tryTimer=setTimeout(markTry,180);
   }).observe(document.body,{childList:true,subtree:true});
 }catch(e){}
 document.addEventListener('keydown',()=>{ setTimeout(markTry,140) },true);
